@@ -9,7 +9,7 @@ Everything under https://github.com/oobrien/vis/blob/master/tube/data should be 
 
 Under vis/tube/data:
 
-* 2015-* and rods2012_od - This is from the TfL Open Data portal and based on an amended version of the OGL which is compatible with CC-By.
+* 2015-* and rods_od - This is from the TfL Open Data portal and based on an amended version of the OGL which is compatible with CC-By.
 * 2247.json - This is from MySociety MapIt and OS Open Data (OGL)
 * london_wards_2011_centroids - from the ONS (OGL)
 * osis - This is collated from http://content.tfl.gov.uk/out-of-station-interchanges.pdf
