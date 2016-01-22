@@ -210,9 +210,9 @@ var metricKey = {};
 var osis = {};
 
 var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Crossrail": "X", "DLR": "L", "District": "D", "East London": "E", 
-	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "R",
-	"Overground 2015": "Y", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
+	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "R", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
 var linesForKey;
+
 
 function init()
 {
@@ -914,7 +914,7 @@ function requestODData()
 	odRequested = true;
 	$.ajax(
 	{
-    	url: "data/rods2012_od.csv",
+    	url: "data/rods_od.csv",
     	success: function(data) 
     	{
 	      	handleODData(data);
@@ -965,7 +965,6 @@ function handleData(data)
 	for (var i in features)
 	{		
 		features[i].set('toHereCount', 0);
-		features[i].set('fromHereCount', 0);
 	}
 	
 	handleMetricChange();
@@ -1018,7 +1017,7 @@ function handleDemographicData(data)
 
 function handleODData(dataText)
 {
-	var rows = dataText.split('\r')
+	var rows = dataText.split('\n')
 	var header = rows[0];
 	headerArr = header.split(',');
 
@@ -1028,7 +1027,8 @@ function handleODData(dataText)
 	{
 		
 		rowArr = rows[i].split(',');
-		var rowName = rowArr[0];
+		var rowYear = rowArr[0];
+		var rowName = rowArr[1];
 		var matched = false;
 		var features = layerPoints.getSource().getFeatures();
 		for (var j in features)
@@ -1040,18 +1040,22 @@ function handleODData(dataText)
 				{
 					features[j].set('flows', new Array());
 				}
-				for (var k = 1; k < rowArr.length; k++)
+				for (var k = 2; k < rowArr.length; k++)
 				{
 					if (rowArr[k] > 0 && ignore.indexOf(headerArr[k]) < 0)
 					{
 						var flows = features[j].get('flows');
-						if (flows[headerArr[k]] === undefined)
+
+						if (flows[rowYear] === undefined)
 						{
-							flows[headerArr[k]] = 0;
+							flows[rowYear] = new Array();
+						}						
+						if (flows[rowYear][headerArr[k]] === undefined)
+						{
+							flows[rowYear][headerArr[k]] = 0;
 						}
-						flows[headerArr[k]] += parseInt(rowArr[k]); 
+						flows[rowYear][headerArr[k]] += parseInt(rowArr[k]); 
 						features[j].set('flows', flows);
-						features[j].set('fromHereCount', features[j].get('fromHereCount') + parseInt(rowArr[k]));
 					}
 				}
 			}
@@ -1075,6 +1079,7 @@ function showDefaultJourney()
 		}		
 		$("#info").css('display', 'none');
 		$("#info").html("");
+		console.log(features[defaultJourneyStart]);
 		selectClick.getFeatures().push(features[defaultJourneyStart]);
 	}
 	else
@@ -1217,10 +1222,31 @@ function handleChange()
 	
 	if (metric == "journeys")
 	{
-		$("#year").val(2012);
-		$("#year").prop('disabled', true);
-		$("#yearcomp").val('none');
-		$('#yearcomp').prop('disabled', true);		
+		if ($("#year").val() > 2012)
+		{
+			$("#year").val(2014);
+		}
+		else
+		{
+			$("#year").val(2012);		
+		}
+		
+		if ($("#yearcomp").val() == "none")
+		{
+			$("#yearcomp").val($("#year").val());		
+		}
+		if ($("#yearcomp").val() != 2014 && $("#year").val() == 2014)
+		{
+			$("#yearcomp").val(2012);
+		}		
+		if ($("#yearcomp").val() != 2012 && $("#year").val() == 2012)
+		{
+			$("#yearcomp").val(2014);
+		}		
+
+		//$("#year").prop('disabled', true);
+		//$("#yearcomp").val('none');
+		//$('#yearcomp').prop('disabled', true);		
 		scalingFactor = 1.6;
 	}
 	else if (metric == "am_inout")
@@ -1398,6 +1424,11 @@ function handleChange()
 				if (features[i].get('toHereCount') > 0)
 				{
 					features[i].set('radius', Math.sqrt(features[i].get('toHereCount')) * scalingFactor);
+					features[i].set('fillColor', "#ffaa00");								
+				}	
+				if (features[i].get('toHereCount') < 0)
+				{
+					features[i].set('radius', Math.sqrt(-1*features[i].get('toHereCount')) * scalingFactor);
 					features[i].set('fillColor', "#ff0000");								
 				}	
 				if (selectClick.getFeatures().getLength() > 0)
@@ -1565,8 +1596,8 @@ function handleChange()
 	if (metric == "journeys")
 	{
 		values = [1000, 50]
-		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " journeys end here</td><td>Other station (no journeys end here)</td></tr></table><i>Select a station to see journeys<br />that start at it.</i>";
-		fills = ["#ff0000", "#ffffff"]
+		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " journeys end here (red=down)</td><td>Other station (no journeys end here)</td></tr></table><i>Select a station to see journeys<br />that start at it.</i>";
+		fills = ["#ffaa00", "#ffffff"]
 		strokeWidths[0] = 4;
 	}
 
@@ -1692,7 +1723,7 @@ function updateSelectedInfo()
 	}
 	if (metric == "journeys")
 	{
-		htmlstr += "<h3>Top 10 journeys from this station<br />typical day (RODS 2012 data)</h3></h1>";
+		htmlstr += "<h3>Top 20 journeys from this station<br />typical day (RODS data)</h3></h1>";
 
 		/* Reset from previous population. */
 		var features = layerPoints.getSource().getFeatures();
@@ -1701,56 +1732,99 @@ function updateSelectedInfo()
 			features[j].set('toHereCount', 0);
 		}
 
-		var flows = feature.get('flows');
-		for (var toStationName in flows)
+		if (feature.get('flows'))
 		{
-			var matched = false;
-			for (var j in features)
+			if ($("#year").val() != $("#yearcomp").val())
 			{
-				if (features[j].get('tfl_intid') == toStationName)
+				var flows = feature.get('flows')[$("#year").val()];
+				var compflows = feature.get('flows')[$("#yearcomp").val()];
+				for (var toStationName in flows)
 				{
-					matched = true;
-					if (flows[toStationName] > 0)
+					var matched = false;
+					for (var j in features)
 					{
-						features[j].set('toHereCount', features[j].get('toHereCount') + flows[toStationName]);
+						if (features[j].get('tfl_intid') == toStationName)
+						{
+							matched = true;
+							if (flows[toStationName] > 0 || compflows[toStationName] > 0)
+							{
+								var newflows = flows[toStationName];
+								if (newflows === undefined)
+								{
+									newflows = 0;
+								}
+
+								var oldflows = compflows[toStationName];
+								if (oldflows === undefined)
+								{
+									oldflows = 0;
+								}
+								features[j].set('toHereCount', features[j].get('toHereCount') + newflows - oldflows);
+							}
+						}
 					}
+					if (!matched) { console.log("Ignoring data for journeys ending at: " + toStationName); }
 				}
+			
 			}
-			if (!matched) { console.log("Ignoring data for journeys ending at: " + toStationName); }
-		}
-		
-		/* Set up HTML table. */
-		var tuples = [];
-
-		var features = layerPoints.getSource().getFeatures();
-		for (var j in features) tuples.push([features[j].get('name'), features[j].get('toHereCount'), features[j].get('lines')]);
-
-		tuples.sort(function(a, b) {
-			a = a[1];
-			b = b[1];
-
-			return a < b ? 1 : (a > b ? -1 : 0);
-		});
-
-		htmlstr += "<table>";
-		for (var i = 0; i < tuples.length; i++) 
-		{
-			var key = tuples[i][0];
-			var value = tuples[i][1];
-			if (value > 0) 
+			else
 			{
-				htmlstr += "<tr><td>" + key + "</td><td>&nbsp;</td><td>";
-				for (var j = 0; j < tuples[i][2].length; j++)
+				var flows = feature.get('flows')[$("#year").val()];
+				for (var toStationName in flows)
 				{
-					htmlstr += "<div class='keyBall' style='background-color: " + linesForKey[tuples[i][2][j]] + ";'>&nbsp;</div>";		 	
+					var matched = false;
+					for (var j in features)
+					{
+						if (features[j].get('tfl_intid') == toStationName)
+						{
+							matched = true;
+							if (flows[toStationName] > 0)
+							{
+								features[j].set('toHereCount', features[j].get('toHereCount') + flows[toStationName]);
+							}
+						}
+					}
+					if (!matched) { console.log("Ignoring data for journeys ending at: " + toStationName); }
 				}
-				
-				htmlstr += "</td><th>" + value + "</th></tr>";
 			}
-			if (i == 9) { break; }
-		}
 		
-		htmlstr += "</table>";
+			/* Set up HTML table. */
+			var tuples = [];
+
+			var features = layerPoints.getSource().getFeatures();
+			for (var j in features) tuples.push([features[j].get('name'), features[j].get('toHereCount'), features[j].get('lines')]);
+
+			tuples.sort(function(a, b) {
+				a = a[1];
+				b = b[1];
+
+				return a < b ? 1 : (a > b ? -1 : 0);
+			});
+
+			htmlstr += "<div style='height: 180px; overflow-y: scroll;'><table>";
+			for (var i = 0; i < tuples.length; i++) 
+			{
+				var key = tuples[i][0];
+				var value = tuples[i][1];
+				if (value > 0) 
+				{
+					htmlstr += "<tr><td style='font-size: 12px;'>" + key + "</td><td>&nbsp;</td><td>";
+					for (var j = 0; j < tuples[i][2].length; j++)
+					{
+						htmlstr += "<div class='keyBall' style='background-color: " + linesForKey[tuples[i][2][j].name] + ";'>&nbsp;</div>";		 	
+					}
+				
+					htmlstr += "</td><th style='font-size: 12px;'>" + value + "</th></tr>";
+				}
+				if (i == 19) { break; }
+			}
+		
+			htmlstr += "</table></div>";		
+		}
+		else
+		{
+			//Defer. We call this again once the OD data is actually in.
+		}		
 	}
 	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) > -1)
 	{
