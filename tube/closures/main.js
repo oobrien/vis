@@ -333,10 +333,10 @@ function requestDisruptionData()
 	var nextsa = moment().day(13).format('YYYY-MM-DD');
 	var nextsu = moment().day(13).add(1, 'days').format('YYYY-MM-DD');
 				
-	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status/' + today + 'T00:00:00/to/' + today + 'T23:59:59?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status/' + thissa + 'T00:00:00/to/' + thissu + 'T23:59:59?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status/' + nextsa + 'T00:00:00/to/' + nextsu + 'T23:59:59?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + today + '&endDate=' + today + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
 	if (timerange == "2015-05-31") { theurl = "../data/2015-05-31.json"; }
 	if (timerange == "2015-06-07") { theurl = "../data/2015-06-07.json"; }
 	
@@ -433,7 +433,7 @@ function handleDisruptionData(statusJSON)
 									if (startcode && endcode && startcode != endcode)
 									{
 										var segmentId = '#' + network + "-" + linename + "_" + startcode + "_" + endcode;
-										//console.log(segmentId);
+										console.log(segmentId);
 
 										for (var f in features)
 										{	
