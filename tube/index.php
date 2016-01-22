@@ -100,7 +100,7 @@
 				<option value='sun_out'>Sunday Exit</option>
 				<option value='am_inout'>Entries vs Exits (Weekday AM Peak)</option>
 				<option value='wdwe_out'>Weekday vs Saturday Exits</option>
-				<option value='journeys'>Journeys</option>
+				<option value='journeys'>Journeys (for 2012 & 2014)</option>
 				<option value='tongues'>Tube Tongues</option>
 				<option value='wardwords'>Tube Tongues (Wards)</option>
 				<option value='occupation'>Working Lines</option>
@@ -150,6 +150,7 @@
 				<option value=2011>2011</option>
 				<option value=2012>2012</option>
 				<option value=2013>2013</option>
+				<option value=2014>2014</option>
 			</select></td>
 		
 			</tr>
