@@ -10,8 +10,6 @@ body
 
 td 
 { 
-	padding-left: 3px; 
-	padding-right: 3px;
 } 
 
 a:link, a:visited 
@@ -176,12 +174,12 @@ a:link, a:visited
 
 .keyBall
 {
-	float: left; margin: 1px 5px; width: 10px; height: 10px; border-radius: 5px;
+	float: left; margin: 1px; width: 10px; height: 10px; border-radius: 5px;
 }
 
 .keyCircle
 {
-	float: left; margin: 1px 5px; width: 16px; height: 18px;  padding: 6px 7px; border-radius: 18px; font-size: 16px; font-weight: bold; text-align: center; vertical-align: center;
+	float: left; margin: 1px; width: 16px; height: 18px;  padding: 6px 7px; border-radius: 18px; font-size: 16px; font-weight: bold; text-align: center; vertical-align: center;
 }
 
 .keyItemText
