@@ -1,0 +1,788 @@
+platform_id,name
+7688,KENTON BAKERLOO NB                 
+7617,LAMBETH NORTH SB                   
+7997,THEYDON BOIS EB                    
+8023,RODING VALLEY FROM HAINAULT EB     
+8095,RUISLIP GARDENS WB                 
+8075,WEST ACTON WB                      
+8300,EARLS COURT DIST EDG RD EB         
+8254,PADDINGTON DISTRICT EB             
+7792,UPMINSTER BRIDGE EB                
+7915,KEW GARDENS DISTRICT WB            
+7894,WIMBLEDON PARK WB                  
+8330,EALING COMMON DISTRICT WB          
+7642,CANONS PARK NB                     
+8879,WEST HAM Jubilee EB                
+7813,EAST HAM H&C EB                    
+7600,GOLDHAWK ROAD WB                   
+8376,LIVERPOOL ST MET SB                
+7569,CROXLEY NB                         
+8352,CHALFONT & LAT MET CHES NB         
+8354,CHALFONT & LAT MET AMER NB         
+7552,HILLINGDON MET NB                  
+7734,EAST FINCHLEY NB                   
+8482,FINCHLEY CENTRAL MHE NB            
+7718,TOTTERIDGE & WHETSTONE NB          
+7699,BURNT OAK NB                       
+7784,SOUTH WIMBLEDON SB                 
+7925,OAKWOOD EB                         
+7555,HILLINGDON PICC WB                 
+7991,HATTON CROSS WB                    
+8790,HEATHROW T123 ARRIVALS WB          
+8105,BLACKHORSE ROAD VICTORIA NB        
+8202,STOCKWELL VICTORIA SB              
+1200,GOLDHAWK ROAD CIRCLE WB            
+8253,PADDINGTON CIRCLE OR               
+8687,WATERLOO W&C DEPS EB               
+8609,BANK W&C DEPS WB                   
+8878,WEST HAM Jubilee WB                
+8875,NORTH GREENWICH Jubilee EB         
+8874,NORTH GREENWICH Jubilee WB         
+8871,CANADA WATER Jubilee EB            
+8876,CANNING TOWN Jubilee WB            
+8873,CANARY WHARF Jubilee EB            
+8872,CANARY WHARF Jubilee WB            
+8869,BERMONDSEY Jubilee EB              
+8870,CANADA WATER Jubilee WB            
+8867,LONDON BRIDGE Jubilee EB           
+8866,LONDON BRIDGE Jubilee WB           
+8863,WATERLOO Jubilee EB                
+1114,HEATHROW T5 PICC EB                
+4364,HEATHROW T4 EB                     
+7992,HEATHROW T123 PICC EB              
+7989,HOUNSLOW WEST WB                   
+8201,STOCKWELL VICTORIA NB              
+8121,PIMLICO SB                         
+8122,VAUXHALL VICTORIA NB               
+8195,VICTORIA VICTORIA SB               
+7599,GOLDHAWK ROAD EB                   
+1186,WOOD LANE WB                       
+1189,WOOD LANE CIRCLE WB                
+1199,GOLDHAWK ROAD CIRCLE EB            
+7645,MARYLEBONE BAKERLOO NB             
+8251,PADDINGTON BAKERLOO SB             
+7728,WEST FINCHLEY NB                   
+7719,TOTTERIDGE & WHETSTONE SB          
+7935,TURNPIKE LANE EB                   
+7932,BOUNDS GREEN WB                    
+8011,SOUTH WOODFORD EB                  
+8007,BUCKHURST HILL WB                  
+8582,WIMBLEDON DISTRICT DEPS EB         
+7892,SOUTHFIELDS WB                     
+7658,KENSAL GREEN BAKERLOO NB           
+7669,HARLESDEN BAKERLOO SB              
+7630,KILBURN NB                         
+7635,DOLLIS HILL SB                     
+8072,EAST ACTON EB                      
+8069,SHEPHERDS BUSH CENTRAL WB          
+8387,ALDGATE EAST DISTRICT EB           
+7840,STEPNEY GREEN DISTRICT WB          
+8385,ALDGATE EAST H&C EB                
+7842,STEPNEY GREEN H&C WB               
+7871,ST JAMES'S PARK DISTRICT EB        
+8229,EMBANKMENT DISTRICT WB             
+8862,WATERLOO Jubilee WB                
+8186,GREEN PARK JUBILEE SB              
+7869,ST JAMES'S PARK CIRCLE IR          
+8227,EMBANKMENT CIRCLE OR               
+8306,BARONS COURT DISTRICT EB           
+8297,EARLS COURT DIST EAL/RICH WB       
+8335,RAYNERS LANE MET SB                
+8339,HARROW - HILL UX NB                
+8488,FINCHLEY RD JUBILEE NB             
+7631,KILBURN SB                         
+7829,BROMLEY-BY-BOW DISTRICT EB         
+7820,PLAISTOW DISTRICT WB               
+8880,STRATFORD Jubilee DEPS NB          
+8877,CANNING TOWN Jubilee EB            
+7831,BROMLEY-BY-BOW H&C EB              
+7822,PLAISTOW H&C WB                    
+8480,FINCHLEY CENTRAL HB NB             
+7724,WOODSIDE PARK SB                   
+7883,FULHAM BROADWAY EB                 
+8296,EARLS COURT DIST WIM WB            
+7593,LADBROKE GROVE EB                  
+7588,ROYAL OAK WB                       
+1192,ROYAL OAK CIRCLE WB                
+1193,LADBROKE GROVE CIRCLE EB           
+8572,EALING BROADWAY CENT DEPS EB       
+8426,NORTH ACTON (EALING BWY) WB        
+7636,NEASDEN NB                         
+7639,KINGSBURY SB                       
+7531,PRESTON ROAD SB                    
+8491,FINCHLEY RD MET NB                 
+7672,STONEBRIDGE PARK BAK NB            
+7681,NORTH WEMBLEY BAKERLOO SB          
+7616,LAMBETH NORTH NB                   
+8225,EMBANKMENT BAKERLOO SB             
+8864,SOUTHWARK Jubilee WB               
+8861,WESTMINSTER Jubilee EB             
+8457,KENNINGTON CX NB                   
+8223,EMBANKMENT NORTHERN SB             
+8250,PADDINGTON BAKERLOO NB             
+7651,MAIDA VALE SB                      
+7748,GOODGE STREET NB                   
+8173,EUSTON NORTHERN CX SB              
+8179,OXFORD CIRCUS VICTORIA NB          
+8169,EUSTON VICTORIA SB                 
+8441,LEYTONSTONE (HAINAULT) EB          
+8037,REDBRIDGE WB                       
+7875,SLOANE SQUARE DISTRICT EB          
+7872,ST JAMES'S PARK DISTRICT WB        
+8120,PIMLICO NB                         
+8188,GREEN PARK VICTORIA SB             
+7873,SLOANE SQUARE CIRCLE IR            
+7870,ST JAMES'S PARK CIRCLE OR          
+7819,PLAISTOW DISTRICT EB               
+7812,EAST HAM DISTRICT WB               
+7821,PLAISTOW H&C EB                    
+7814,EAST HAM H&C WB                    
+7806,BARKING DISTRICT EB                
+7803,BECONTREE WB                       
+7794,HORNCHURCH EB                      
+7789,UPMINSTER DISTRICT DEPS WB         
+7937,MANOR HOUSE EB                     
+7934,WOOD GREEN WB                      
+7922,CHISWICK PARK EB                   
+7907,GUNNERSBURY DISTRICT EB            
+7906,STAMFORD BROOK WB                  
+7742,KENTISH TOWN NORTHERN NB           
+7739,ARCHWAY SB                         
+8408,MONUMENT DISTRICT EB               
+8388,ALDGATE EAST DISTRICT WB           
+8406,MONUMENT CIRCLE IR                 
+7502,ALDGATE CIRCLE OR                  
+7723,WOODSIDE PARK NB                   
+7717,HIGH BARNET DEPS SB                
+8116,SEVEN SISTERS VICTORIA NB          
+8106,BLACKHORSE ROAD VICTORIA SB        
+8181,OXFORD CIRCUS CENTRAL EB           
+8266,HOLBORN CENTRAL WB                 
+8273,LEICESTER SQUARE NTHN NB           
+7749,GOODGE STREET SB                   
+7781,COLLIERS WOOD NB                   
+7778,TOOTING BEC SB                     
+7779,TOOTING BROADWAY NB                
+7774,BALHAM NORTHERN SB                 
+8002,DEBDEN EB                          
+8575,EPPING (MAIN) DEPS WB              
+8228,EMBANKMENT DISTRICT EB             
+7855,BLACKFRIARS DISTRICT WB            
+8226,EMBANKMENT CIRCLE IR               
+7853,BLACKFRIARS CIRCLE OR              
+7620,ST JOHN'S WOOD NB                  
+8489,FINCHLEY RD JUBILEE SB             
+7968,SUDBURY HILL EB                    
+7962,ALPERTON WB                        
+7970,SOUTH HARROW EB                    
+7967,SUDBURY TOWN WB                    
+8399,MILE END CENTRAL EB                
+8044,LEYTON WB                          
+8224,EMBANKMENT BAKERLOO NB             
+8278,PICCADILLY CIRCUS BAK SB           
+8222,EMBANKMENT NORTHERN NB             
+8274,LEICESTER SQUARE NTHN SB           
+7668,HARLESDEN BAKERLOO NB              
+7677,WEMBLEY CENTRAL BAKERLOO SB        
+7767,CLAPHAM NORTH NB                   
+7766,OVAL SB                            
+8126,BRIXTON VICTORIA DEPS NB           
+8123,VAUXHALL VICTORIA SB               
+8389,WHITECHAPEL DISTRICT EB            
+8398,MILE END DISTRICT WB               
+8511,WHITECHAPEL H&C EB                 
+8514,MILE END H&C WB                    
+8410,TURNHAM GREEN EB                   
+7904,RAVENSCOURT PARK WB                
+8017,SNARESBROOK EB                     
+8449,WOODFORD to ACTON WB               
+7788,MORDEN DEPS NB                     
+7782,COLLIERS WOOD SB                   
+8094,RUISLIP GARDENS EB                 
+8089,NORTHOLT WB                        
+7680,NORTH WEMBLEY BAKERLOO NB          
+7689,KENTON BAKERLOO SB                 
+8289,GLOUCESTER ROAD DISTRICT EB        
+7876,SLOANE SQUARE DISTRICT WB          
+8285,GLOUCESTER ROAD PICC EB            
+7956,KNIGHTSBRIDGE WB                   
+8287,GLOUCESTER ROAD CIRCLE IR          
+7874,SLOANE SQUARE CIRCLE OR            
+8336,RAYNERS LANE PICC EB               
+7969,SUDBURY HILL WB                    
+7929,ARNOS GROVE EB                     
+7926,OAKWOOD WB                         
+7893,WIMBLEDON PARK EB                  
+7890,EAST PUTNEY WB                     
+7974,NORTHFIELDS EB                     
+8322,ACTON TOWN PICC HR WB              
+8444,LEYTONSTONE (EPPING) EB            
+8012,SOUTH WOODFORD WB                  
+8283,SOUTH KENSINGTON DIST EB           
+8199,VICTORIA DISTRICT WB               
+8281,SOUTH KENSINGTON CIRCLE IR         
+8197,VICTORIA CIRCLE OR                 
+8070,WHITE CITY EB                      
+8067,HOLLAND PARK WB                    
+8134,FINSBURY PARK VICTORIA NB          
+8110,TOTTENHAM HALE VICTORIA SB         
+8058,CHANCERY LANE EB                   
+8439,BANK CENTRAL WB                    
+8236,BAKER ST JUBILEE NB                
+7623,SWISS COTTAGE SB                   
+8198,VICTORIA DISTRICT EB               
+7865,WESTMINSTER DISTRICT WB            
+8196,VICTORIA CIRCLE IR                 
+7863,WESTMINSTER CIRCLE OR              
+8263,HOLBORN PICCADILLY EB              
+8156,KINGS CROSS PICCADILLY WB          
+7545,RUISLIP MET SB                     
+7536,EASTCOTE MET NB                    
+7546,RUISLIP PICC EB                    
+7539,EASTCOTE PICC WB                   
+8574,WEST RUISLIP CENTRAL DEPS EB       
+8091,SOUTH RUISLIP CENTRAL WB           
+7549,ICKENHAM MET SB                    
+7540,RUISLIP MANOR MET NB               
+7550,ICKENHAM PICC EB                   
+7543,RUISLIP MANOR PICC WB              
+7589,WESTBOURNE PARK H&C EB             
+8257,PADDINGTON H&C WB                  
+8258,PADDINGTON CIRCLE WB               
+7591,WESTBOURNE PARK CIRCLE EB          
+8025,CHIGWELL FROM HAINAULT EB          
+8450,WOODFORD TO HAINAULT WB            
+7580,CHORLEYWOOD SB                     
+8343,MOOR PARK MET AMERSHAM NB          
+8183,OXFORD CIRCUS BAKERLOO NB          
+8235,BAKER ST BAKERLOO SB               
+8038,WANSTEAD EB                        
+8035,GANTS HILL WB                      
+7537,EASTCOTE MET SB                    
+7534,WEST HARROW NB                     
+7538,EASTCOTE PICC EB                   
+7971,SOUTH HARROW WB                    
+7905,STAMFORD BROOK EB                  
+8314,HAMMERSMITH D/P DISTRICT WB        
+8419,NOTTING HILL GATE CENTRAL EB       
+8063,LANCASTER GATE WB                  
+7652,KILBURN PARK NB                    
+7659,KENSAL GREEN BAKERLOO SB           
+7638,KINGSBURY NB                       
+7643,CANONS PARK SB                     
+7889,EAST PUTNEY EB                     
+7886,PARSONS GREEN WB                   
+7533,NORTHWICK PARK SB                  
+8495,WEMBLEY PARK MET NB                
+7823,WEST HAM DISTRICT EB               
+7816,UPTON PARK DISTRICT WB             
+7825,WEST HAM H&C EB                    
+7818,UPTON PARK H&C WB                  
+7566,NORTHWOOD HILLS SB                 
+7558,NORTH HARROW NB                    
+8507,CHARING CROSS BAKERLOO NB          
+8184,OXFORD CIRCUS BAKERLOO SB          
+8189,GREEN PARK PICCADILLY EB           
+8272,LEICESTER SQUARE PICC WB           
+8085,GREENFORD EB                       
+8082,HANGER LANE WB                     
+7887,PUTNEY BRIDGE EB                   
+7884,FULHAM BROADWAY WB                 
+7961,ALPERTON EB                        
+7958,NORTH EALING WB                    
+8358,EDGWARE RD BAKERLOO NB             
+7649,WARWICK AVENUE SB                  
+7528,BAYSWATER DISTRICT EB              
+8365,EDGWARE RD H&C DIST DEPS WB        
+7587,ROYAL OAK EB                       
+8368,EDGWARE RD H&C H&C WB              
+8369,EDGWARE RD H&C CIRCLE DEPS IR      
+8363,EDGWARE RD H&C CIRCLE IR           
+1191,ROYAL OAK CIRCLE EB                
+7527,BAYSWATER CIRCLE OR                
+8277,PICCADILLY CIRCUS BAK NB           
+7619,REGENTS PARK SB                    
+8260,BOND STREET CENTRAL EB             
+8432,TOTTENHAM COURT RD CENT WB         
+8187,GREEN PARK VICTORIA NB             
+8176,WARREN STREET VICTORIA SB          
+8203,STOCKWELL NORTHERN NB              
+8456,KENNINGTON CX SB                   
+8458,KENNINGTON CITY SB                 
+7984,HOUNSLOW EAST EB                   
+7977,BOSTON MANOR WB                    
+8462,MOORGATE NORTHERN NB               
+7751,ANGEL SB                           
+7927,SOUTHGATE EB                       
+7924,COCKFOSTERS DEPS WB                
+8066,HOLLAND PARK EB                    
+8065,QUEENSWAY WB                       
+8416,HIGH ST KEN DISTRICT EB            
+7529,BAYSWATER DISTRICT WB              
+7526,BAYSWATER CIRCLE IR                
+8415,HIGH ST KEN CIRCLE OR              
+7568,NORTHWOOD SB                       
+7563,PINNER NB                          
+8344,MOOR PARK MET SB                   
+7565,NORTHWOOD HILLS NB                 
+8338,HARROW - HILL SB                   
+7530,PRESTON ROAD NB                    
+7676,WEMBLEY CENTRAL BAKERLOO NB        
+7685,SOUTH KENTON BAKERLOO SB           
+8090,SOUTH RUISLIP CENTRAL EB           
+8086,GREENFORD WB                       
+7564,PINNER SB                          
+8337,HARROW - HILL MET MAIN NB          
+7976,BOSTON MANOR EB                    
+7973,SOUTH EALING WB                    
+7959,PARK ROYAL EB                      
+8328,EALING COMMON PICCADILLY WB        
+8081,HANGER LANE EB                     
+8074,WEST ACTON EB                      
+8073,EAST ACTON WB                      
+8034,GANTS HILL EB                      
+8031,BARKINGSIDE WB                     
+7634,DOLLIS HILL NB                     
+8493,WEMBLEY PARK JUBILEE SB            
+8172,EUSTON NORTHERN CX NB              
+8474,CAMDEN TOWN CX SB                  
+7573,RICKMANSWORTH MET SB               
+7570,CROXLEY SB                         
+7567,NORTHWOOD NB                       
+7508,BARBICAN H&C EB                    
+8380,LIVERPOOL ST H&C WB                
+7507,BARBICAN MET SB                    
+8375,LIVERPOOL ST MET NB                
+8436,BANK NORTHERN NB                   
+8485,OLD STREET NORTHERN SB             
+8378,LIVERPOOL ST CIRCLE IR             
+7505,BARBICAN CIRCLE OR                 
+8052,BETHNAL GREEN CENTRAL EB           
+8046,STRATFORD CENTRAL WB               
+7839,STEPNEY GREEN DISTRICT EB          
+7834,BOW ROAD DISTRICT WB               
+7841,STEPNEY GREEN H&C EB               
+7836,BOW ROAD H&C WB                    
+8234,BAKER ST BAKERLOO NB               
+8359,EDGWARE RD BAKERLOO SB             
+8062,LANCASTER GATE EB                  
+8259,BOND STREET CENTRAL WB             
+7854,BLACKFRIARS DISTRICT EB            
+7846,CANNON STREET DISTRICT WB          
+7852,BLACKFRIARS CIRCLE IR              
+7844,CANNON STREET CIRCLE OR            
+8136,FINSBURY PARK PICCADILLY EB        
+7936,TURNPIKE LANE WB                   
+7648,WARWICK AVENUE NB                  
+7653,KILBURN PARK SB                    
+8006,BUCKHURST HILL EB                  
+8003,DEBDEN WB                          
+8868,BERMONDSEY Jubilee WB              
+8865,SOUTHWARK Jubilee EB               
+7763,BOROUGH NB                         
+8437,BANK NORTHERN SB                   
+8438,BANK CENTRAL EB                    
+8053,BETHNAL GREEN CENTRAL WB           
+8468,MOORGATE H&C EB                    
+8386,ALDGATE EAST H&C WB                
+8467,MOORGATE MET SB                    
+7503,ALDGATE MET DEPS NB                
+7501,ALDGATE CIRCLE IR                  
+8465,MOORGATE CIRCLE OR                 
+8043,LEYTON EB                          
+8018,SNARESBROOK WB                     
+8039,WANSTEAD WB                        
+8045,STRATFORD CENTRAL EB               
+8442,LEYTONSTONE WB                     
+8505,CHARING CROSS NORTHERN NB          
+8430,TOTTENHAM COURT RD NTHN SB         
+8275,PICCADILLY CIRCUS PICC EB          
+7949,COVENT GARDEN WB                   
+1185,WOOD LANE EB                       
+7594,LADBROKE GROVE WB                  
+1194,LADBROKE GROVE CIRCLE WB           
+1188,WOOD LANE CIRCLE EB                
+8064,QUEENSWAY EB                       
+8061,MARBLE ARCH WB                     
+8570,ELEPHANT/CASTLE BAK DEPS NB        
+8219,WATERLOO BAKERLOO SB               
+7595,LATIMER ROAD EB                    
+7590,WESTBOURNE PARK H&C WB             
+7592,WESTBOURNE PARK CIRCLE WB          
+1195,LATIMER ROAD CIRCLE EB             
+8279,SOUTH KENSINGTON PICC EB           
+7951,HYDE PARK CORNER WB                
+7524,EUSTON SQUARE H&C EB               
+7517,FARRINGDON H&C WB                  
+7523,EUSTON SQUARE MET SB               
+7514,FARRINGDON MET NB                  
+7750,ANGEL NB                           
+8171,EUSTON NORTHERN CITY SB            
+7945,RUSSELL SQUARE EB                  
+7944,CALEDONIAN ROAD WB                 
+8168,EUSTON VICTORIA NB                 
+8143,HIGHBURY & IS VICTORIA SB          
+7512,FARRINGDON CIRCLE IR               
+7521,EUSTON SQUARE CIRCLE OR            
+8492,WEMBLEY PARK JUBILEE NB            
+7641,QUEENSBURY SB                      
+7650,MAIDA VALE NB                      
+7655,QUEENS PARK BAKERLOO SB            
+7624,WEST HAMPSTEAD JUBILEE NB          
+7633,WILLESDEN GREEN SB                 
+8581,RICHMOND DISTRICT DEPS EB          
+7908,GUNNERSBURY DISTRICT WB            
+7684,SOUTH KENTON BAKERLOO NB           
+8571,HARROW/WSTONE BAK DEPS SB          
+8473,CAMDEN TOWN BARNET NB              
+7741,TUFNELL PARK SB                    
+7654,QUEENS PARK BAKERLOO NB            
+7663,WILLESDEN JUNC BAKERLOO SB         
+7765,OVAL NB                            
+8217,WATERLOO NORTHERN SB               
+8209,ELEPHANT/CASTLE NORTHERN SB        
+7553,HILLINGDON MET SB                  
+7544,RUISLIP MET NB                     
+7554,HILLINGDON PICC EB                 
+7547,RUISLIP PICC WB                    
+7955,KNIGHTSBRIDGE EB                   
+8190,GREEN PARK PICCADILLY WB           
+7990,HATTON CROSS EB                    
+7987,HOUNSLOW CENTRAL WB                
+7986,HOUNSLOW CENTRAL EB                
+7979,OSTERLEY WB                        
+7988,HOUNSLOW WEST EB                   
+7985,HOUNSLOW EAST WB                   
+7796,ELM PARK EB                        
+7793,UPMINSTER BRIDGE WB                
+7943,CALEDONIAN ROAD EB                 
+7940,ARSENAL WB                         
+8068,SHEPHERDS BUSH CENTRAL EB          
+8420,NOTTING HILL GATE CENTRAL WB       
+8431,TOTTENHAM COURT RD CENT EB         
+8059,CHANCERY LANE WB                   
+7948,COVENT GARDEN EB                   
+7946,RUSSELL SQUARE WB                  
+7556,UXBRIDGE MET DEPS SB               
+7548,ICKENHAM MET NB                    
+7557,UXBRIDGE PICC DEPS EB              
+7551,ICKENHAM PICC WB                   
+8424,NOTTING HILL GATE DIST WB          
+8421,NOTTING HILL GATE CIRCLE IR        
+8288,GLOUCESTER ROAD CIRCLE OR          
+7738,ARCHWAY NB                         
+7735,EAST FINCHLEY SB                   
+8153,KINGS CROSS VICTORIA NB            
+8135,FINSBURY PARK VICTORIA SB          
+7705,BRENT CROSS NB                     
+7702,COLINDALE SB                       
+7597,SHEPHERDS BUSH MARKET EB           
+7596,LATIMER ROAD WB                    
+1196,LATIMER ROAD CIRCLE WB             
+1197,SHEPHERDS BUSH MARKET CIRCLE EB    
+7535,WEST HARROW SB                     
+7559,NORTH HARROW SB                    
+7532,NORTHWICK PARK NB                  
+7662,WILLESDEN JUNC BAKERLOO NB         
+7673,STONEBRIDGE PARK BAK SB            
+8083,PERIVALE EB                        
+8428,NORTH ACTON (WEST RUIS) WB         
+7713,BELSIZE PARK NB                    
+7710,GOLDERS GREEN SB                   
+7903,RAVENSCOURT PARK EB                
+8307,BARONS COURT DISTRICT WB           
+8321,ACTON TOWN PICC EB                 
+8305,BARONS COURT PICCADILLY WB         
+8028,FAIRLOP EB                         
+8026,GRANGE HILL TO HAINAULT WB         
+7914,KEW GARDENS DISTRICT EB            
+8413,TURNHAM GREEN RICH WB              
+8860,WESTMINSTER Jubilee WB             
+8262,BOND STREET JUBILEE SB             
+7950,HYDE PARK CORNER EB                
+8276,PICCADILLY CIRCUS PICC WB          
+8194,VICTORIA VICTORIA NB               
+8180,OXFORD CIRCUS VICTORIA SB          
+8088,NORTHOLT EB                        
+8084,PERIVALE WB                        
+8240,BAKER ST H&C EB                    
+7525,EUSTON SQUARE H&C WB               
+8242,BAKER ST MET MAIN SB               
+7522,EUSTON SQUARE MET NB               
+7520,EUSTON SQUARE CIRCLE IR            
+8239,BAKER ST CIRCLE OR                 
+8578,HAINAULT FROM FAIRLOP EB           
+8024,CHIGWELL TO HAINAULT WB            
+8429,TOTTENHAM COURT RD NTHN NB         
+8178,WARREN STREET NORTHERN SB          
+8315,HAMMERSMITH H&C DEPS EB            
+7598,SHEPHERDS BUSH MARKET WB           
+1198,SHEPHERDS BUSH MARKET CIRCLE WB    
+1201,HAMMERSMITH H&C CIRCLE DEPS EB     
+7711,HAMPSTEAD NB                       
+7706,BRENT CROSS SB                     
+8299,EARLS COURT DIST UPM EB            
+8284,SOUTH KENSINGTON DIST WB           
+8294,EARLS COURT PICCADILLY EB          
+8280,SOUTH KENSINGTON PICC WB           
+8414,HIGH ST KEN CIRCLE IR              
+8282,SOUTH KENSINGTON CIRCLE OR         
+8036,REDBRIDGE EB                       
+8033,NEWBURY PARK WB                    
+7885,PARSONS GREEN EB                   
+7882,WEST BROMPTON WB                   
+7939,ARSENAL EB                         
+7938,MANOR HOUSE WB                     
+8142,HIGHBURY & IS VICTORIA NB          
+8117,SEVEN SISTERS VICTORIA SB          
+7622,SWISS COTTAGE NB                   
+7625,WEST HAMPSTEAD JUBILEE SB          
+8494,WEMBLEY PARK MET SB                
+8243,BAKER ST MET MAIN NB               
+7729,WEST FINCHLEY SB                   
+7730,MILL HILL EAST DEPS SB             
+8163,KINGS CROSS H&C EB                 
+7509,BARBICAN H&C WB                    
+8162,KINGS CROSS MET SB                 
+7506,BARBICAN MET NB                    
+7504,BARBICAN CIRCLE IR                 
+8160,KINGS CROSS CIRCLE OR              
+8030,BARKINGSIDE EB                     
+8454,HAINAULT TO FAIRLOP WB             
+8498,GREAT PORTLAND ST H&C EB           
+8164,KINGS CROSS H&C WB                 
+8501,GREAT PORTLAND ST MET SB           
+8161,KINGS CROSS MET NB                 
+8159,KINGS CROSS CIRCLE IR              
+8497,GREAT PORTLAND ST CIRCLE OR        
+8177,WARREN STREET NORTHERN NB          
+8157,KINGS CROSS NORTHERN NB            
+7747,MORNINGTON CRESCENT SB             
+8475,CAMDEN TOWN CITY SB                
+8175,WARREN STREET VICTORIA NB          
+8154,KINGS CROSS VICTORIA SB            
+7798,DAGENHAM EAST EB                   
+7795,HORNCHURCH WB                      
+8455,KENNINGTON CITY NB                 
+7764,BOROUGH SB                         
+8256,PADDINGTON H&C EB                  
+8241,BAKER ST H&C WB                    
+8238,BAKER ST CIRCLE IR                 
+8249,PADDINGTON CIRCLE EB               
+7891,SOUTHFIELDS EB                     
+7888,PUTNEY BRIDGE WB                   
+7815,UPTON PARK DISTRICT EB             
+7807,BARKING DISTRICT WB                
+7817,UPTON PARK H&C EB                  
+7808,BARKING H&C DEPS WB                
+7736,HIGHGATE NB                        
+8481,FINCHLEY CENTRAL SB                
+7541,RUISLIP MANOR MET SB               
+8334,RAYNERS LANE MET NB                
+7542,RUISLIP MANOR PICC EB              
+8332,RAYNERS LANE PICC WB               
+8425,NORTH ACTON EB                     
+8071,WHITE CITY WB                      
+7901,WEST KENSINGTON EB                 
+7881,WEST BROMPTON EB                   
+8290,GLOUCESTER ROAD DISTRICT WB        
+8417,HIGH ST KEN DISTRICT WIMBLEDON WB  
+8304,BARONS COURT PICCADILLY EB         
+8286,GLOUCESTER ROAD PICC WB            
+8573,EALING BROADWAY DIST DEPS EB       
+8324,ACTON TOWN DISTRICT WB             
+7957,NORTH EALING EB                    
+8320,ACTON TOWN PICC UX WB              
+7632,WILLESDEN GREEN NB                 
+7637,NEASDEN SB                         
+8004,LOUGHTON EB                        
+7998,THEYDON BOIS WB                    
+7802,BECONTREE EB                       
+7799,DAGENHAM EAST WB                   
+7800,DAGENHAM HEATHWAY EB               
+7797,ELM PARK WB                        
+7571,WATFORD DEPS SB                    
+8345,MOOR PARK MET WATFORD NB           
+8271,LEICESTER SQUARE PICC EB           
+8264,HOLBORN PICCADILLY WB              
+7783,SOUTH WIMBLEDON NB                 
+7780,TOOTING BROADWAY SB                
+7703,HENDON CENTRAL NB                  
+7700,BURNT OAK SB                       
+7773,BALHAM NORTHERN NB                 
+7770,CLAPHAM COMMON SB                  
+7769,CLAPHAM COMMON NB                  
+8204,STOCKWELL NORTHERN SB              
+7771,CLAPHAM SOUTH NB                   
+7768,CLAPHAM NORTH SB                   
+8355,CHALFONT & LAT MET SB              
+7572,RICKMANSWORTH MET NB               
+8323,ACTON TOWN DISTRICT EB             
+8411,TURNHAM GREEN E B'WAY WB           
+8027,GRANGE HILL FROM HAINAULT EB       
+8022,RODING VALLEY TO HAINAULT WB       
+8218,WATERLOO BAKERLOO NB               
+8508,CHARING CROSS BAKERLOO SB          
+7864,WESTMINSTER DISTRICT EB            
+7861,TEMPLE DISTRICT WB                 
+8216,WATERLOO NORTHERN NB               
+8506,CHARING CROSS NORTHERN SB          
+7862,WESTMINSTER CIRCLE IR              
+7859,TEMPLE CIRCLE OR                   
+8265,HOLBORN CENTRAL EB                 
+8057,ST PAULS WB                        
+8472,CAMDEN TOWN EDGWARE NB             
+7714,BELSIZE PARK SB                    
+7584,AMERSHAM MET DEPS SB               
+7583,CHESHAM DEPS SB                    
+7579,CHORLEYWOOD NB                     
+7640,QUEENSBURY NB                      
+7644,STANMORE JUB DEPS SB               
+7850,MANSION HOUSE DISTRICT EB          
+8409,MONUMENT DISTRICT WB               
+7848,MANSION HOUSE CIRCLE IR            
+8407,MONUMENT CIRCLE OR                 
+7746,MORNINGTON CRESCENT NB             
+8170,EUSTON NORTHERN CITY NB            
+7716,CHALK FARM SB                      
+7743,KENTISH TOWN NORTHERN SB           
+8155,KINGS CROSS PICCADILLY EB          
+7942,HOLLOWAY ROAD WB                   
+7701,COLINDALE NB                       
+7698,EDGWARE DEPS SB                    
+8448,WOODFORD to EPPING EB              
+8005,LOUGHTON WB                        
+7833,BOW ROAD DISTRICT EB               
+7824,WEST HAM DISTRICT WB               
+7835,BOW ROAD H&C EB                    
+7826,WEST HAM H&C WB                    
+7709,GOLDERS GREEN NB                   
+7704,HENDON CENTRAL SB                  
+8397,MILE END DISTRICT EB               
+7830,BROMLEY-BY-BOW DISTRICT WB         
+8513,MILE END H&C EB                    
+7832,BROMLEY-BY-BOW H&C WB              
+7933,WOOD GREEN EB                      
+7930,ARNOS GROVE WB                     
+7978,OSTERLEY EB                        
+7975,NORTHFIELDS WB                     
+8208,ELEPHANT/CASTLE NORTHERN NB        
+7757,LONDON BRIDGE NORTHERN SB          
+8060,MARBLE ARCH EB                     
+8182,OXFORD CIRCUS CENTRAL WB           
+8185,GREEN PARK JUBILEE NB              
+8237,BAKER ST JUBILEE SB                
+8109,TOTTENHAM HALE VICTORIA NB         
+8102,WALTHAMSTOW C VICTORIA DEPS SB     
+7860,TEMPLE DISTRICT EB                 
+7851,MANSION HOUSE DISTRICT WB          
+7858,TEMPLE CIRCLE IR                   
+7849,MANSION HOUSE CIRCLE OR            
+8373,LIVERPOOL ST CENTRAL EB            
+8400,MILE END CENTRAL WB                
+7715,CHALK FARM NB                      
+7712,HAMPSTEAD SB                       
+7804,UPNEY EB                           
+7801,DAGENHAM HEATHWAY WB               
+8423,NOTTING HILL GATE DIST EB          
+8255,PADDINGTON DISTRICT WB             
+8252,PADDINGTON CIRCLE IR               
+8422,NOTTING HILL GATE CIRCLE OR        
+8313,HAMMERSMITH D/P DISTRICT EB        
+7902,WEST KENSINGTON WB                 
+8311,HAMMERSMITH D/P PICC EB            
+8295,EARLS COURT PICCADILLY WB          
+8032,NEWBURY PARK EB                    
+8029,FAIRLOP WB                         
+7811,EAST HAM DISTRICT EB               
+7805,UPNEY WB                           
+8056,ST PAULS EB                        
+8374,LIVERPOOL ST CENTRAL WB            
+7845,CANNON STREET DISTRICT EB          
+8404,TOWER HILL DISTRICT WB             
+7756,LONDON BRIDGE NORTHERN NB          
+8463,MOORGATE NORTHERN SB               
+7843,CANNON STREET CIRCLE IR            
+8402,TOWER HILL CIRCLE OR               
+7777,TOOTING BEC NB                     
+7772,CLAPHAM SOUTH SB                   
+7618,REGENTS PARK NB                    
+7646,MARYLEBONE BAKERLOO SB             
+8261,BOND STREET JUBILEE NB             
+7621,ST JOHN'S WOOD SB                  
+8367,EDGWARE RD H&C H&C EB              
+8499,GREAT PORTLAND ST H&C WB           
+8490,FINCHLEY RD MET SB                 
+8500,GREAT PORTLAND ST MET NB           
+8496,GREAT PORTLAND ST CIRCLE IR        
+8364,EDGWARE RD H&C CIRCLE OR           
+7941,HOLLOWAY ROAD EB                   
+8137,FINSBURY PARK PICCADILLY WB        
+7931,BOUNDS GREEN EB                    
+7928,SOUTHGATE WB                       
+7740,TUFNELL PARK NB                    
+7737,HIGHGATE SB                        
+8484,OLD STREET NORTHERN NB             
+8158,KINGS CROSS NORTHERN SB            
+7966,SUDBURY TOWN EB                    
+7960,PARK ROYAL WB                      
+8403,TOWER HILL DISTRICT EB             
+8390,WHITECHAPEL DISTRICT WB            
+8379,LIVERPOOL ST H&C EB                
+8512,WHITECHAPEL H&C WB                 
+8401,TOWER HILL CIRCLE IR               
+8377,LIVERPOOL ST CIRCLE OR             
+7516,FARRINGDON H&C EB                  
+8469,MOORGATE H&C WB                    
+7515,FARRINGDON MET SB                  
+8466,MOORGATE MET NB                    
+8464,MOORGATE CIRCLE IR                 
+7513,FARRINGDON CIRCLE OR               
+8329,EALING COMMON DISTRICT EB          
+7923,CHISWICK PARK WB                   
+8327,EALING COMMON PICCADILLY EB        
+7972,SOUTH EALING EB                    
+8312,HAMMERSMITH D/P PICC WB            
+8312,HAMMERSMITH D/P PICC WB
+7695,HARROW/WSTONE BAK ARRS NB          
+8210,ELEPHANT/CASTLE BAK ARRS SB        
+8452,EPPING (MAIN) ARRS EB              
+4552,WOODFORD FROM HAINAULT EB          
+8096,WEST RUISLIP CENTRAL ARRS WB       
+8076,EALING BROADWAY CENT ARRS WB       
+4550,H ST KEN DISTRICT OLYMPIA ARRS EB  
+8583,EDGWARE RD H&C DIST ARRS EB        
+8584,UPMINSTER DISTRICT ARRS EB         
+7918,RICHMOND DISTRICT ARRS WB          
+7895,WIMBLEDON DISTRICT ARRS WB         
+8077,EALING BROADWAY DIST ARRS WB       
+8589,STANMORE JUB ARRS NB               
+8881,STRATFORD Jubilee ARRS SB          
+8591,BARKING H&C ARRS EB                
+8590,HAMMERSMITH H&C ARRS WB            
+8595,ALDGATE MET ARRS SB                
+8594,WATFORD ARRS NB                    
+8593,CHESHAM ARRS NB                    
+8592,AMERSHAM MET ARRS NB               
+8602,UXBRIDGE MET ARRS NB               
+8482,FINCHLEY CENTRAL NB                
+8598,MILL HILL EAST ARRS NB             
+8597,HIGH BARNET ARRS NB                
+8596,EDGWARE ARRS NB                    
+8599,MORDEN ARRS SB                     
+8601,COCKFOSTERS ARRS EB                
+8603,UXBRIDGE PICC ARRS WB              
+7993,HEATHROW T4 WB                     
+1115,HEATHROW T5 ARRIVALS WB            
+8605,WALTHAMSTOW C VICTORIA ARRS NB     
+8604,BRIXTON VICTORIA ARRS SB           
+1202,HAMMERSMITH H&C CIRCLE ARRS WB     
+8370,EDGWARE RD H&C CIRCLE ARRS OR      
+8440,BANK W&C ARRS EB                   
+8220,WATERLOO W&C ARRS WB               
+4549,H ST KEN DISTRICT OLYMPIA DEPS WB  
+8298,EARLS COURT DIST OLYMP WB          
+7877,OLYMPIA DISTRICT ARRS WB           
+,
+,,
+,            

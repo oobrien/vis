@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+	<meta property="og:title" content="Tube Heartbeat" />
+	<meta property="og:url" content="http://tubeheartbeat.com/london/" />
+	<meta property="og:description" content="Visualising the pulse of London with HERE" />
+	<meta property="og:site_name" content="Tube Heartbeat" /> 					
+	<meta property="og:type" content="article" />
+	<meta property="og:image" content="http://tubeheartbeat.com/london/images/tubeheartbeat_300.png" />
+	
+	<meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=no, minimal-ui">
+	<title>Tube Heartbeat</title>
+	
+    <link rel="stylesheet" type="text/css" href="http://js.api.here.com/v3/3.0/mapsjs-ui.css" />
+	<link rel="stylesheet" type="text/css" media="all" href="../js/jquery-ui-1.11.4.custom/jquery-ui.structure.css" />		
+	<link rel="stylesheet" type="text/css" media="all" href="../js/jquery-ui-1.11.4.custom/jquery-ui.theme.css" />		
+	<link rel="stylesheet" type="text/css" media="all" href="http://fonts.googleapis.com/css?family=Cabin">
+	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
+
+	<script src="http://js.api.here.com/v3/3.0/mapsjs-core.js" type="text/javascript" charset="utf-8"></script>
+	<script src="http://js.api.here.com/v3/3.0/mapsjs-service.js" type="text/javascript" charset="utf-8"></script>
+    <script src="http://js.api.here.com/v3/3.0/mapsjs-ui.js" type="text/javascript" charset="utf-8"></script>
+	<script src="http://js.api.here.com/v3/3.0/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
+
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="../js/jquery-ui-1.11.4.custom/external/jquery/jquery.js"></script>	     
+	<script type="text/javascript" src="../js/jquery-ui-1.11.4.custom/jquery-ui.js"></script>	     
+	<script type="text/javascript" src="main.js"></script>
+	<script>
+	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+	  ga('create', 'UA-81213687-1', 'auto');
+	  ga('send', 'pageview');
+	</script>	
+</head>
+<body>   
+<div id="fb-root"></div>
+	<script>(function(d, s, id) {
+	  var js, fjs = d.getElementsByTagName(s)[0];
+	  if (d.getElementById(id)) return;
+	  js = d.createElement(s); js.id = id;
+	  js.src = "//connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v2.7&appId=114474805306975";
+	  fjs.parentNode.insertBefore(js, fjs);
+	}(document, 'script', 'facebook-jssdk'));</script>
+	<div id="toppanel">
+		<div id="toppanelcontent">
+		<!-- Title and short summary about the project. -->
+			<div id="titlebox">
+				<div id="title">Tube Heartbeat</div>
+				<div id="subtitle">Visualising London's pulse with <a href="https://company.here.com/here/">HERE</a></div>
+				<div id="socialbox">
+					<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tube Heartbeat - Visualising London's pulse" data-url="http://tubeheartbeat.com/london/" data-via="HERE" data-lang="en" data-dnt="true" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+					<div class="fb-like" data-href="https://tubeheartbeat.com/london/" data-layout="button" data-action="like" data-size="small" data-show-faces="false" data-share="true"></div>				
+				</div>
+			</div>
+			<div id="controlsbox">
+				<div style='margin-top: 12px'>				
+ 					<table>
+ 					<tr><td colspan='7'><div id="slider"></div></td><td><button id='animateB'>&#9658; Play</button><button id='pauseB' style='display: none;'>&#10073;&#10073; Pause</button></td></tr>
+					<tr><td>5am</td><td>8am</td><td>11am</td><td>2pm</td><td>5pm</td><td>8pm</td><td>11pm</td><td><!-- <button>View day total</button> --></td></tr>	
+					</table>	
+				</div>
+			</div>
+			<div id="timebox">
+				<div id='amount'></div>
+			</div>
+			<div id="controlsboxes">
+			<div id="controlsbox2" class='controlsbox'>
+				<div id="controlsbox2title" style='position: relative; width: 100%; text-align: center; margin-bottom: 6px; border: 1px solid #aaa;'>Dataset</div>
+				<input type='radio' name='datasetR' value='datasetR2012' id='datasetR2012' />2012<br />
+				<input type='radio' name='datasetR' value='datasetRrecent' id='datasetRrecent' checked='checked' />Most recent<br />
+				<input type='radio' name='datasetR' value='datasetRcompare' id='datasetRcompare' />See the change
+			</div>
+			<div id="controlsbox4" class='controlsbox'>
+				<div id="controlsbox4title" style='position: relative; width: 100%; text-align: center; margin-bottom: 6px; border: 1px solid #aaa;'>Show</div>
+				<input type='radio' name='objectR' value='objectRline' />Line changes<br />
+				<input type='radio' name='objectR' value='objectRstation' />Station changes<br />
+				<input type='radio' name='objectR' value='objectRboth' checked='checked' />Both
+			</div>
+			<!--
+			<div id="controlsbox3" class='controlsbox'>
+				<div id="controlsbox3title" style='position: relative; width: 100%; text-align: center; margin-bottom: 2px; padding-bottom: 2px; border-bottom: 1px dotted #aaa;'>Direction</div>
+				<input type='radio' name='directionR' disabled value='directionRbusiest' id='directionRbusiest' checked='checked' />Biggest flow<br />
+				<input type='radio' name='directionR' disabled value='directionRreverse' id='directionRreverse' />Reverse flow<br />
+				<input type='radio' name='directionR' disabled value='directionRboth' id='directionRboth' />Add both together
+			</div>
+			-->
+			<div id="controlsbox3" class='controlsbox'>
+				<div id="controlsbox3title" style='position: relative; width: 100%; text-align: center; margin-bottom: 6px; border: 1px solid #aaa;'>Jump to</div>
+				<select style='width: 100px;' id='stationJumpS' onchange="jumpToStation()">
+					<option>Choose...</option>
+				</select>
+				
+			</div>
+			</div>
+			<!-- //TODO Put this elsewhere in the UI (at bottom) as it's an optino rather than a core control.
+			<div id="optionsbox">
+				<div>Map: </td><td><button>Show Roads and Labels</button></div>
+				<div>Map: </td><td><button>Show Graph for the Whole Network</button></div>
+			</div>
+			-->
+
+			<div id='socialbuttons'>
+			</div>
+		</div>
+		<div id='linespanel'>
+			<table><tr>
+			<!-- TODO Build this from lines.csv rather than manually -->
+			<td style='background-color: #B36305'>Bakerloo</td>
+			<td style='background-color: #E32017'>Central</td>
+			<td style='background-color: #FFD300; color: #003688;'>Circle</td>
+			<td style='background-color: #00782A'>District</td>
+			<td style='background-color: #F3A9BB; color: #003688;'>Hammersmith & City</td>
+			<td style='background-color: #A0A5A9'>Jubilee</td>
+			<td style='background-color: #9B0056'>Metropolitan</td>
+			<td style='background-color: #000000'>Northern</td>
+			<td style='background-color: #003688'>Piccadilly</td>
+			<td style='background-color: #0098D4'>Victoria</td>
+			<td style='background-color: #95CDBA; color: #003688;'>Waterloo & City</td>
+			</tr></table>
+		</div>
+		<div id='numberpanel'>
+			<table><tr>
+			<td>Arriving: <span id='numarriving'></span></td>
+			<td>Leaving: <span id='numleaving'></span></td>
+			<td>Interchanging: <span id='numtransit'></span></td>
+			<td>Total Journeys: <span id='numtotal'></span></td>
+			</tr></table>
+		</div>
+	</div>
+
+	<!-- Facebook button code goes here -->
+	<div id="mapcontainer">
+	</div>	
+	
+	
+	<div id="controlpanel">
+	<!-- Controls to to switch between current and 2012, a time scrubber and background fade controls. -->
+	</div>
+
+	<div id="itemprofilepanel">
+	<!-- This is a modal overlay that appears across half the screen with info about station or segment, title in large font, + graphs. OR try and incorporate it into H.map.Marker -->
+		<div id="itemprofilepanelclosebox"><button id='profilecloseB'>x</button></div>
+		<div id="itemprofilepaneltitle"></div>
+		<div id="itemprofilepanelkey"></div>
+		<div id="itemprofilepanelcharts">
+			<div id="itemprofilepanelstationchart" style='height: 150px;'></div>
+			<div id="itemprofilepaneldir1chartpanel">
+				<div id="itemprofilepaneldir1charttitle"></div>
+				<div id="itemprofilepaneldir1chart" style='height: 150px;'></div>
+			</div>
+			<div id="itemprofilepaneldir2chartpanel">
+				<div id="itemprofilepaneldir2charttitle"></div>
+				<div id="itemprofilepaneldir2chart" style='height: 150px;'></div>
+			</div>
+		</div>
+	</div>
+
+	<!-- This is a modal overlay that appears on first load with close and forward buttons. -->
+	<div id="storypanel">
+		<div id="blurpanel">
+		</div>
+		<div id="storycontentpanel">
+			<div id='tubedot1' class='tubedot'></div>
+			<div id='tubedot2' class='tubedot'></div>
+			<div id='tubedot3' class='tubedot'></div>
+			<div id='story1'>
+				<div class='storytitle'>People made 1.35 billion journeys on London's iconic tube network last year.</div>
+				<div>Every weekday, London sees 2 million people commuting in on the tube... and 2 million commuting back.<br /><br />This is London's pulse.</div>
+				<div id='storydaynumber'></div>
+				<div id='storydaygraph'></div>
+<!--			<div class='storytitle'>London is a growing city<br />& the Underground is getting busier</div>
+				<div>London's population hits 8.8 million in summer 2016 - an all time high. It's increasing by four full tube carriages every day. <br /><br />
+				Underground travel is increasing even faster. There were 1.35 billion tube journeys in 2015-6 - 44 million more than the previous year.</div>
+				<div id='storypopgrowthgraph'></div><div id='storytubegrowthgraph'></div>
+-->			</div>
+			<div id='story2'>
+				<div class='storytitle'>Explore Tube Heartbeat</div>
+				<div>Tube Heartbeat combines the power of the <a href="https://developer.here.com/">HERE Maps API for JavaScript</a> with <a href="https://tfl.gov.uk">Transport for London</a> data to map London's busy Underground system.
+				<br /><br />Find out when your local station is busiest and whether your commute indeed is busier than 
+				it used to be. <button id='storyanimateB'>&#9658; Play</button> the animation to watch London's daily pulse, 
+				and explore the data for <button id='storylineB'>lines</button> and <button id='storystationB'>stations</button>.</div>
+				<div><img id='pulseanim' src='images/pulse.gif' alt='Oxford Circus pulse' style='padding: 20px;' /></div>
+			</div>
+			<div id='story3'>
+				<div class='storytitle'>Some interesting stats to spot</div>
+				<div style='text-align:left'>
+				<ul>
+					<li>Peak time at <button id='storycentralpiccadillyB' class='storyButton'>Leicester Square</button> is after 10pm - the tube is a popular way to get back to homes and hotels after a night at the theatre.</li>
+					<li>Closing museums cause an early peak in <button id='storycentralsouthkenB' class='storyButton'>South Kensington</button>, while shoppers on <button id='storyoxfordstreetB' class='storyButton'>Oxford Street</button> can also be seen in the stats.</li>
+					<li>School kids cause spikes in usage across certain quieter stations, particularly in <button id='storyouterlondonB' class='storyButton'>outer London</button>.</li>
+					<li><button id='storywesthamB' class='storyButton'>West Ham's</button> morning peak entry is an hour before everyone else! Other stations have two morning peaks.</li>
+					<li>Some places are changing character. <button id='storystratfordB' class='storyButton'>Stratford</button> now has almost as many people arriving as leaving in the morning peak.</li>
+				</ul>
+				</div>
+			</div>
+<!--		<div id='story4'>
+			</div>
+-->			<div id='storybuttons'>
+				<button id='storyskip'>Skip</button> <button id='storynext'>Next &#10140;</button>
+			</div>
+		</div>
+	</div>
+
+	<button id='aboutbutton'>About</button>
+	<div id="aboutpanel" title="About Tube Heartbeat">
+	  <div>
+		<span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 150px 0;"></span>
+		<div>Tube Heartbeat was produced by Oliver O'Brien for <a href="http://360.here.com/?p=171683">HERE</a>, using the <a href="https://developer.here.com/develop/javascript-api">HERE JavaScript API</a>.
+		<br /><br />It contains data from Transport for London. Powered by TfL Open Data. Contains OS data © Crown copyright and database rights 2016.
+		<br /><br />You can contact me via my blog (<a href="http://oobrien.com/">http://oobrien.com/</a>) or Twitter (<a href="http://twitter.com/oobr">@oobr</a>).
+		<br /><br />Tip: Click on lines to see the patterns of movement in each direction along each segment.</div>
+	  </div>
+	</div>
+
+	<button id='keybutton'>Key</button>
+	<div id="keypanel" title="Tube Heartbeat Key">
+	  <div>
+		<span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 200px 0;"></span>
+		<div>Line colours are the official colours for that line, as specified by TfL.
+		<br /><br />Only the higher of the flows in each direction are mapped, with arrows showing which way this is.
+		<br /><br />Station borders change colour - red indicate that more people are entering the station than interchanging in it or leaving it, black indicates more interchanges and green indicates more exits.
+		<br /><br />When comparing years, orange lines/stations indicate a fall in usage between the years. Blue stations indicate a rise in usage. The station areas and line thicknesses correspond to the size of the rise (or fall).</div>
+	  </div>
+	</div>
+
+	
+	<div id="dataloadwaitpanel" title="Loading datasets">
+	<!-- This appears behind the story panel but in front of the others. -->
+	  <div>
+		<span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 50px 0;"></span>
+		<div>One moment please - loading the datasets needed...</div>
+		<img src='images/spinner.gif' style='width: 32px; height: 32px; margin-top: 10px;' alt='Loading...' />
+	  </div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,12 @@
+tfl_line_id	name	colour	hexcolour	textcolour	z_order	displayorder
+1	Bakerloo	rgba(179,99,5,0.7)	#B36305	#FFFFFF	8	1
+2	Central	rgba(227,32,23,0.7)	#E32017	#FFFFFF	2	2
+3	District	rgba(0,120,42,0.7)	#00782A	#FFFFFF	9	4
+5	Jubilee	rgba(160,165,169,0.7)	#A0A5A9	#FFFFFF	3	6
+6	Hammersmith & City	rgba(243,169,187,0.7)	#F3A9BB	#003688	11	5
+7	Metropolitan	rgba(155,0,86,0.7)	#9B0056	#FFFFFF	5	7
+8	Northern	rgba(0,0,0,0.7)	#000000	#FFFFFF	4	8
+9	Piccadilly	rgba(0,54,136,0.7)	#003688	#FFFFFF	6	9
+10	Victoria	rgba(0,152,212,0.7)	#0098D4	#FFFFFF	1	10
+11	Circle	rgba(255,211,0,0.7)	#FFD300	#003688	10	3
+12	Waterloo & City	rgba(149,205,186,0.7)	#95CDBA	#003688	12	11

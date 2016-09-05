@@ -1,0 +1,524 @@
+/* * { border: 1px solid red; }
+*/
+
+body
+{
+	margin: 0; 
+	padding: 0; 
+	height: 100%;
+	width: 100%;
+	font-family: 'Cabin', sans-serif;
+	font-size: 12px;
+	background-color: #ccc;
+}
+
+a:link, a:visited, a:active
+{
+	color: black;
+}
+
+
+@media screen
+{
+	#mapcontainer
+	{
+		position: absolute; 
+		width: 100%; 
+		height: 100%;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		margin-left: auto; margin-right: auto; 
+	} 
+}
+
+@media print
+{
+	#mapcontainer
+	{
+		position: absolute; 
+		top: 0;
+		bottom: 0;
+		width: 100%; 
+	}
+		
+}
+
+
+.ui-dialog
+{
+	font-family: 'Cabin', sans-serif;
+}
+
+#toppanel
+{
+	position: absolute;
+	top: 0;
+	width: 100%;
+	color: white;
+	background-color: #4c4c4c;
+	z-index: 100;
+}
+
+#toppanelcontent
+{
+}
+
+#linespanel
+{
+	clear: both;
+	background-color: #4c4c4c;
+	color: white;
+	width: 100%;
+	z-index: 100;	
+}
+
+#linespanel table, #linespanel tr
+{
+	margin: 0;
+	padding: 0;
+	border-width: 0;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+#linespanel td
+{
+	margin: 0;
+	padding: 0;
+	border-width: 0;
+	text-align: center;
+	vertical-align: center;
+	width: 8%;
+	height: 30px;
+	font-size: 15px;
+	font-weight: bold;
+	line-height: 90%;
+}
+
+#numberpanel
+{
+	clear: both;
+	background-color: #4c4c4c;
+	color: white;
+	width: 100%;
+	z-index: 100;	
+}
+
+#numberpanel table, #numberpanel tr
+{
+	margin: 5px 0;
+	padding: 0;
+	border-width: 0;
+	border-collapse: collapse;
+	width: 100%;
+}
+
+#numberpanel td
+{
+	margin: 0;
+	padding: 0;
+	border-width: 0;
+	text-align: center;
+	vertical-align: center;
+	width: 25%;
+	height: 30px;
+	font-size: 24px;
+	font-weight: bold;
+	line-height: 90%;
+}
+
+#timebox
+{
+	text-align: center;
+	vertical-align: center;
+	width: 290px;
+	font-size: 48px;
+	height: 70px;
+}
+
+
+#amount
+{
+	margin-top: 10px;
+}
+
+#slider
+{
+	margin: 5px 5px 5px 0;
+	width: 250px;
+}
+
+#controlsboxes
+{
+	float: left;
+}
+
+#titlebox, #controlsbox, #timebox, #controlsbox2, #controlsbox3, #controlsbox4, #optionsbox
+{
+	position: relative;
+	margin: 10px;
+	float: left;
+}
+
+#titlebox a:link, #titlebox a:visited, #titlebox a:active
+{
+	color: white;
+}
+
+#socialbox
+{
+	margin-top: 8px;
+}
+
+#socialbox iframe
+{
+vertical-align: bottom;
+margin-right: 5px;
+}
+
+#title
+{
+	font-size: 32px;
+}
+
+#subtitle
+{
+	font-size: 11px;
+	padding-left: 3px;
+}
+
+#storypanel
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	z-index: 250;
+	padding: 0;
+	margin: 0;
+}
+
+#blurpanel
+{
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;	
+	opacity: 0.9;
+	background-color: white;
+	filter: blur(5px);
+}
+
+#storycontentpanel
+{
+   position: relative;
+    width: 600px;
+    height: 450px;
+    top: 100px;
+    margin: 0 auto;
+    border: 8px solid  #4c4c4c;
+    border-radius: 50px;
+	padding: 30px;
+	color:  #4c4c4c;
+	text-align: center;
+	vertical-align: center;
+	font-size: 18px;
+}
+
+#aboutbutton
+{
+	position: absolute;
+	bottom: 30px;
+	right: 50px;
+	padding: 1px;
+	font-size: 12px;
+}
+
+#aboutbutton span
+{
+	padding: 2px 4px;
+}
+
+#keybutton
+{
+	position: absolute;
+	bottom: 30px;
+	right: 10px;
+	padding: 1px;
+	font-size: 12px;
+}
+
+#keybutton span
+{
+	padding: 2px 4px;
+}
+
+
+.tubedot
+{
+	background-color: white;
+	padding: 10px;
+	border: 4px solid black;
+	border-radius: 20px;
+	width: 0;
+	height: 0;
+}
+
+#tubedot1 {	position: absolute; top: -18px; left: 100px; }
+#tubedot3 { position: absolute; bottom: -18px; left: 150px;}
+#tubedot2 { position: absolute; top: -18px; right: 150px;}
+#tubedot4 { position: absolute; bottom: -18px; right: 100px;}
+
+#story2, #story3, #story4 { display: none; }
+
+#storybuttons
+{
+	position: absolute;
+	clear: both;
+	right: 30px;
+	bottom: 30px;
+}
+
+#storyanimateB span, #storylineB span, #storystationB span, .storyButton span
+{
+	padding: 3px 5px;
+	font-size: 12px;
+}
+
+.storytitle
+{
+	font-size: 36px; margin-bottom: 10px
+}
+
+#storypopgrowthgraph
+{
+	position: absolute;
+	left: 0;
+	width: 40%;
+	height: 150px;
+	bottom: 50px;
+	margin: 20px;
+	padding: 20px;
+
+}
+
+#storytubegrowthgraph
+{
+	position: absolute;
+	right: 0;
+	width: 40%;
+	height: 150px;
+	bottom: 50px;
+	margin: 20px;
+	padding: 20px;
+
+}
+
+#storydaygraph
+{
+	position: absolute;
+	right: 0;
+	left: 0;
+	height: 150px;
+	bottom: 50px;
+	margin: 20px;
+	padding: 20px;
+}
+
+#itemprofilepanel
+{
+	position: absolute;
+	bottom: 0;
+	display: none;
+	z-index: 200;
+	left: 0;
+	right: 0;
+	background-color: white;
+	opacity: 0.85;
+	padding: 10px;
+	border-top: 10px solid #4c4c4c;
+	color:  #4c4c4c;
+	text-align: center;
+	font-size: 14px;
+}
+
+#itemprofilepaneltitle
+{
+	font-size: 36px;
+}
+
+#pulseanim
+{
+	width: 176px; 
+	height: 134px;
+
+}
+
+.mapname
+{
+	font-size: 10px;
+}
+
+#itemprofilepanelkey
+{
+}
+
+#itemprofilepanelclosebox
+{
+	float: right;
+}
+
+.panelkeyitem
+{
+	font-size: 16px;
+	width: 150px;
+	padding: 5px 0;
+	margin: 10px 10px 10px 0;
+	text-align: center;
+	vertical-align: center;
+	float: left;
+}
+
+#itemprofilepanelcharts
+{
+	clear: both;
+}
+
+#itemprofilepanelstationchart
+{
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: 5px 0 20px 0;
+	display: none;
+}
+
+#itemprofilepaneldir1chartpanel
+{
+	left: 0;
+	width: 50%;
+	bottom: 0;
+	margin: 5px 0 20px 0;
+	float: left;
+	display: none;
+}
+
+#itemprofilepaneldir2chartpanel
+{
+	width: 50%;
+	right: 0;
+	bottom: 0;
+	margin: 5px 0 20px 0;
+	float: left;
+	display: none;
+}
+
+#itemprofilepaneldir1charttitle, #itemprofilepaneldir2charttitle
+{
+	font-size: 18px;
+}
+
+.controlsbox
+{
+	width: 100px;
+}
+
+.chartsubtitle
+{
+	text-align: left; float: left; padding: 16px 0;
+}
+
+@media screen and (min-width: 1101px) and (max-width: 1270px) 
+{
+	#title { font-size: 24px; }
+	#titlebox { margin-bottom: 0; }
+	#subtitle { font-size: 9px; }
+	#slider { width: 200px; }
+	#timebox {	font-size: 40px; width: 230px;  }
+	#controlsbox { margin: 0 5px 10px 5px; font-size: 10px; }
+	#controlsbox2 { margin-top: 10px; font-size: 10px;} 
+	#controlsbox3 { margin-top: 10px;font-size: 10px; } 
+	#controlsbox4 { margin-top: 10px;font-size: 10px; } 
+	#linespanel td { font-size: 14px; }
+	#numberpanel td { font-size: 14px; }
+	input { font-size: 9px; margin: 1px; }
+	.storytitle { font-size: 30px; }
+	#storycontentpanel { width: 500px; height: 400px; font-size: 16px; top: 30px;  }
+	#storypopgrowthgraph, #storytubegrowthgraph, #storydaygraph { height: 130px; }
+	#pulseanim { width: 88px; height: 67px; }
+}
+
+@media screen and (min-width: 1001px) and (max-width: 1100px) 
+{
+	#title { font-size: 18px; }
+	#subtitle { display: none; }
+	#slider { width: 150px; }
+	#timebox {	font-size: 24px;  width: 160px; height: auto }
+	#controlsbox { margin: 0 5px 10px 5px; font-size: 10px; }
+	#controlsbox2 { display: none; } 
+	#controlsbox3 { margin-top: 10px;font-size: 10px; } 
+	#controlsbox4 { margin-top: 10px;font-size: 10px; } 
+	#linespanel td { font-size: 14px; }
+	#numberpanel td { font-size: 14px; }
+	input { font-size: 9px; margin: 1px; }
+	.storytitle { font-size: 30px; }
+	#storycontentpanel { width: 500px; height: 400px; font-size: 16px; top: 30px;  }
+	#storypopgrowthgraph, #storytubegrowthgraph, #storydaygraph { height: 130px; }
+	#pulseanim { width: 88px; height: 67px; }
+}
+
+@media screen and (min-width: 751px) and (max-width: 1000px) 
+{
+	#title { font-size: 18px; }
+	#subtitle { display: none; }
+	#slider { width: 150px; }
+	#timebox {	font-size: 24px;  width: 160px; height: auto }
+	#controlsbox { margin: 0 5px 10px 5px; font-size: 10px; }
+	#controlsbox2 { display: none; } 
+	#controlsbox3 { margin-top: 10px;font-size: 10px; } 
+	#controlsbox4 { display: none; } 
+	#linespanel td { font-size: 14px; }
+	#numberpanel td { font-size: 14px; }
+	input { font-size: 9px; margin: 1px; }
+	.storytitle { font-size: 30px; }
+	#storycontentpanel { width: 500px; height: 350px; font-size: 16px; top: 30px;  }
+	#storypopgrowthgraph, #storytubegrowthgraph, #storydaygraph { height: 130px; }
+	#pulseanim { width: 88px; height: 67px; }
+}
+
+@media screen and (min-width: 0px) and (max-width: 750px) 
+{
+	#title { font-size: 18px; }
+	#subtitle { display: none; }
+	#slider { width: 150px; }
+
+	#controlsbox { margin: 0 5px; font-size: 9px;}
+/*	#controlsbox2 { margin: 0 5px; width: 100px; font-size: 9px; }
+	#controlsbox2title { display: none; } */
+	#controlsbox2 { display: none; } 
+	#controlsbox3 { float: right; } 
+	#controlsbox4 { display: none; } 
+	input { font-size: 9px; margin: 1px; }
+
+	#linespanel { display: none; }
+	#numberpanel { display: none; }
+	#itemprofilepaneltitle { font-size: 14px; }
+	#itemprofilepanelkey { font-size: 9px; }
+	#itemprofilepaneldir1charttitle, #itemprofilepaneldir2charttitle { font-size: 10px; }
+	.chartsubtitle { display: none; }
+	#itemprofilepanelstationchart, #itemprofilepaneldir1chart, #itemprofilepaneldir2chart { height: 200px; }
+	#timebox {	font-size: 24px;  width: 160px; height: auto }
+	.panelkeyitem { font-size: 9px; width: 100px; margin-bottom: 0; }
+	.storytitle { font-size: 24px; }
+	#storycontentpanel { width: 400px; height: 340px; font-size: 14px; top: 20px; }
+	#storypopgrowthgraph, #storytubegrowthgraph, #storydaygraph { height: 100px; }
+	#pulseanim { width: 88px; height: 67px; }
+}
