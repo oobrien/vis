@@ -7,7 +7,8 @@
 	<meta property="og:description" content="Visualising the pulse of London with HERE" />
 	<meta property="og:site_name" content="Tube Heartbeat" /> 					
 	<meta property="og:type" content="article" />
-	<meta property="og:image" content="http://tubeheartbeat.com/london/images/tubeheartbeat_300.png" />
+	<meta property="og:image" content="http://tubeheartbeat.com/london/images/tubeheartbeat_1200.png" />
+	<meta property="fb:app_id" content="114474805306975" />
 	
 	<meta name="viewport" content="width=device-width, initial-scale=0.6, user-scalable=no, minimal-ui">
 	<title>Tube Heartbeat</title>
@@ -53,7 +54,7 @@
 				<div id="subtitle">Visualising London's pulse with <a href="https://company.here.com/here/">HERE</a></div>
 				<div id="socialbox">
 					<a href="https://twitter.com/share" class="twitter-share-button" data-text="Tube Heartbeat - Visualising London's pulse" data-url="http://tubeheartbeat.com/london/" data-via="HERE" data-lang="en" data-dnt="true" data-show-count="false">Tweet</a><script async src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
-					<div class="fb-like" data-href="https://tubeheartbeat.com/london/" data-layout="button" data-action="like" data-size="small" data-show-faces="false" data-share="true"></div>				
+					<div class="fb-like" data-href="http://tubeheartbeat.com/london/" data-layout="button_count" data-action="like" data-size="small" data-show-faces="false" data-share="true"></div>				
 				</div>
 			</div>
 			<div id="controlsbox">
@@ -70,8 +71,8 @@
 			<div id="controlsboxes">
 			<div id="controlsbox2" class='controlsbox'>
 				<div id="controlsbox2title" style='position: relative; width: 100%; text-align: center; margin-bottom: 6px; border: 1px solid #aaa;'>Dataset</div>
-				<input type='radio' name='datasetR' value='datasetR2012' id='datasetR2012' />2012<br />
-				<input type='radio' name='datasetR' value='datasetRrecent' id='datasetRrecent' checked='checked' />Most recent<br />
+				<input type='radio' name='datasetR' value='datasetRolder' id='datasetRolder' />Older (2012)<br />
+				<input type='radio' name='datasetR' value='datasetRnewer' id='datasetRnewer' checked='checked' />Latest (2015)<br />
 				<input type='radio' name='datasetR' value='datasetRcompare' id='datasetRcompare' />See the change
 			</div>
 			<div id="controlsbox4" class='controlsbox'>
@@ -138,7 +139,7 @@
 	
 	
 	<div id="controlpanel">
-	<!-- Controls to to switch between current and 2012, a time scrubber and background fade controls. -->
+	<!-- Controls to to switch between newer and older, a time scrubber and background fade controls. -->
 	</div>
 
 	<div id="itemprofilepanel">

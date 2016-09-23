@@ -436,7 +436,7 @@ margin-right: 5px;
 	text-align: left; float: left; padding: 16px 0;
 }
 
-@media screen and (min-width: 1101px) and (max-width: 1270px) 
+@media screen and (min-width: 1121px) and (max-width: 1270px) 
 {
 	#title { font-size: 24px; }
 	#titlebox { margin-bottom: 0; }
@@ -456,14 +456,14 @@ margin-right: 5px;
 	#pulseanim { width: 88px; height: 67px; }
 }
 
-@media screen and (min-width: 1001px) and (max-width: 1100px) 
+@media screen and (min-width: 1011px) and (max-width: 1120px) 
 {
 	#title { font-size: 18px; }
 	#subtitle { display: none; }
 	#slider { width: 150px; }
 	#timebox {	font-size: 24px;  width: 160px; height: auto }
 	#controlsbox { margin: 0 5px 10px 5px; font-size: 10px; }
-	#controlsbox2 { display: none; } 
+	#controlsbox2 { margin-top: 10px;font-size: 10px; } 
 	#controlsbox3 { margin-top: 10px;font-size: 10px; } 
 	#controlsbox4 { margin-top: 10px;font-size: 10px; } 
 	#linespanel td { font-size: 14px; }
@@ -475,7 +475,7 @@ margin-right: 5px;
 	#pulseanim { width: 88px; height: 67px; }
 }
 
-@media screen and (min-width: 751px) and (max-width: 1000px) 
+@media screen and (min-width: 771px) and (max-width: 1010px) 
 {
 	#title { font-size: 18px; }
 	#subtitle { display: none; }
@@ -494,13 +494,13 @@ margin-right: 5px;
 	#pulseanim { width: 88px; height: 67px; }
 }
 
-@media screen and (min-width: 0px) and (max-width: 750px) 
+@media screen and (min-width: 0px) and (max-width: 770px) 
 {
 	#title { font-size: 18px; }
 	#subtitle { display: none; }
 	#slider { width: 150px; }
 
-	#controlsbox { margin: 0 5px; font-size: 9px;}
+	#controlsbox { margin: 0; font-size: 9px;}
 /*	#controlsbox2 { margin: 0 5px; width: 100px; font-size: 9px; }
 	#controlsbox2title { display: none; } */
 	#controlsbox2 { display: none; } 
@@ -515,10 +515,11 @@ margin-right: 5px;
 	#itemprofilepaneldir1charttitle, #itemprofilepaneldir2charttitle { font-size: 10px; }
 	.chartsubtitle { display: none; }
 	#itemprofilepanelstationchart, #itemprofilepaneldir1chart, #itemprofilepaneldir2chart { height: 200px; }
-	#timebox {	font-size: 24px;  width: 160px; height: auto }
+	#timebox {	font-size: 21px;  width: 120px; height: auto }
 	.panelkeyitem { font-size: 9px; width: 100px; margin-bottom: 0; }
 	.storytitle { font-size: 24px; }
 	#storycontentpanel { width: 400px; height: 340px; font-size: 14px; top: 20px; }
 	#storypopgrowthgraph, #storytubegrowthgraph, #storydaygraph { height: 100px; }
 	#pulseanim { width: 88px; height: 67px; }
+	.twitter-share-button { display: none; }
 }

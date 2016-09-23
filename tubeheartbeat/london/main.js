@@ -17,7 +17,9 @@ var segGroup = new H.map.Group();
 
 var nightMode = false;
 var timeofday =9;
-var yearstr = "current";
+var OLD_YEAR = "aut2012";
+var NEW_YEAR = "aut2015";
+var yearstr = NEW_YEAR;
 var showGraphs = false;
 var nlcGraph = -1;
 var nlcStartGraph = -1;
@@ -31,7 +33,7 @@ var dayChart;
 var shortAnim = false;
 
 var direction = 'directionRbusiest';
-var dataset = 'datasetRcurrent';
+var dataset = 'datasetRnewer';
 var object = 'objectRboth';
 
 var defaultLayers;
@@ -48,8 +50,8 @@ var dayLayer;
 function init()
 {
 	var platform = new H.service.Platform({
-	  'app_id': 'YyCiz5fA5sFK593ZqCEG',
-	  'app_code': 'hfwTGH-20M2rP3HyyWIltA'
+	  'app_id': 'pzyHlMgMiCMOaN31GPTv',
+	  'app_code': 'm3pB0Jpyy3AXx6rVPQmZXQ'
 	});
 
 	/* Obtain the default map types from the platform object: */
@@ -635,8 +637,8 @@ function calculateDifferenceData()
 			{
 				if (stations[stationID]["lines"][lineID][endStationID]["to"])
 				{
-					var oldF = stations[stationID]["lines"][lineID][endStationID]["to"]["aut2012"];
-					var newF = stations[stationID]["lines"][lineID][endStationID]["to"]["current"];
+					var oldF = stations[stationID]["lines"][lineID][endStationID]["to"][OLD_YEAR];
+					var newF = stations[stationID]["lines"][lineID][endStationID]["to"][NEW_YEAR];
 					if (oldF && newF)
 					{
 						stations[stationID]["lines"][lineID][endStationID]["to"]["both"] = [];
@@ -648,8 +650,8 @@ function calculateDifferenceData()
 				}
 				if (stations[stationID]["lines"][lineID][endStationID]["from"])
 				{
-					var oldF = stations[stationID]["lines"][lineID][endStationID]["from"]["aut2012"];
-					var newF = stations[stationID]["lines"][lineID][endStationID]["from"]["current"];
+					var oldF = stations[stationID]["lines"][lineID][endStationID]["from"][OLD_YEAR];
+					var newF = stations[stationID]["lines"][lineID][endStationID]["from"][NEW_YEAR];
 					if (oldF && newF)
 					{
 						stations[stationID]["lines"][lineID][endStationID]["from"]["both"] = [];
@@ -663,28 +665,28 @@ function calculateDifferenceData()
 		}		
 		
 		
-		if (stations[stationID]['A'] && stations[stationID]['A']["aut2012"] && stations[stationID]['A']["current"])
+		if (stations[stationID]['A'] && stations[stationID]['A'][OLD_YEAR] && stations[stationID]['A'][NEW_YEAR])
 		{
 			stations[stationID]['A']["both"] = [];		
-			for (var i = 0; i < stations[stationID]['A']["aut2012"].length; i++)
+			for (var i = 0; i < stations[stationID]['A'][OLD_YEAR].length; i++)
 			{
-				stations[stationID]['A']["both"][i] = stations[stationID]['A']["current"][i] - stations[stationID]['A']["aut2012"][i];
+				stations[stationID]['A']["both"][i] = stations[stationID]['A'][NEW_YEAR][i] - stations[stationID]['A'][OLD_YEAR][i];
 			}
 		}
-		if (stations[stationID]['E'] && stations[stationID]['E']["aut2012"] && stations[stationID]['E']["current"])
+		if (stations[stationID]['E'] && stations[stationID]['E'][OLD_YEAR] && stations[stationID]['E'][NEW_YEAR])
 		{
 			stations[stationID]['E']["both"] = [];		
-			for (var i = 0; i < stations[stationID]['E']["aut2012"].length; i++)
+			for (var i = 0; i < stations[stationID]['E'][OLD_YEAR].length; i++)
 			{
-				stations[stationID]['E']["both"][i] = stations[stationID]['E']["current"][i] - stations[stationID]['E']["aut2012"][i];
+				stations[stationID]['E']["both"][i] = stations[stationID]['E'][NEW_YEAR][i] - stations[stationID]['E'][OLD_YEAR][i];
 			}
 		}
-		if (stations[stationID]['I'] && stations[stationID]['I']["aut2012"] && stations[stationID]['I']["current"])
+		if (stations[stationID]['I'] && stations[stationID]['I'][OLD_YEAR] && stations[stationID]['I'][NEW_YEAR])
 		{
 			stations[stationID]['I']["both"] = [];		
-			for (var i = 0; i < stations[stationID]['I']["aut2012"].length; i++)
+			for (var i = 0; i < stations[stationID]['I'][OLD_YEAR].length; i++)
 			{
-				stations[stationID]['I']["both"][i] = stations[stationID]['I']["current"][i] - stations[stationID]['I']["aut2012"][i];
+				stations[stationID]['I']["both"][i] = stations[stationID]['I'][NEW_YEAR][i] - stations[stationID]['I'][OLD_YEAR][i];
 			}
 		}
 	}
@@ -697,10 +699,10 @@ function calculateDifferenceData()
 	
 	for (var i = 0; i < totals[yearstr]["arriving"].length; i++)
 	{
-		totals["both"]["arriving"][i] = totals["current"]["arriving"][i] - totals["aut2012"]["arriving"][i];
-		totals["both"]["leaving"][i] = totals["current"]["leaving"][i] - totals["aut2012"]["leaving"][i];
-		totals["both"]["transit"][i] = totals["current"]["transit"][i] - totals["aut2012"]["transit"][i];
-		totals["both"]["total"][i] = totals["current"]["total"][i] - totals["aut2012"]["total"][i];
+		totals["both"]["arriving"][i] = totals[NEW_YEAR]["arriving"][i] - totals[OLD_YEAR]["arriving"][i];
+		totals["both"]["leaving"][i] = totals[NEW_YEAR]["leaving"][i] - totals[OLD_YEAR]["leaving"][i];
+		totals["both"]["transit"][i] = totals[NEW_YEAR]["transit"][i] - totals[OLD_YEAR]["transit"][i];
+		totals["both"]["total"][i] = totals[NEW_YEAR]["total"][i] - totals[OLD_YEAR]["total"][i];
 	}	
 	
 }
@@ -771,10 +773,10 @@ function drawLines(yearstr, timeofday)
 						var currFlowTo  = 0;
 						if (yearstr == "both")
 						{
-							var currFlowFrom = stationLines[lineID][endStationID]["from"]["aut2012"][timeofday] +
-								stationLines[lineID][endStationID]["from"]["current"][timeofday];
-							var currFlowTo = stationLines[lineID][endStationID]["to"]["aut2012"][timeofday] +
-								stationLines[lineID][endStationID]["to"]["current"][timeofday];						
+							var currFlowFrom = stationLines[lineID][endStationID]["from"][OLD_YEAR][timeofday] +
+								stationLines[lineID][endStationID]["from"][NEW_YEAR][timeofday];
+							var currFlowTo = stationLines[lineID][endStationID]["to"][OLD_YEAR][timeofday] +
+								stationLines[lineID][endStationID]["to"][NEW_YEAR][timeofday];						
 						}
 						
 						if ((yearstr == "both" && currFlowTo < currFlowFrom) || (yearstr != "both" && flowFrom > flowTo))
@@ -914,14 +916,14 @@ function handleStationFlowData(data, yearstr)
 		totals[yearstr]["total"][i] += grandtotal;
 	}
 	
-	if (yearstr == "current")
+	if (yearstr == NEW_YEAR)
 	{
-		yearstr = "aut2012"
+		yearstr = OLD_YEAR
 		requestSegData(yearstr);
 	}
 	else
 	{
-		yearstr = "current";
+		yearstr = NEW_YEAR;
 		calculateDifferenceData();
 		drawObjects(yearstr, timeofday);	
 		updateNumbers(yearstr, timeofday);
@@ -1452,13 +1454,13 @@ $(document).ready(function()
 	$('input[name=datasetR]').click(function()
 	{
 		dataset = $('input[name=datasetR]:checked').val();
-		if (dataset == "datasetR2012")
+		if (dataset == "datasetRolder")
 		{
-			yearstr = "aut2012";
+			yearstr = OLD_YEAR;
 		}
-		else if (dataset == "datasetRrecent")
+		else if (dataset == "datasetRnewer")
 		{
-			yearstr = "current";		
+			yearstr = NEW_YEAR;		
 		}
 		else if (dataset == "datasetRcompare")
 		{
