@@ -53,7 +53,7 @@ if (!$.urlParam('GeogCode'))
 
 function init()
 {
-	var url = '' + $.urlParam('GeogCode') + '.txt';
+	var url = 'c11stats_' + $.urlParam('GeogCode') + '.txt';
 	$.get(url, null, handleData, 'text');
 }
 
