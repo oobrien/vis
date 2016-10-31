@@ -11,7 +11,16 @@ locations.oldstreet = [51.52565, -0.08692];
 locations.tottenhamhale = [51.5883, -0.0562];
 locations.bigben = [51.50068, -0.12458];
 locations.stratford = [51.54189, 0.00048];
+locations.clapham = [51.46208, -0.13752];
+locations.tooting = [51.43226, -0.16385];
+locations.angel = [51.53189, -0.10628];
+locations.dalston = [51.54618, -0.07561];
+locations.hammersmith = [51.49226, -0.22363];
+locations.putney = [51.46310, -0.21593];
+locations.croydon = [51.37365, -0.10119];
 locations.blackfriars = [51.50990, -0.10436];
+locations.bloomsbury = [51.52453, -0.13390];
+locations.bank = [51.51337, -0.08898];
 
 var args;
 
@@ -131,9 +140,9 @@ function requestCams()
 	
 	$.ajax(
 	{
-		//url: "jamcams-camera-list.xml",
+		url: "jamcams-camera-list.xml",
 		//url: "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/jamcams-camera-list.xml",
-		url: "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/jamcams-camera-list.xml",
+		//url: "https://s3-eu-west-1.amazonaws.com/jamcams.tfl.gov.uk/jamcams-camera-list.xml",
 		success: function(data)
 		{
 			handleCams(data);
@@ -151,11 +160,13 @@ function sortCamsbydistance(a, b)
 	else return 1;
 }
 
+var cams;
+
 function handleCams(data)
 {
 	
 	var camlist = [];
-	var cams = data.getElementsByTagName('syndicatedFeed')[0].getElementsByTagName('cameraList')[0].getElementsByTagName('camera');
+	cams = data.getElementsByTagName('syndicatedFeed')[0].getElementsByTagName('cameraList')[0].getElementsByTagName('camera');
 	for (var i = 0; i < cams.length; i++)
 	{
 		var cam = cams[i];
@@ -163,12 +174,7 @@ function handleCams(data)
 		var camlat = cam.getElementsByTagName('lat')[0].innerHTML;
 		var camlon = cam.getElementsByTagName('lng')[0].innerHTML;
 		var camname = cam.getElementsByTagName('location')[0].innerHTML;
-		var camid = cam.getElementsByTagName('file')[0].innerHTML;
-		if (camid.length >4) 
-		{
-			camid = camid.substring(0, camid.length-4) + ".mp4";
-
-		}
+		var camid = cam.getAttribute('id');
 		var hacklat = 1.607*lat; // 1/cos 51.51 degrees.
 		var camhacklat = 1.607*camlat;
 		var opp = camlon-lon;
@@ -181,7 +187,7 @@ function handleCams(data)
 		if (opp > 0 && adj < 0) { hackanglec = 180 + hackanglec } 
 		if (opp < 0 && adj < 0) { hackanglec = 180 + hackanglec } 
 		
-		camlist.push([camid, camname, hackanglec, hackdistance]);			
+		camlist.push([camid+".mp4", camname, hackanglec, hackdistance]);			
 	}
 	
 	camlist.sort(sortCamsbydistance);
