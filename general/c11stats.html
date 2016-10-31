@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" rel="stylesheet">
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<style type='text/css'>
+body
+{
+	margin: 0; 
+	padding: 30px 120px; 
+	height: 100%;
+	font-family: 'Share Tech Mono', monospace;
+	font-size: 36px;
+	background-color: black;
+	color: #0ff;
+	text-align: center;
+}
+#tabletitle { font-size: 72px; height: 72px;}
+#totalcount { font-size: 48px; } 
+#bignum { font-size: 400px; font-weight: bold; }
+#bigpc { font-size: 100px; font-weight: bold; }
+#numandpc { border: 10px solid #0ff; padding: 40px 60px; border-radius: 120px; margin: 30px 0; }
+#bigname { font-size: 72px; height: 144px;}
+</style>
+<script language="javascript">
+//<![CDATA[
+var currcount;
+var colours = ["#f33", "#fa0", "#ff0", "#0f0", "#0ff", "#99f", "#f0f", "#fff"];
+var stats = [];
+
+/* From http://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-get-parameters */
+$.urlParam = function(name)
+{
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results == null)
+	{
+		return null;
+	}
+	else
+	{
+		return results[1] || 0;
+	}
+}
+
+/* Examples (note, the corresponding aggregate file needs to be in place):
+	Bloomsbury E05000129
+*/
+if (!$.urlParam('GeogCode'))
+{
+	window.location.href = '?GeogCode=E05000129';
+}
+
+function init()
+{
+	var url = '' + $.urlParam('GeogCode') + '.txt';
+	$.get(url, null, handleData, 'text');
+}
+
+function handleData(data)
+{
+	var lines = data.split('\n');
+	for (var i in lines)
+	{
+		var tokens = lines[i].split('\t');
+		if (tokens != null && tokens.length > 0)
+		{
+			stats.push(tokens);
+		}
+	}
+	getStat();
+	setInterval(getStat, 5000);
+}
+
+function getStat()
+{
+	var rand;
+	do
+	{
+		rand = parseInt(Math.random()*stats.length);
+	}
+	while (stats[rand][9] == "100.00%" || stats[rand][9] == "0.00%" || stats[rand][4] != "Count")
+	
+	var colourcode = stats[rand][1].substring(2, 3);
+	$('body').css('color', colours[colourcode]);
+	$('#numandpc').css('borderColor', colours[colourcode]);
+	
+	$('#tabletitle').html(stats[rand][2]);
+	$('#totalcountnum').html(stats[rand][8]);
+	$('#totalcountqual').html(stats[rand][3].substring(4));
+	$('#bignum').html(stats[rand][7]);
+	$('#bigpc').html("(" + stats[rand][9] + ")");
+	$('#bigname').html(stats[rand][6]);
+	
+	if (stats[rand][2].length > 90) { $('#tabletitle').css('fontSize', '24px') }
+	else if (stats[rand][2].length > 60) { $('#tabletitle').css('fontSize', '36px') }
+	else if (stats[rand][2].length > 30) { $('#tabletitle').css('fontSize', '48px') }
+	else { $('#tabletitle').css('fontSize', '72px') }
+
+	if (stats[rand][6].length > 200) { $('#bigname').css('fontSize', '30px') }
+	else if (stats[rand][6].length > 110) { $('#bigname').css('fontSize', '42px') }
+	else if (stats[rand][6].length > 75) { $('#bigname').css('fontSize', '48px') }
+	else if (stats[rand][6].length > 50) { $('#bigname').css('fontSize', '60px') }
+	else if (stats[rand][6].length > 16) { $('#bigname').css('fontSize', '72px') }
+	else { $('#bigname').css('fontSize', '120px') }
+}
+//]]> 
+</script>
+</head>
+<body onload="init()">
+<div id='tabletitle'></div>
+<div id='numandpc'>
+<div id='bigname'></div>
+<div id='bignum'></div>
+<div id='bigpc'></div>
+</div>
+<div id='totalcount'>of Bloomsbury's <span id='totalcountnum'></span> <span id='totalcountqual'></span></div>
+</body>
+</html>
