@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<!-- 
+	This is adapted from the TfL example at https://blog.tfl.gov.uk/2015/12/07/unified-api-part-5-aot-arrivals-of-things/
+-->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<title>ArrivalBoard: To-the-Second Countdowns For London Bus Stops & Tube Stations</title>
+<link href="https://fonts.googleapis.com/css?family=Share+Tech+Mono" rel="stylesheet">
+<meta http-equiv="refresh" content="3600" />
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/signalr.js/2.2.1/jquery.signalR.js"></script>
+<script type="text/javascript" src="https://push-api.tfl.gov.uk/signalr/hubs"></script> 
+<style type="text/css">
+body, html 
+{
+	position: absolute;
+	border-width: 0;
+	padding: 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	background: black;
+
+}
+
+table 
+{
+	position: absolute;
+	top: 0;
+	left: 0;
+	bottom: 0;
+	right: 0;
+	width: 100%;
+	border-width: 0;
+	padding: 20px;
+	color: #ff0;
+	background-color: #000;
+	font-family: 'Share Tech Mono', monospace;
+	font-size: 18px;
+}
+
+td 
+{ 
+	padding: 8px 0;
+	text-align: center;
+}
+
+th
+{
+	padding: 16px 0;
+	color: white;
+}
+
+.arrived td
+{
+	color: #111;
+	background-color: yellow;
+
+}
+
+.regno
+{
+	border-radius: 5px;
+	border: 3px solid #666;
+	height: 18px;
+	font-size: 18px;
+	padding: 3px;
+	margin: 10px;
+	background-color: white;
+	color: black;	
+}
+
+.normalStatus { }
+.blink_me 
+{
+	animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker 
+{
+	50% { opacity: 0; }
+}
+</style>
+</head>
+<body>
+<script type='text/javascript'>//<![CDATA[
+
+var buses = {};
+var boardRows = [];
+var status;
+var lastid;
+
+var lines = 
+{
+	"Bakerloo": ["#B36305", "#fff"],
+	"Central":["#E32017", "#fff"],
+	"Circle":["#FFD300", "#000"],
+	"DLR":["#00A4A7", "#000"],
+	"District":["#00782A", "#fff"],
+	"Hammersmith & City":["#F3A9BB", "#000"],
+	"Jubilee":["#A0A5A9", "#fff"],
+	"Metropolitan":["#9B0056", "#fff"],
+	"Northern":["#000000", "#fff"],
+	"Piccadilly":["#003688", "#fff"],
+	"Tramlink":["#84B817", "#fff"],
+	"Victoria":["#0098D4", "#000"],
+	"Waterloo & City":["#95CDBA", "#000"]
+}
+
+/* From http://stackoverflow.com/questions/979975/how-to-get-the-value-from-the-get-parameters */
+$.urlParam = function(name)
+{
+	var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+	if (results == null)
+	{
+		return null;
+	}
+	else
+	{
+		return results[1] || 0;
+	}
+}
+
+/* Examples:
+	Gower St/UCH bus stop 490013914N
+	Euston Square tube station 940GZZLUESQ
+	Liverpool St tube station 940GZZLULVT
+*/
+
+if (!$.urlParam('NaptanId'))
+{
+	window.location.href = '?NaptanId=490013914N';
+}
+
+$(function() 
+{
+	/* From https://gist.github.com/idlem1nd/8667222f74652f78569e */
+	$.connection.hub.logging = true;
+	$.connection.hub.url = "http://push-api.tfl.gov.uk/signalr/hubs/signalr";
+
+	var hub = $.connection.predictionsRoomHub;
+	hub.client.showPredictions = updateBoardFreshData;
+
+	$.connection.hub.start().done(function() 
+	{
+		console.log("tfl.predictions: connection started"); 
+		var lineRooms = [{ "NaptanId": $.urlParam('NaptanId') }];
+		hub.server.addLineRooms(lineRooms).done(function() 
+		{
+			console.log("tfl.predictions: Invocation of addLineRooms succeeded");
+			status = "<span style='color: #0f0;'><span class='blink_me''>&#9679;</span> Connected</span>";
+			return;
+		}).fail(function (error) 
+		{
+			console.log("tfl.predictions: Invocation of addLineRooms failed. Error: " + error);
+			status = "<span style='color: 'f00;'>&#9679; Disconnected</span>";
+			return;
+		});	
+	});
+
+	function updateBoardFreshData(data) 
+	{
+		data.sort(sortByTts);
+		console.log(data);
+		$.each(data, function( index, prediction ) {
+			var newbus = prediction;
+			var bid = "b" + prediction.Id;
+			if (!buses[bid])
+			{
+				buses[bid] = {};
+				buses[bid].Status = "New";	
+				buses[bid].StatusColour = "#0af";	
+				buses[bid].StatusTextColour = "#fff";	
+				buses[bid].TimeChange = "";		
+			}
+			else
+			{
+				var oldtts = buses[bid].TimeToStation;
+				if (prediction.TimeToStation < (oldtts-3))
+				{
+					buses[bid].Status = "Faster";
+					buses[bid].StatusColour = "#0f0";	
+					buses[bid].StatusTextColour = "#000";	
+					buses[bid].TimeChange = prediction.TimeToStation - oldtts;					
+				}
+				else if (prediction.TimeToStation > (oldtts+3))
+				{
+					buses[bid].Status = "Slower";
+					buses[bid].StatusColour = "#f00";	
+					buses[bid].StatusTextColour = "#fff";	
+					buses[bid].TimeChange = prediction.TimeToStation - oldtts;					
+				}	
+				else
+				{
+					buses[bid].Status = "On Track";
+					buses[bid].StatusColour = "#000";	
+					buses[bid].StatusTextColour = "#ff0";	
+					buses[bid].TimeChange = "";				
+				}	
+			}
+			buses[bid].StationName = prediction.StationName;
+			buses[bid].LineName = prediction.LineName;
+			buses[bid].DestinationName = prediction.DestinationName;
+			if (prediction.ModeName == "tube")
+			{
+				if (buses[bid].DestinationName !== null)
+				{
+					buses[bid].LineName = buses[bid].DestinationName.substring(0, 4);					
+				}
+				buses[bid].DestinationName = prediction.Towards;				
+			}
+			buses[bid].VehicleId = prediction.VehicleId;
+			buses[bid].TimeToStation = prediction.TimeToStation;
+			buses[bid].LastHeard = new Date().getTime();				
+			buses[bid].LastHeardInterval = 0;
+			buses[bid].TimeToLive = parseInt(0.001*(new Date(Date.parse(prediction.TimeToLive)).getTime() - new Date().getTime()));
+			if (Object.keys(lines).indexOf(prediction.LineName) > -1)
+			{
+				buses[bid].LineNameTD = "<td style='font-size: 24px; font-weight: bold; background-color: " + lines[prediction.LineName][0] + "; color: " + lines[prediction.LineName][1] + ";'>" + prediction.LineName + "</td>";
+				buses[bid].BackgroundColour = lines[prediction.LineName][0];
+				buses[bid].TextColour = lines[prediction.LineName][1];
+			}
+			else
+			{
+				buses[bid].LineNameTD = "<td style='font-size: 48px; font-weight: bold;'>" + prediction.LineName + "</td>";
+				buses[bid].BackgroundColour = "#ff0";
+				buses[bid].TextColour = "#000";
+			}				
+		});
+		return true;
+	};
+});
+
+function updateBoardDecrement()
+{
+			var buses10Min = 0;
+			boardRows = [];	
+			$.each(buses, function( index, bus ) 
+			{
+					bus.TimeToStation--;
+					bus.TimeToLive--;
+					bus.LastHeardInterval++;
+					if (bus.TimeToLive > -1 || (bus.TimeToLive > -11 && bus.TimeToLive <= bus.TimeToStation))
+					{
+						boardRows.push(bus);
+						if (bus.TimeToStation < 60*10)
+						{
+							buses10Min++;
+						}
+					}
+			});			
+			boardRows.sort(sortByTts);
+			$("#board").empty();
+			if (boardRows.length == 0)
+			{
+				$("#board").append("<tr><td>Predictions loading... (may take up to 30 seconds, or longer for low-volume locations)</td></tr>");
+			}
+			var now = new Date().getTime();
+			var rownum = 0;
+			$.each(boardRows, function( index, bus ) 
+			{
+				if (bus.LastHeardInterval > 60 && bus.TimeToStation > 0)
+				{
+					bus.Status = "Quiet";
+					bus.TimeChange = "";
+					bus.StatusColour="#fa0";
+					bus.StatusTextColour = "#000";	
+				}
+				if (bus.LastHeardInterval > 120 && bus.TimeToStation > 0)
+				{
+					bus.Status = "Lost";
+					bus.TimeChange = "";
+					bus.StatusColour="#aaa";
+					bus.StatusTextColour = "#000";	
+				}
+				if (bus.LastHeardInterval > 60 && bus.TimeToStation < 0)
+				{
+					bus.Status = "No Update";
+					bus.TimeChange = "";
+					bus.StatusColour="#ff0";
+					bus.StatusTextColour = "#000";					
+				}
+			
+				bus.TimeChangeTxt = "";
+				bus.LastHeardIntervalTxt = " (" + bus.LastHeardInterval + ")";
+				if (bus.TimeChange != "")
+				{
+					if (bus.TimeChange > 0)
+					{
+						bus.TimeChangeTxt = " (+" + bus.TimeChange + "s)";
+					}
+					else
+					{
+						bus.TimeChangeTxt = " (" + bus.TimeChange + "s)";
+					}
+				} 
+				var fontsize = (64-4*index);
+				if (fontsize < 18) { fontsize = 18; }
+				
+				var statusClass = "normalStatus";
+				if (bus.LastHeardInterval < 5)
+				{
+					statusClass = "blink_me";
+				}
+				
+				bus.TimeToStationTxt = bus.TimeToStation;
+				if (bus.TimeToStation < 0)
+				{
+					bus.TimeToStationTxt = "Due";
+				}
+				
+				if (rownum == 0)
+				{
+					var statusClass1B = "normalStatus";
+					$("#board").append("<tr><th style='font-size: 36px;' colspan='7'>" + bus.StationName + "</th></tr>");
+					$("#board").append("<tr><th colspan='3' style='text-align: left;'>Status: " + status + "</th><th colspan='4' style='text-align: right;'>Arrivals in next 10 min: <span>" + buses10Min + "</span></th></tr>");
+					if (bus.VehicleId != lastid)
+					{
+						statusClass1B = "blink_me";
+						lastid = bus.VehicleId;
+					}
+					$("#board").append("<tr><th colspan='3'><span class='" + statusClass1B + "' style='text-align: center; background-color: " + bus.BackgroundColour + "; color: " + bus.TextColour + "; font-size: 230px; border: 10px solid " + bus.BackgroundColour + "; border-radius: 40px; padding: 10px 50px;'>" + bus.LineName + "</span></th><th colspan='4' style='text-align: center; font-size: 288px;'>" + bus.TimeToStationTxt + "</th><th colspan='2'></th></tr>");
+					$("#board").append("<tr><th></th><th>Service</th><th>Destination</th><th>ID</th><th>Arriving</th><th>TTL</th><th style='width: 250px;'>Status</th></tr>");
+				}
+				if (rownum < 100)
+				{
+					if (bus.TimeToStation < 0)
+					{
+						html = "<tr class='arrived'><td>" + (index+1) + "</td>" + bus.LineNameTD + "<td>" + bus.DestinationName + "</td><td><div class='regno'>" + bus.VehicleId + "</div></td><td style='font-weight: bold; border: 1px solid #ff0; font-size: 64px;' class='blink_me'>" + bus.TimeToStationTxt + "</td><td>" + bus.TimeToLive + "</td><td class=" + statusClass + " style='color: " + bus.StatusTextColour + "; background-color: " + bus.StatusColour + ";'>" + bus.Status + bus.TimeChangeTxt + bus.LastHeardIntervalTxt + "</td></tr>";
+					}
+					else if (bus.TimeToStation < 30)
+					{
+						html = "<tr><td>" + (index+1) + "</td>" + bus.LineNameTD + "<td>" + bus.DestinationName + "</td><td><div class='regno'>" + bus.VehicleId + "</div></td><td style='font-weight: bold; border: 1px solid #ff0; font-size: " + fontsize + "px;'>" + bus.TimeToStationTxt + "</td><td>" + bus.TimeToLive + "</td><td class=" + statusClass + " style='color: " + bus.StatusTextColour + "; background-color: " + bus.StatusColour + ";'>" + bus.Status + bus.TimeChangeTxt + bus.LastHeardIntervalTxt + "</td></tr>";
+					}
+					else
+					
+					{
+						html = "<tr><td>" + (index+1) + "</td>" + bus.LineNameTD + "<td>" + bus.DestinationName + "</td><td><div class='regno'>" + bus.VehicleId + "</div></td><td style='font-weight: bold; border: 1px solid #000; font-size: " + fontsize + "px;'>" + bus.TimeToStationTxt + "</td><td>" + bus.TimeToLive + "</td><td class=" + statusClass + " style='color: " + bus.StatusTextColour + "; background-color: " + bus.StatusColour + ";'>" + bus.Status + bus.TimeChangeTxt + bus.LastHeardIntervalTxt + "</td></tr>"; 
+					}
+					$("#board").append(html);
+					rownum++;
+				}
+			});
+}
+
+function sortByTts(a, b) 
+{
+	return ((a.TimeToStation < b.TimeToStation) ? -1 : ((a.TimeToStation > b.TimeToStation) ? 1 : 0));
+};
+
+function decrementCounter()
+{
+	updateBoardDecrement();
+}
+
+setInterval(decrementCounter, 1000)
+//]]> 
+</script>
+<div id='countdown' class='camdir'>
+	<span id='countdowntimer'></span>
+</div>	
+<table id="board">
+	<tr><td>Predictions loading...</td></tr>
+</table>
+</body>
+</html>
+
