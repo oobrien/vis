@@ -5,26 +5,26 @@
 	<meta property="og:title" content="London Panopticon" />
 	<meta property="og:url" content="http://vis.oobrien.com/panopticon/" />
 	<meta property="og:description" content="CCTV traffic cameras from TfL around you." />
-	<meta property="og:site_name" content="London Panopticon" /> 					
+	<meta property="og:site_name" content="London Panopticon" />
 	<meta property="og:type" content="article" />
 	<meta property="og:image" content="http://vis.oobrien.com/panopticon/images/thumbnail.png" />
-	<meta property="fb:admins" content="507348039" />    
-	<meta property="fb:app_id" content="114474805306975" />    
+	<meta property="fb:admins" content="507348039" />	
+	<meta property="fb:app_id" content="114474805306975" />	
 
 	<title>London Panopticon</title>
 	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
-	<link rel="stylesheet" type="text/css" media="all" href="http://fonts.googleapis.com/css?family=Hammersmith+One">
+	<link rel="stylesheet" type="text/css" media="all" href="https://fonts.googleapis.com/css?family=Hammersmith+One">
 	
-	<script type="text/javascript" src="http://vis.oobrien.com/js/jquery-1.11.1.min.js"></script>	     
+	<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<script>
-	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-	  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-	  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-	  ga('create', 'UA-424605-12', 'oobrien.com');
-	  ga('send', 'pageview');
+	ga('create', 'UA-424605-12', 'oobrien.com');
+	ga('send', 'pageview');
 	</script>
 </head>
 <body>   
@@ -43,14 +43,23 @@
 			Look around: 
 			<select id='location' onchange='setLocationManual()'>
 				<option value='geo'>Current location</option>
-				<option value='trafalgarsq'>Trafalgar Square</option>
-				<option value='bigben'>Houses of Parliament</option>
-				<option value='oxfordcircus'>Oxford Circus</option>
-				<option value='camdentown'>Camden Town</option>
-				<option value='oldstreet'>Old Street</option>
-				<option value='stratford'>Stratford</option>
-				<option value='tottenhamhale'>Tottenham Hale</option>
+				<option value='angel'>Angel</option>
+				<option value='bank'>Bank</option>
 				<option value='blackfriars'>Blackfriars (for CS)</option>
+				<option value='bloomsbury'>Bloomsbury (UCL)</option>
+				<option value='camdentown'>Camden Town</option>
+				<option value='clapham'>Clapham</option>
+				<option value='croydon'>Croydon</option>
+				<option value='dalston'>Dalston</option>
+				<option value='hammersmith'>Hammersmith</option>
+				<option value='oldstreet'>Old Street</option>
+				<option value='oxfordcircus'>Oxford Circus</option>
+				<option value='bigben'>Parliament Square</option>
+				<option value='putney'>Putney</option>
+				<option value='stratford'>Stratford</option>
+				<option value='tooting'>Tooting</option>
+				<option value='tottenhamhale'>Tottenham Hale</option>
+				<option value='trafalgarsq'>Trafalgar Square</option>
 			</select>
 			<div id='explanationkey'>Showing the TfL traffic cameras nearest to you in all directions.<br />
 			Works in Chrome, Firefox and Safari but not Android Chrome.<br />
