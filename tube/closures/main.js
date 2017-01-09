@@ -178,6 +178,8 @@ function init()
 				features[j].set('fillColor', "#ffffff");
 				features[j].set('strokeColor', "#000000");
 				features[j].set('label', "");
+				features[j].set('strokeColorNormal', "#000000");
+				features[j].set('labelNormal', "");
 				features[j].set('strokeWidth', 1.5);
 				features[j].setId(features[j].get('id'));
 			}					
@@ -339,6 +341,14 @@ function requestDisruptionData()
 	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
 	if (timerange == "2015-05-31") { theurl = "../data/2015-05-31.json"; }
 	if (timerange == "2015-06-07") { theurl = "../data/2015-06-07.json"; }
+
+	if (timerange == "live") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "today") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + today + '&endDate=' + today + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "thiswe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "nextwe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "2015-05-31") { thestationurl = "../data/2015-05-31-station.json"; }
+	if (timerange == "2015-06-07") { thestationurl = "../data/2015-06-07-station.json"; }
+
 	
 	$.ajax(
 	{
@@ -350,6 +360,17 @@ function requestDisruptionData()
 		dataType: 'json',
 		async:true
 	});
+	$.ajax(
+	{
+		url: thestationurl,
+		success: function(data)
+		{
+			handleStationDisruptionData(data);
+		},
+		dataType: 'json',
+		async:true
+	});
+	
 }
 
 
@@ -358,6 +379,32 @@ function handleOSIData(data)
 	osis = data;
 	processOSIs();
 	requestDisruptionData();
+}
+
+
+function handleStationDisruptionData(statusJSON)
+{
+	var stations = layerPoints.getSource().getFeatures();
+	for (var i in stations)
+	{	
+		stations[i].set('closed', false);
+	}
+
+	for (var sj in statusJSON)
+	{
+		var station = statusJSON[sj];
+		for (var i in stations)
+		{	
+			if (stations[i].getId() == station.stationAtcoCode && (station.description.includes("is closed") || station.description.includes("be closed")) && station.type == "Part Closure")
+			{
+				stations[i].set('closed', true);
+			}
+			if (stations[i].getId() == station.stationAtcoCode && station.type == "Part Closure")
+			{
+				stations[i].set('partclosed', true);
+			}
+		}
+	}
 }
 
 function handleDisruptionData(statusJSON)
@@ -377,7 +424,7 @@ function handleDisruptionData(statusJSON)
 			}
 		}
 	}
-
+	
 	for (var sj in statusJSON)
 	{
 		var line = statusJSON[sj];
@@ -400,12 +447,20 @@ function handleDisruptionData(statusJSON)
 			{
 				var ls = line.lineStatuses[j];
 				
-				if (ls.disruption && ls.disruption.affectedStops)
+				if (ls.disruption && ls.disruption.affectedStops && ls.disruption.closureText != "specialService")
 				{
 					for (var l in ls.disruption.affectedStops)
 					{
 						var as0 = ls.disruption.affectedStops[l];
 						//console.log(as0.id);
+						/*
+						for (var i in stations)
+						{	
+							if (stations[i].getId() == as0.id)
+							{
+								stations[i].set('closed', true);
+							}
+						}*/
 						//TODO Future enhancement: Show station alert dots.
 					}				
 				}
@@ -432,7 +487,6 @@ function handleDisruptionData(statusJSON)
 										endcode = rsnes.stopPoint.id;
 									}
 									markClosed(startcode, endcode, network, linename, features);
-
 								}
 							}
 						}
@@ -549,6 +603,31 @@ function sortLinesByDisruption(a, b)
 
 function flashLines()
 {
+	var stations = layerPoints.getSource().getFeatures();
+	for (var i in stations)
+	{
+		if (stations[i].get('closed') && !stations[i].get('hide'))
+		{
+			if (blink)
+			{
+				stations[i].set('fillColor', 'rgba(0,0,0,0)');
+				stations[i].set('strokeColor', 'rgba(0,0,0,0)');		
+				stations[i].set('label', '');		
+			}
+			else
+			{
+				stations[i].set('fillColor', "#ff0000");					
+				stations[i].set('strokeColor', stations[i].get('strokeColorNormal'));		
+				stations[i].set('label', stations[i].get('labelNormal'));		
+			}
+		}
+		else if (stations[i].get('partclosed') && !stations[i].get('hide'))
+		{
+				stations[i].set('fillColor', "#ffaa00");					
+		}
+
+	}
+
 	layerLines.getSource().clear();
 
 	var features = layerLinesAll.getSource().getFeatures();
@@ -619,6 +698,12 @@ function flashLines()
 /* This method is designed to be called frequently, to restyle and show/hide lines. */
 function processLines()
 {
+	var stations = layerPoints.getSource().getFeatures();
+	for (var i in stations)
+	{
+		stations[i].set('fillColor', "#ffffff");
+	}
+
 	layerLinesAll.setVisible(false);
 
 	var features = layerLinesAll.getSource().getFeatures();
@@ -665,7 +750,7 @@ function processLines()
 		var flines = features[j].get('lines');
 		for (var k in flines)
 		{
-			if (flines[k].name in linesForKey) {}
+			if (flines[k].name in linesForKey || ["Emirates Air Line","East London"].indexOf(flines[k].name) > -1) {}
 			else
 			{
 				linesForKey[flines[k].name] = flines[k].colour;
@@ -708,6 +793,8 @@ function handleChange()
 	{
 		var feature = features[i];
 		var show = false;
+		features[i].set('hide', true);
+
 		for (var j in feature.get('lines'))
 		{
 			if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= year) && 
@@ -719,11 +806,13 @@ function handleChange()
 					if (feature.get('lines')[j].name == serviceFilter)
 					{
 						show = true;
+						features[i].set('hide', false);
 					}
 				}
 				else
 				{
 					show = true;
+					features[i].set('hide', false);
 				}
 			}
 		}
@@ -775,6 +864,9 @@ function handleChange()
 					}
 				}
 			}
+			features[i].set('labelNormal', features[i].get('label'));
+			features[i].set('strokeColorNormal', features[i].get('strokeColor'));
+
 		}
 		else
 		{
@@ -782,7 +874,9 @@ function handleChange()
 			features[i].set('strokeColor', 'rgba(0, 0, 0, 0)');
 			features[i].set('label', "");
 		}
-	}		
+	}	
+	
+		
 	processOSIs();	
 	updateUrl();	
 }
