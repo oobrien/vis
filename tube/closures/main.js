@@ -27,7 +27,7 @@ var tfl_app_key = "f5b2bb26fbd6fe285da0c9f2bd4d28bc";
 var here_app_id = "YyCiz5fA5sFK593ZqCEG";
 var here_app_code = "hfwTGH-20M2rP3HyyWIltA";
 
-var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Crossrail": "R", "DLR": "L", "District": "D", "East London": "E", 
+var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "DLR": "L", "District": "D", "East London": "E", 
 	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "X", 
 	"Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
 
@@ -288,7 +288,7 @@ function init()
 		]),
 		view: new ol.View({		
 			projection: "EPSG:3857",
-			maxZoom: 14,
+			maxZoom: 18,
 			minZoom: 11,
 			zoom: currentZoom,
 			center: ol.proj.transform([currentLon, currentLat], "EPSG:4326", "EPSG:3857"), 
@@ -333,10 +333,10 @@ function requestDisruptionData()
 	var nextsa = moment().day(13).format('YYYY-MM-DD');
 	var nextsu = moment().day(13).add(1, 'days').format('YYYY-MM-DD');
 				
-	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + today + '&endDate=' + today + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + today + '&endDate=' + today + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
 	if (timerange == "2015-05-31") { theurl = "../data/2015-05-31.json"; }
 	if (timerange == "2015-06-07") { theurl = "../data/2015-06-07.json"; }
 	
@@ -390,6 +390,7 @@ function handleDisruptionData(statusJSON)
 		if (network == "tube") { network = "Tube"; }
 		if (network == "overground") { network = "Overground"; }
 		if (network == "dlr") { network = "DLR"; }
+		if (network == "tram") { linename = "Tramlink"; network="Tramlink"; }
 		if (network == "tflrail") { network = "Crossrail"; }		
 		if (linename == "TFL Rail") { linename = "TfL Rail"; } //Upstream typo.
 				
@@ -409,7 +410,7 @@ function handleDisruptionData(statusJSON)
 					}				
 				}
 				
-				if (ls.disruption && ls.disruption.affectedRoutes)
+				if (ls.disruption && ls.disruption.closureText != "specialService" && ls.disruption.affectedRoutes)
 				{	
 					for (var k in ls.disruption.affectedRoutes)
 					{
@@ -430,43 +431,33 @@ function handleDisruptionData(statusJSON)
 										startcode = endcode;
 										endcode = rsnes.stopPoint.id;
 									}
-									if (startcode && endcode && startcode != endcode)
-									{
-										var segmentId = '#' + network + "-" + linename + "_" + startcode + "_" + endcode;
-										console.log(segmentId);
+									markClosed(startcode, endcode, network, linename, features);
 
-										for (var f in features)
-										{	
-											var flines = features[f].get('lines');
-											if (flines)
-											{
-												for (j = 0; j < flines.length; j++)
-												{
-													if (flines[j].network == network && flines[j].name == linename)
-													{
-														if (startcode == flines[j].start_sid || endcode == flines[j].start_sid)
-														{
-															if (startcode == flines[j].end_sid || endcode == flines[j].end_sid) 
-															{
-																features[f].get('lines')[j].end_sid_disrupted = true;
-															}
-															if (startcode == flines[j].otend_sid || endcode == flines[j].otend_sid) 
-															{
-																features[f].get('lines')[j].otend_sid_disrupted = true;
-															}
-															if (startcode == flines[j].ot2end_sid || endcode == flines[j].ot2end_sid) 
-															{
-																features[f].get('lines')[j].ot2end_sid_disrupted = true;
-															}
-														}															
-													}
-												}
-											}
-										}
-									}
 								}
 							}
 						}
+					}
+					if (ls.disruption.isBlocking && ls.disruption.isWholeLine && ls.statusSeverityDescription == "Suspended")
+					{
+						var segmentId = '#' + network + "-" + linename + "_";
+						console.log(segmentId);
+
+						for (var f in features)
+						{	
+							var flines = features[f].get('lines');
+							if (flines)
+							{
+								for (j = 0; j < flines.length; j++)
+								{
+									if (flines[j].network == network && flines[j].name == linename)
+									{
+										features[f].get('lines')[j].end_sid_disrupted = true;
+										features[f].get('lines')[j].otend_sid_disrupted = true;
+										features[f].get('lines')[j].ot2end_sid_disrupted = true;
+									}
+								}
+							}
+						}						
 					}
 				}
 			}
@@ -488,6 +479,45 @@ function handleDisruptionData(statusJSON)
 		dataTimer = setInterval(requestDisruptionData, 3600000); //Hourly	
 	}
 }
+
+function markClosed(startcode, endcode, network, linename, features)
+{
+	if (startcode && endcode && startcode != endcode)
+	{
+		var segmentId = '#' + network + "-" + linename + "_" + startcode + "_" + endcode;
+		console.log(segmentId);
+
+		for (var f in features)
+		{	
+			var flines = features[f].get('lines');
+			if (flines)
+			{
+				for (j = 0; j < flines.length; j++)
+				{
+					if (flines[j].network == network && flines[j].name == linename)
+					{
+						if (startcode == flines[j].start_sid || endcode == flines[j].start_sid)
+						{
+							if (startcode == flines[j].end_sid || endcode == flines[j].end_sid) 
+							{
+								features[f].get('lines')[j].end_sid_disrupted = true;
+							}
+							if (startcode == flines[j].otend_sid || endcode == flines[j].otend_sid) 
+							{
+								features[f].get('lines')[j].otend_sid_disrupted = true;
+							}
+							if (startcode == flines[j].ot2end_sid || endcode == flines[j].ot2end_sid) 
+							{
+								features[f].get('lines')[j].ot2end_sid_disrupted = true;
+							}
+						}															
+					}
+				}
+			}
+		}
+	}
+}
+
 
 function processOSIs()
 {
@@ -619,7 +649,6 @@ function processLines()
 					}
 				}
 				if (lines[j].name == "Emirates Air Line") { lines[j].hide = true; }
-				if (lines[j].name == "Tramlink") { lines[j].hide = true; }
 				if (features[i].get('id') == "BatterseaParkSpur") { lines[j].hide = true; }
 				
 			}
@@ -683,7 +712,7 @@ function handleChange()
 		{
 			if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= year) && 
 					(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= year) &&
-					feature.get('lines')[j].name != "Emirates Air Line" && feature.get('lines')[j].name != "Tramlink" && feature.get('name') != "Battersea Park")
+					feature.get('lines')[j].name != "Emirates Air Line" && feature.get('name') != "Battersea Park")
 			{
 				if (serviceFilter !== undefined)
 				{
@@ -710,11 +739,18 @@ function handleChange()
 			features[i].set('strokeWidth', 2);				
 			features[i].set('radius', 13);	
 			features[i].set('fillColor', "#ffffff");
-			if (features[i].get('labelX'))
+			if (features[i].get('cartography')['labelX'])
 			{
-				features[i].set('label', features[i].get('name'));
-				features[i].set('offsetX', features[i].get('labelX'));
-				features[i].set('offsetY', features[i].get('labelY'));				
+				if (features[i].get('cartography')['display_name'])
+				{
+					features[i].set('label', features[i].get('cartography')['display_name']);								
+				}
+				else
+				{
+					features[i].set('label', features[i].get('name'));				
+				}
+				features[i].set('offsetX', features[i].get('cartography')['labelX']);
+				features[i].set('offsetY', features[i].get('cartography')['labelY']);				
 			}
 			
 			var lineCount = 0;

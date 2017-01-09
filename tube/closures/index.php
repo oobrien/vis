@@ -13,7 +13,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=0.7, user-scalable=no, minimal-ui">
 
 	<title>Tube Line Closure Map</title>
-	<link rel="stylesheet" type="text/css" media="all" href="http://vis.oobrien.com/js/openlayers/v3.5.0-dist/ol.css" />	
+	<link rel="stylesheet" type="text/css" media="all" href="http://vis.oobrien.com/js/openlayers/v3.19.1-dist/ol.css" />	
 	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
 	<link rel="stylesheet" type="text/css" media="all" href="http://fonts.googleapis.com/css?family=Hammersmith+One">
 	<link rel="stylesheet" type="text/css" media="all" href="http://vis.oobrien.com/js/jquery-ui-1.10.4/themes/base/jquery-ui.css" />		
@@ -22,7 +22,7 @@
 	<script type="text/javascript" src="http://vis.oobrien.com/js/jquery-ui-1.10.4/ui/jquery-ui.js"></script>
 	<script type="text/javascript" src="moment.js"></script>
 	<script type="text/javascript" src="http://vis.oobrien.com/js/proj4.js"></script>	     
-	<script type="text/javascript" src="http://vis.oobrien.com/js/openlayers/v3.5.0-dist/ol-debug.js"></script> 
+	<script type="text/javascript" src="http://vis.oobrien.com/js/openlayers/v3.19.1-dist/ol-debug.js"></script> 
 	<script type="text/javascript" src="main.js"></script>
 	<script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
