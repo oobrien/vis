@@ -15,11 +15,12 @@ var linesForKey;
 var args = [];
 var osis = {};
 
-var year = 2015;
+var year = 2017;
 var currentZoom = 13;
 var currentLat = 51.51;
 var currentLon = -0.15;
 var blink = true;
+var noBlinking = false;
 
 var tfl_app_id = "8ee22a25";
 var tfl_app_key = "f5b2bb26fbd6fe285da0c9f2bd4d28bc";
@@ -67,7 +68,7 @@ function init()
 	}
 	else
 	{
-		$('#dates').val('thiswe');
+		$('#dates').val('live');
 	}
 				
 	if (args.zoom)
@@ -377,7 +378,6 @@ function requestDisruptionData()
 function handleOSIData(data)
 {
 	osis = data;
-	processOSIs();
 	requestDisruptionData();
 }
 
@@ -388,6 +388,7 @@ function handleStationDisruptionData(statusJSON)
 	for (var i in stations)
 	{	
 		stations[i].set('closed', false);
+		stations[i].set('partclosed', false);
 	}
 
 	for (var sj in statusJSON)
@@ -397,7 +398,15 @@ function handleStationDisruptionData(statusJSON)
 		{	
 			if (stations[i].getId() == station.stationAtcoCode && (station.description.includes("is closed") || station.description.includes("be closed")) && station.type == "Part Closure")
 			{
-				stations[i].set('closed', true);
+				if (stations[i].get('altid'))
+				{
+					stations[i].set('partclosed', true);		
+					console.log(stations[i].get('name') + " - marking as part closed as this station has two areas and IDs (e.g. Overground ID and Underground ID) and TfL doesn't let us know whether both or just one are closed. Note that both MIGHT be closed.");		
+				}
+				else
+				{
+					stations[i].set('closed', true);
+				}
 			}
 			if (stations[i].getId() == station.stationAtcoCode && station.type == "Part Closure")
 			{
@@ -405,6 +414,30 @@ function handleStationDisruptionData(statusJSON)
 			}
 		}
 	}
+	
+	/* Manually close stations on the GOBLIN until Feb 2017 */
+	for (var i in stations)
+	{	
+		if (["910GUPRHLWY", "910GCROUCHH", "910GHRGYGL", "910GSTOTNHM", "910GWLTHQRD", "910GLEYTNMR", "910GLYTNSHR", "910GWNSTDPK", "910GWDGRNPK"].indexOf(stations[i].getId()) > -1) { stations[i].set('closed', true); }
+		//if ([].indexOf(stations[i].getId()) > -1) { stations[i].set('partclosed', true); }
+	}
+	
+	var open = 0;
+	var pc = 0;
+	var closed = 0;
+	for (var i in stations)
+	{
+		if (stations[i].get('hide')) { continue; }
+		if (stations[i].get('closed')) { closed++; }
+		else if (stations[i].get('partclosed')) { pc++; }
+		else open++;
+	}
+	
+	$('#countopen').html(open);
+	$('#countpc').html(pc);
+	$('#countclosed').html(closed);
+	
+	processOSIs();
 }
 
 function handleDisruptionData(statusJSON)
@@ -425,6 +458,19 @@ function handleDisruptionData(statusJSON)
 		}
 	}
 	
+	/* Manually close GOBLIN until Feb 2017 */
+	markClosed("910GGOSPLOK", "910GUPRHLWY", "Overground", "London Overground");	
+	markClosed("910GUPRHLWY", "910GCROUCHH", "Overground", "London Overground");
+	markClosed("910GCROUCHH", "910GHRGYGL", "Overground", "London Overground");
+	markClosed("910GHRGYGL", "910GSTOTNHM", "Overground", "London Overground");
+	markClosed("910GSTOTNHM", "910GBLCHSRD", "Overground", "London Overground");
+	markClosed("910GBLCHSRD", "910GWLTHQRD", "Overground", "London Overground");
+	markClosed("910GWLTHQRD", "910GLEYTNMR", "Overground", "London Overground");
+	markClosed("910GLEYTNMR", "910GLYTNSHR", "Overground", "London Overground");
+	markClosed("910GLYTNSHR", "910GWNSTDPK", "Overground", "London Overground");
+	markClosed("910GWNSTDPK", "910GWDGRNPK", "Overground", "London Overground");
+	markClosed("910GWDGRNPK", "910GBARKING", "Overground", "London Overground");
+	
 	for (var sj in statusJSON)
 	{
 		var line = statusJSON[sj];
@@ -443,29 +489,30 @@ function handleDisruptionData(statusJSON)
 				
 		if (line.lineStatuses)
 		{
+			
 			for (var j in line.lineStatuses)
 			{
 				var ls = line.lineStatuses[j];
-				
+				/*
 				if (ls.disruption && ls.disruption.affectedStops && ls.disruption.closureText != "specialService")
 				{
 					for (var l in ls.disruption.affectedStops)
 					{
 						var as0 = ls.disruption.affectedStops[l];
 						//console.log(as0.id);
-						/*
+						
 						for (var i in stations)
 						{	
 							if (stations[i].getId() == as0.id)
 							{
 								stations[i].set('closed', true);
 							}
-						}*/
+						}
 						//TODO Future enhancement: Show station alert dots.
 					}				
-				}
+				} */
 				
-				if (ls.disruption && ls.disruption.closureText != "specialService" && ls.disruption.affectedRoutes)
+				if (ls.disruption && ls.disruption.closureText != "minorDelays" && ls.disruption.closureText != "specialService" && ls.disruption.affectedRoutes)
 				{	
 					for (var k in ls.disruption.affectedRoutes)
 					{
@@ -486,7 +533,7 @@ function handleDisruptionData(statusJSON)
 										startcode = endcode;
 										endcode = rsnes.stopPoint.id;
 									}
-									markClosed(startcode, endcode, network, linename, features);
+									markClosed(startcode, endcode, network, linename);
 								}
 							}
 						}
@@ -494,7 +541,7 @@ function handleDisruptionData(statusJSON)
 					if (ls.disruption.isBlocking && ls.disruption.isWholeLine && ls.statusSeverityDescription == "Suspended")
 					{
 						var segmentId = '#' + network + "-" + linename + "_";
-						console.log(segmentId);
+						//console.log(segmentId);
 
 						for (var f in features)
 						{	
@@ -522,11 +569,12 @@ function handleDisruptionData(statusJSON)
 	clearInterval(dataTimer);
 	
 	processLines();
+
 	$('#loadingDisruption').css('display', 'none');
 	blinkTimer = setInterval(flashLines, 1000); //Every second (blink on/off)
 	if ($('#dates').val() == "live")
 	{
-		dataTimer = setInterval(requestDisruptionData, 900000); //Every 15 minutes
+		dataTimer = setInterval(requestDisruptionData, 600000); //Every 10 minutes
 	}
 	else
 	{
@@ -534,13 +582,14 @@ function handleDisruptionData(statusJSON)
 	}
 }
 
-function markClosed(startcode, endcode, network, linename, features)
+function markClosed(startcode, endcode, network, linename)
 {
 	if (startcode && endcode && startcode != endcode)
 	{
 		var segmentId = '#' + network + "-" + linename + "_" + startcode + "_" + endcode;
-		console.log(segmentId);
+		//console.log(segmentId);
 
+		var features = layerLinesAll.getSource().getFeatures();
 		for (var f in features)
 		{	
 			var flines = features[f].get('lines');
@@ -585,7 +634,8 @@ function processOSIs()
 		{
 			var geom = new ol.geom.LineString([ source.getFeatureById(start).getGeometry().getCoordinates(), source.getFeatureById(end).getGeometry().getCoordinates()]);
 			var feature = new ol.Feature({ geometry: geom});
-			if (source.getFeatureById(start).get('fillColor') != 'rgba(0, 0, 0, 0)' && source.getFeatureById(end).get('fillColor') != 'rgba(0, 0, 0, 0)')
+			if (!source.getFeatureById(start).get('fillColor') != 'rgba(0, 0, 0, 0)' && source.getFeatureById(end).get('fillColor') != 'rgba(0, 0, 0, 0)'
+				&& !source.getFeatureById(start).get('closed') && !source.getFeatureById(end).get('closed'))
 			{
 				layerOSICore.getSource().addFeature(feature);		
 			}
@@ -608,7 +658,7 @@ function flashLines()
 	{
 		if (stations[i].get('closed') && !stations[i].get('hide'))
 		{
-			if (blink)
+			if (blink && !noBlinking)
 			{
 				stations[i].set('fillColor', 'rgba(0,0,0,0)');
 				stations[i].set('strokeColor', 'rgba(0,0,0,0)');		
@@ -682,7 +732,7 @@ function flashLines()
 				if (disrupted)
 				{
 					line.set('strokeLinecap', "round");							
-					if (blink)
+					if (blink && !noBlinking)
 					{
 						line.set('strokeColor', 'rgba(0,0,0,0)');
 					}
@@ -750,7 +800,7 @@ function processLines()
 		var flines = features[j].get('lines');
 		for (var k in flines)
 		{
-			if (flines[k].name in linesForKey || ["Emirates Air Line","East London"].indexOf(flines[k].name) > -1) {}
+			if (flines[k].name in linesForKey || ["Emirates Air Line","East London", "Crossrail"].indexOf(flines[k].name) > -1) {}
 			else
 			{
 				linesForKey[flines[k].name] = flines[k].colour;
@@ -781,6 +831,7 @@ function processLines()
 	$("#linekey").html(html);
 	
 	flashLines();
+	processOSIs();
 }
 
 function handleChange()
@@ -899,6 +950,11 @@ function toggleBackground()
 {
 	layerBackground.setVisible(!layerBackground.getVisible());
 	updateUrl();
+}
+
+function toggleBlinking()
+{
+	noBlinking = !noBlinking;
 }
 
 function filterLine(lineName)

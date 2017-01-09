@@ -56,13 +56,18 @@
 				<option value='nextwe'>Next Weekend (any time)</option>
 				<option value='2015-05-31'>31 May 2015 (locally cached)</option>
 				<option value='2015-06-07'>7 June 2015 (locally cached)</option>
-			</select><br />
-		Toggle: <button onclick='toggleBackground()'>Background Map</button>
+			</select><br /><div style='margin-top: 10px;'>
+		Toggle: <button onclick='toggleBackground()'>Background Map</button><button onclick='toggleBlinking()'>Blinking</button></div>
 			<div id='explanationkey' style='width: 240px; margin: 10px 0; text-align: left; font-size: 9px;'>This map uses 
-				the live disruption data from the <a href="https://www.tfl.gov.uk/info-for/open-data-users/">TfL API</a>, on a geographically accurate tube map <a href="https://gist.github.com/oobrien/8525859">derived from OpenStreetMap data</a>. 
-				Disrupted line sections are shown as flashing dots. Free <a href="http://www.oyster-rail.org.uk/interchanging-trains/">out-of-station interchanges</a> are shown with connecting blobs. 
+				the live disruption data from the <a href="https://www.tfl.gov.uk/info-for/open-data-users/">TfL API</a>, on a geographically accurate tube map <a href="https://github.com/oobrien/vis/tree/master/tube/data">derived from OpenStreetMap data</a>. 
+				Disrupted line sections are shown as flashing dots. Free <a href="http://www.oyster-rail.org.uk/interchanging-trains/">out-of-station interchanges</a> are shown with connecting blobs. Red stations are closed. Orange stations are partially closed.
 			See the <a href="https://tfl.gov.uk/tube-dlr-overground/status/">official site</a> for details of the disruptions. 
-			Data updates every few minutes.<br /><br />Background map: <a href="https://developer.here.com/rest-apis">HERE Maps</a>. Lines/stations: <a href="http://osm.org/">OpenStreetMap</a>. Created by <a href="http://oobrien.com/">Oliver O'Brien</a> (<a href="http://twitter.com/oobr">@oobr</a>).
+			Data updates every few minutes.
+			
+			<table id='counts'><th style='color: white;'>Stations<br />Open</th><th style='color: #ffaa00;'>Stations<br />Part-Closed</th><th style='color: #ff0000;'>Stations<br />Closed</th></tr>
+			<tr><td style='color: white;' id='countopen'></td><td style='color: #ffaa00;' id='countpc'></td><td style='color: #ff0000;' id='countclosed'></td></tr></table>
+			
+			Background map: <a href="https://developer.here.com/rest-apis">HERE Maps</a>. Lines/stations: <a href="http://osm.org/">OpenStreetMap</a>. Created by <a href="http://oobrien.com/">Oliver O'Brien</a> (<a href="http://twitter.com/oobr">@oobr</a>).
 		</div>
 
 		<div id='socialbuttons'>

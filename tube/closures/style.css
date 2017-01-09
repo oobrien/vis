@@ -36,6 +36,22 @@ a:link, a:visited
 	border-bottom: 3px solid #57b;
 }
 
+#counts
+{
+	margin: 5px 0;
+}
+
+#counts th, #counts td
+{
+	width: 70px;
+	text-align: center;
+}
+
+#counts td
+{
+	font-size: 24px;
+}
+
 #title
 {
 	font-size: 24px; 
