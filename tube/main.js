@@ -1,182 +1,11 @@
-/* This is pretty poorly written Javascript. I first started putting together in 2011 and 
-	it has morphed into something else as I've added different maps/vis into it. If I started 
-	it from scratch, it would be a lot better - honest! - Oliver O'Brien */
-
-proj4.defs("EPSG:27700", "+proj=tmerc +lat_0=49 +lon_0=-2 +k=0.9996012717 +x_0=400000 +y_0=-100000 +ellps=airy +datum=OSGB36 +units=m +no_defs");
-proj4.defs('urn:ogc:def:crs:EPSG::27700', proj4.defs('EPSG:3857'));
-
-var defaultJourneyStart = 322; /* Brixton */
-
-var demographicMap = {};
-
-demographicMap["tongues"] = { 
-	"c002": ["English", "#222222"],
-	"c012": ["French", "#ccccff"],
-	"c013": ["Portuguese", "#00ff00"],
-	"c014": ["Spanish", "#ccff00"],
-	"c016": ["Italian", "#6666ff"],
-	"c017": ["German", "#ffffff"],
-	"c018": ["Polish", "#00cccc"],
-	"c019": ["Slovak"],
-	"c020": ["Czech"],
-	"c021": ["Romanian", "#009999"],
-	"c022": ["Lithuanian", "#006666"], 
-	"c023": ["Latvian"],
-	"c024": ["Hungarian"],
-	"c025": ["Bulgarian"],
-	"c026": ["Greek", "#aa0000"],
-	"c027": ["Dutch", "#ffffff"],
-	"c028": ["Swedish", "#ffffff"],
-	"c031": ["Estonian"],
-	"c036": ["Albanian", "#ffffff"],	
-	"c037": ["Serbian/Croatian/Bosnian"],	
-	"c040": ["Northern European Language (non EU)"],
-	"c043": ["Yiddish", "#ffffff"],
-	"c044": ["Russian", "#ffffff"],
-	"c045": ["Turkish", "#ff0088"],
-	"c046": ["Arabic", "#ffff00"],
-	"c048": ["Hebrew", "#ffffff"],
-	"c049": ["Kurdish"],
-	"c050": ["Persian", "#444400"],
-	"c051": ["Pashto"],
-	"c052": ["West, Central Asian Language (not Hebrew, Kurdish, Persian/Farsi or Pashto)"],
-	"c054": ["Urdu", "#ffcc00"],
-	"c055": ["Hindi", "#ffffff"],
-	"c056": ["Panjabi", "#ff3300"],
-	"c058": ["Bengali", "#ff9900"],
-	"c059": ["Gujarati", "#ffaaaa"],
-	"c060": ["Marathi"],
-	"c061": ["Telugu", "#ffffff"],
-	"c062": ["Tamil", "#ff66ff"],
-	"c063": ["Malayalam"],
-	"c064": ["Sinhala"],
-	"c065": ["Nepalese", "#ffffff"],
-	"c066": ["South Asian Language (not Urdu, Hindi, Panjabi, Pahari/Mirpuri/Potwari, Bengali/Sylheti/Chatgaya, Gujarati, Marathi, Telugu, Tamil, Malayalam, Sinhala or Nepalese"],
-	"c068": ["Mandarin"],
-	"c069": ["Cantonese", "#ff0000"],
-	"c070": ["Chinese ao", "#ff3333"],
-	"c071": ["Japanese", "#8800ff"],
-	"c072": ["Korean", "#ffffff"],
-	"c073": ["Vietnamese"],
-	"c074": ["Thai"],
-	"c075": ["Malay"],
-	"c076": ["Tagalog", "#00ffff"],
-	"c077": ["East Asian Language (not Chinese languages, Japanese, Korean, Vietnamese, Thai, Malay or Tagalog/Filipino)"],
-	"c084": ["Amharic"],
-	"c085": ["Tigrinya"],
-	"c086": ["Somali", "#0066ff"],
-	"c088": ["Akan"],
-	"c089": ["Yoruba", "#ffffff"],
-	"c090": ["Igbo"],
-	"c091": ["Swahili, Kiswahili"],
-	"c092": ["Luganda"],
-	"c095": ["Afrikaans", "#ffffff"],
-	"c096": ["Other Nigerian languages (not Yoruba, Igbo)"],
-	"c100": ["Miscellaneous languages"],
-	"x": ["No significant population", '#aaaaaa']
-};
-
-demographicMap["wardwords"] = demographicMap["tongues"];
-
-demographicMap["occupation"] = {
-	"c004": ["Chief exec/senior manager"],
-	"c006": ["Funct md", "#88bb88"],
-	"c007": ["Financial institution manager/director", "#ffffff"],
-	"c009": ["Protective (senior officer)", "#ffffff"],
-	"c011": ["Retail manager/director", "#ffffff"],
-	"c014": ["Hospitality or leisure manager/proprietor", "#ffffff"],
-	"c016": ["Manager/proprietor (misc)", "#ffffff", "#ffffff"],
-	"c019": ["Natural and Social Science professional", "#ffffff"],
-	"c021": ["IT*", "#aaaaff", "#ffffff"],
-	"c025": ["Health*", "#00ffff"],
-	"c027": ["Nursing", "#66ffff"],
-	"c029": ["Education", "#ff0000"],
-	"c031": ["Legal*", "#00ff00"],
-	"c032": ["Biz admin*", "#ff7700"],
-	"c033": ["Architect, Town Planner, Surveyor"],	
-	"c037": ["Media*"],
-	"c041": ["Draughtsperson or related architectural technician", "#ffffff"],
-	"c047": ["Protective", "#ff00ff"],
-	"c049": ["Art/Med", "#ffff00"],
-	"c050": ["Design", "#ffffff"],
-	"c055": ["Biz/$^", "#ddddaa"],
-	"c056": ["Marketing^", "#6644ff"],
-	"c058": ["Public Services and misc associate professional", "#ffffff"],
-	"c061": ["Government administration", "#ffffff"],
-	"c062": ["Financial administration", "#ffffff"],
-	"c063": ["Records administration"],
-	"c064": ["Administrative - not government, finance or records"],
-	"c067": ["Secretarial", "#00cc66"],
-	"c075": ["Electrician", "#ffffff"],
-	"c078": ["Construction", "#aa0066"],
-	"c079": ["Building finishing"],
-	"c084": ["Food prep/hospitality"],
-	"c088": ["Childcare", "#ffffff"],
-	"c090": ["Caring", "#66ff00"],
-	"c092": ["Leisure/travel", "#ffffff"],
-	"c094": ["Housekeeping", "#ffffff"],
-	"c098": ["Sales as", "#ffaaaa"],
-	"c102": ["Customer service"],
-	"c106": ["Process operative"],
-	"c111": ["Road Transport", "#00aaaa"],
-	"c118": ["Elementary process plant"],
-	"c121": ["Cleaning", "#aaaa00"],
-	"c122": ["Security", "#cc00ff"],
-	"c124": ["Elementary storage", "#000000"],
-	"c125": ["Oth elem", "#996633"],	
-};
-
-demographicMap["wardwork"] = demographicMap["occupation"];
-
-var demographicInfo = {};
-
-demographicInfo["tongues"] = {
-	"additional": "Persian includes Farsi. Bengali includes Sylheti and Chatgaya. Chinese ao excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br /><i>Tube Tongues was inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire &amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.</i>",
-	"file": "qs204ew_tubebuffer200m.json",
-	"title": "Tube Tongues",
-	"subtitle": "Second languages at tube stops",
-	"subinfo": "Top primary languages spoken<br />by people living near here:", 
-	"keyexample": "...of people living near here speak French - the second most common.",
- 	"defaultkey": "c012",
- 	"infolimit": 0.005,
- 	"scale": 220
-};
-
-demographicInfo["wardwords"] = {
-	"additional": "Persian includes Farsi. Bengali includes Sylheti and Chatgaya. Chinese ao excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br /><i>Tube Tongues was inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire and <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.</i>",
-	"file": "qs204ew_wardsingle.json",
-	"title": "Tube Tongues (Wards)",
-	"subtitle": "Second languages by ward",
-	"subinfo": "Top primary languages spoken<br />by people living in this ward:", 
-	"keyexample": "...of people living in this ward speak French - the second most common.",
- 	"defaultkey": "c012",
- 	"infolimit": 0.005,
- 	"scale": 220
-};
-
-demographicInfo["occupation"] = {
-	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br /><i>Working Lines was inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.</i>",
- 	"file": "qs606ew_tubebuffer200m.json",
- 	"title": "Working Lines",
- 	"subtitle": "What do the locals do?",
- 	"subinfo": "Top occupations of people<br />living near here:",
- 	"keyexample": "...of people living near here have artistic, literary or media occupations - the most popular job type locally.",
- 	"defaultkey": "c049",
- 	"infolimit": 0.03,
- 	"scale": 220
- };
-
-demographicInfo["wardwork"] = {
-	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br /><i>Working Lines was inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.</i>",
- 	"file": "qs606ew_wardsingle.json",
- 	"title": "Working Lines (Wards)",
- 	"subtitle": "What do the locals do?",
- 	"subinfo": "Top occupations of people<br />living in this ward:",
- 	"keyexample": "...of people living in this ward have artistic, literary or media occupations - the most popular job type locally.",
- 	"defaultkey": "c049",
- 	"infolimit": 0.03,
- 	"scale": 220
- };
+/*
+	London Tube Data Maps
+	Created by Oliver O'Brien (Twitter: @oobr)
+	Live version: http://tubecreature.com/
+	Source repository: https://github.com/oobrien/vis/
+	Licensed under a Creative Commons CC-By-NC licence. 
+	Please contact me (o.obrien [(at)] outlook.com) first if you would like to use this code in a commercial project.
+*/
 
 var olMap;
 var key1map;
@@ -184,13 +13,14 @@ var key1source;
 var key2map;
 var key2source;
 var layerPoints;
+var layerPointsCase;
 var layerOSICore;
 var layerLines;
 var layerLinesAll;
 var layerBackground;
-var selectClick;
-var selectHover;
+var layerAerial;
 var pointsLoaded = "stations";
+var selectClick;
 var showEnglish = false;
 var args = [];
 
@@ -207,12 +37,32 @@ var odRequested = false;
 
 var demographicData = {};
 var metricKey = {};
+
+metricKey["total"] = "tf_yr";
+metricKey["in"] = "i_w_t";
+metricKey["out"] = "o_w_t"; 
+metricKey["early_in"] = "i_w_pre"; 
+metricKey["early_out"] = "o_w_pre"; 
+metricKey["am_in"] = "i_w_apk"; 
+metricKey["am_out"] = "o_w_apk"; 
+metricKey["mid_in"] = "i_w_mid"; 
+metricKey["mid_out"] = "o_w_mid"; 
+metricKey["pm_in"] = "i_w_ppk"; 
+metricKey["pm_out"] = "o_w_ppk";
+metricKey["late_in"] = "i_w_eve"; 
+metricKey["late_out"] = "o_w_eve"; 
+metricKey["sat_in"] = "i_sa"; 
+metricKey["sat_out"] = "o_sa"; 
+metricKey["sun_in"] = "i_su"; 
+metricKey["sun_out"] = "o_su"; 
+
 var osis = {};
 
 var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Crossrail": "X", "DLR": "L", "District": "D", "East London": "E", 
 	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "R", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
 var linesForKey;
 
+var hidelabels = ['940GZZLUTCR', '910G950', '940GZZDLCAN', '940GZZLUNGW', '940GZZDLPOP', '940GZZLUCGN', '940GZZLUERB', '940GZZLUCST', '940GZZLUMMT', '910GWLTHQRD', '940GZZCRCEN', '940GZZCRWEL', '940GZZLUESQ', '940GZZLULSQ', '940GZZLUSPU', '940GZZLUBND', '940GZZDLRAL', '910GBTHNLGR', '940GZZLUGPS', '940GZZLUEMB', '940GZZLURGP'];
 
 function init()
 {
@@ -222,6 +72,15 @@ function init()
 	{
 		var elements = hash.split('&');
 		elements[0] = elements[0].substring(1); /* Remove the # */
+
+		for(var i = 0; i < elements.length; i++)
+		{
+			var pair = elements[i].split('=');
+			if (pair.length > 1)
+			{
+				args[pair[0]] = pair[1];
+			}
+		}
 
 		if (elements[0] == 'map') { args['metric'] = "map"; }
 		if (elements[0] == 'night') { args['metric'] = "night"; }
@@ -258,11 +117,11 @@ function init()
 	
 	if (args['metric'])
 	{
-		$('#metric').val(args['metric']);
+		$('#themetric').val(args['metric']);
 	}
 	else
 	{
-		$('#metric').val('total');		
+		$('#themetric').val('total');		
 	}
 	if (args['filter'])
 	{
@@ -296,7 +155,7 @@ function init()
 	function pointStyle(feature, resolution) 
 	{
 		var zoomFactor = 0.15;
-		if (resolution < 100) { zoomFactor = 0.25; }
+		if (resolution < 100) { zoomFactor = 0.2; }
 		if (resolution < 50) { zoomFactor = 0.3; }
 		if (resolution < 25) { zoomFactor = 0.4; }
 		if (resolution < 12.5) { zoomFactor = 0.5; }
@@ -308,28 +167,100 @@ function init()
 			new ol.style.Style({ 
 				image: new ol.style.Circle({ 
 					radius: feature.get('radius') * zoomFactor, 
-					fill: new ol.style.Fill({ color: feature.get('fillColor') }),
-					stroke: (resolution > 100 && ($('#metric').val() != "map" && $('#metric').val() != "night") ? undefined : new ol.style.Stroke({ width: (feature.get('highlight') ? 4 : feature.get('strokeWidth')), color: (selectHover.getFeatures().getArray().indexOf(feature) > -1 ? '#5577bb' : feature.get('strokeColor')) }))
+					fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
 				}),
 				text: new ol.style.Text({
-					text: (resolution > 50 ? undefined : feature.get('label')),
-					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
-					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
-					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-					font: (resolution < 12.5 ? '12px Cabin Condensed, sans-serif' : '8px Cabin Condensed, sans-serif'),
-					fill: new ol.style.Fill({ color: "#000000" }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.6)', width: 3 })
+					text: (resolution > 50 ? undefined : feature.get('datalabel')),
+					textAlign: 'center',
+					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 8.5px Cabin Condensed, sans-serif' : 'bold 8px Cabin Condensed, sans-serif'))),
+					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
+					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 3 })
 
+				})
+			}),
+			new ol.style.Style({
+				text: new ol.style.Text({
+                                       text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel'))),
+                                        offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
+                                        offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
+                                        textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+                                        font: (resolution < 12.5 ? '12px Cabin Condensed, sans-serif' : ( resolution < 25 ? '10px  Cabin Condensed, sans-serif' : '7px Cabin Condensed, sans-serif')),
+                                        fill: new ol.style.Fill({ color: "#000000" }),
+                                        stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.6)', width: 3 })
 				})
 			})			
 		] 
 	};
+	
+	function pointCaseStyle(feature, resolution) 
+	{
+		var zoomFactor = 0.15;
+		if (resolution < 100) { zoomFactor = 0.2; }
+		if (resolution < 50) { zoomFactor = 0.3; }
+		if (resolution < 25) { zoomFactor = 0.4; }
+		if (resolution < 12.5) { zoomFactor = 0.5; }
+
+		//console.log(feature);
+		//console.log(feature.get('fillColor'));
+
+		return [
+			new ol.style.Style({ 
+				image: new ol.style.Circle({ 
+					radius: feature.get('radius') * zoomFactor, 
+					stroke: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') })))
+				}),
+			}),
+		] 
+	};	
+
+	function selectStyle(feature, resolution) 
+	{
+		var zoomFactor = 0.15;
+		if (resolution < 100) { zoomFactor = 0.2; }
+		if (resolution < 50) { zoomFactor = 0.3; }
+		if (resolution < 25) { zoomFactor = 0.4; }
+		if (resolution < 12.5) { zoomFactor = 0.5; }
+
+		//console.log(feature);
+		//console.log(feature.get('fillColor'));
+
+		return [
+			new ol.style.Style({ 
+				image: new ol.style.Circle({ 
+					radius: feature.get('radius') * zoomFactor, 
+					fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
+					stroke: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth')*2, color: feature.get('strokeColor') })))
+				}),
+				text: new ol.style.Text({
+					text: (resolution > 50 ? undefined : feature.get('datalabel')),
+					textAlign: 'center',
+					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 8.5px Cabin Condensed, sans-serif' : 'bold 8px Cabin Condensed, sans-serif'))),
+					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
+					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 3 })
+
+				})
+			}),
+			new ol.style.Style({
+				text: new ol.style.Text({
+                                       text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel'))),
+                                        offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
+                                        offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
+                                        textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+                                        font: (resolution < 12.5 ? '12px Cabin Condensed, sans-serif' : ( resolution < 25 ? '10px  Cabin Condensed, sans-serif' : '7px Cabin Condensed, sans-serif')),
+                                        fill: new ol.style.Fill({ color: "#000000" }),
+                                        stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.6)', width: 3 })
+				})
+			})			
+		] 
+	};	
+	
+	
 		
 	function lineStyle(feature, resolution) 
 	{
 		return [
 			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 3, color: feature.get('strokeColor'), lineCap: feature.get('strokeLinecap'), lineDash: feature.get('strokeDashstyle') })
+				stroke: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor'), lineCap: feature.get('strokeLinecap'), lineDash: feature.get('strokeDashstyle') })
 			})
 		] 
 	};
@@ -348,7 +279,7 @@ function init()
 	{
 		return [
 			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 2.5, color: '#ffffff' })
+				stroke: new ol.style.Stroke({ width: 2.5, color: '#ff88dd' })
 			})
 		] 
 	};
@@ -358,10 +289,20 @@ function init()
 	{
 		return [
 			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 6, color:'rgba(128, 128, 128, 0.5)' })
+				stroke: new ol.style.Stroke({ width: 6, color:'rgba(128, 0, 0, 0.5)' })
 			})
 		] 	
 	};
+
+	function zoneStyle(feature, resolution)
+	{
+		return [
+			new ol.style.Style({ 
+				stroke: new ol.style.Stroke({ width: 6, color:'rgba(128, 128, 128, 0.25)' })
+			})
+		] 	
+	};
+
 	
 	function thamesStyle(feature, resolution)
 	{
@@ -384,7 +325,14 @@ function init()
 		}),
 		opacity: 0.25
 	});
-	
+	layerAerial = new ol.layer.Tile({
+                source: new ol.source.BingMaps({
+					key: 'AtZti8EK8Nnv2Nb6w-7eGTmhK1nhYgixIXib0-xKzLLv9n_vsTkh_fWqtmqDppeX',
+					imagerySet: 'Aerial'
+				}),
+				visible: false,
+                opacity: 0.6
+        });	
  	
 	 pointSource = new ol.source.Vector({
 		url: 'data/tfl_stations.json',
@@ -407,19 +355,19 @@ function init()
 			for (var j in features)
 			{
 				features[j].set('radius', 15);
-				features[j].set('highlight', false);
 				features[j].set('fillColor', "#ffffff");
 				features[j].set('strokeColor', "#000000");
-				features[j].set('label', "");
-				features[j].set('strokeWidth', 1.5);
-				features[j].setId(features[j].get('id'));
-				if (args['selected'])
+				features[j].set('datalabel', "");
+				features[j].set('geolabel', "");
+				features[j].set('strokeWidth', 3);
+				if (features[j].get('id'))
 				{
-					if (features[j].get('id') == args['selected'])
-					{
-						selectClick.getFeatures().push(features[j]);
-					}
+					features[j].setId(features[j].get('id'));
 				}
+				else
+				{
+					features[j].setId(features[j].get('name'));
+				}				
 			}					
   	  	
 			requestData();	
@@ -445,22 +393,14 @@ function init()
 			for (var j in features)
 			{
 				features[j].set('radius', 15);
-				features[j].set('highlight', false);
 				features[j].set('fillColor', "#ffffff");
 				features[j].set('strokeColor', "#000000");
-				features[j].set('label', "");
-				features[j].set('strokeWidth', 1.5);
+				features[j].set('datalabel', "");
+				features[j].set('geolabel', "");
+				features[j].set('strokeWidth', 3);
 				features[j].set('tfl_intid', features[j].getId()); //Eugh.
-				
-				if (args['selected'])
-				{
-					if (features[j].getId() == args['selected'])
-					{
-						selectClick.getFeatures().push(features[j]);
-					}
-				}
 			}				
-			//if (["wardwork", "wardwords"].indexOf($('#metric').val()) > -1)
+			//if (["wardwork", "wardwords"].indexOf($('#themetric').val()) > -1)
 		
 			handleMetricChange();
 		}
@@ -471,7 +411,13 @@ function init()
 		source: pointSource, 
 		style: function(feature, resolution) { return pointStyle(feature, resolution); }
 	});
-	
+
+ 	layerPointsCase  = new ol.layer.Vector(
+	{ 
+		source: pointSource, 
+		style: function(feature, resolution) { return pointCaseStyle(feature, resolution); }
+	});
+
  	var lineAllSource = new ol.source.Vector({
 		url: 'data/tfl_lines.json',
 		defaultProjection: 'EPSG:4326',
@@ -529,6 +475,19 @@ function init()
 		style: function(feature, resolution) { return glaStyle(feature, resolution); }
 	});
 
+	var zoneSource = new ol.source.Vector({
+		url: 'data/zones1to6.json',
+		defaultProjection: 'EPSG:4326',
+		format: new ol.format.GeoJSON()
+	}) 
+
+ 	layerZones = new ol.layer.Vector(
+	{ 
+		source: zoneSource, 
+		style: function(feature, resolution) { return zoneStyle(feature, resolution); }
+	});
+
+
 	var thamesSource = new ol.source.Vector({
 		url: 'data/river_thames_simp.json',
 		defaultProjection: 'EPSG:4326',
@@ -543,7 +502,7 @@ function init()
   	
 	olMap = new ol.Map({
 		target: "mapcontainer",
-		layers: [ layerBackground, layerLinesAll, layerThames, layerGLA, layerLines, layerOSICase, layerPoints, layerOSICore  ],
+		layers: [ layerBackground, layerAerial, layerLinesAll, layerThames, layerZones, layerGLA, layerLines, layerOSICase, layerPointsCase, layerOSICore, layerPoints ],
 		controls: ol.control.defaults({}).extend(
 		[
 			new ol.control.ScaleLine({'geodesic': true, 'units': 'metric'}),
@@ -552,7 +511,7 @@ function init()
 		]),
 		view: new ol.View({		
 			projection: "EPSG:3857",
-			maxZoom: 15,
+			maxZoom: 16,
 			minZoom: 10,
 			zoom: currentZoom,
 			center: ol.proj.transform([currentLon, currentLat], "EPSG:4326", "EPSG:3857"), 
@@ -564,45 +523,48 @@ function init()
 	{
 		if (args['layers'][0] == "F")
 		{
-			toggleBackground();
+            $("#backgroundCB").prop('checked', false);
+			layerBackground.setVisible(false);
 		}
 		if (args['layers'].length > 2 && args['layers'][2] == "F")
 		{
-			toggleLines();
+            $("#linesCB").prop('checked', false);
+			layerLines.setVisible(false);
+		}
+		if (args['layers'].length > 5 && args['layers'][5] == "T")
+        {
+            $("#aerialCB").prop('checked', true);
+			layerAerial.setVisible(true);
+						
 		}
 	}
 
     //INTERACTIONS AND EVENTS		
 	selectClick = new ol.interaction.Select({
-  		condition: ol.events.condition.click,
-		style: function(feature, resolution) { return pointStyle(feature, resolution); },
-		layers: [layerPoints]
-  	});  	
-  	
-  	selectClick.getFeatures().on('change:length', function(e) 
-  	{
-		var features = layerPoints.getSource().getFeatures();
-		for (var i in features)
+		layers: [ layerPoints ],
+		condition: ol.events.condition.click,
+		style: function(feature, resolution) { return selectStyle(feature, resolution); }
+	  });
+	 olMap.getInteractions().extend([selectClick]);
+
+	$(olMap.getViewport()).on('click', function(evt) 
+	{
+		var pixel = olMap.getEventPixel(evt.originalEvent);
+		var coordinate = olMap.getEventCoordinate(evt.originalEvent);
+		var popupFeature;
+
+		olMap.forEachFeatureAtPixel(pixel, function(feature, layer) 
 		{
-			if (features[i].get('highlight'))
+			if (layer == layerPoints && feature)
 			{
-				features[i].set('highlight', false);
-				features[i].changed(); //Necessary, as otherwise a pan or zoom causes selected features to get stuck.
-			}				 			
-		}			
-		
-        if (e.target.getArray().length === 0) 
-        {
-			$("#info").css('display', 'none');
-			$("#info").html('');
-			resetDisplay();
-        } 
-        else 
-        {
-          	var feature = e.target.item(0);	 
-			feature.set('highlight', true);
-          	
-          	if ($("#metric").val() == "journeys")
+				popupFeature = feature;				
+			}
+		}.bind(this));
+
+		if (popupFeature)
+		{
+			//olMap.getOverlays().item(0).setPosition(coordinate);
+          	if ($("#themetric").val() == "journeys")
 			{
 				handleChange();
 			}
@@ -610,39 +572,75 @@ function init()
 			{
 				updateSelectedInfo();		
 			};
-        }
-        
-        updateUrl();
-    });  
-    
-    selectHover = new ol.interaction.Select({
-  		condition: ol.events.condition.mouseMove,
-		style: function(feature, resolution) { return pointStyle(feature, resolution); },
-		layers: [layerPoints]
-  	});  	
-  	
-	olMap.addInteraction(selectClick);	
-	olMap.addInteraction(selectHover);	
+		}
+		else
+		{
+			resetDisplay();
+			$("#info").css('display', 'none');
+			$("#info").html('');
+		}
+		updateUrl();
+	});
+	
+	$(olMap.getViewport()).on('mousemove', function(evt) 
+	{
+	  	var pixel = olMap.getEventPixel(evt.originalEvent);
+		displayFeatureInfo(pixel);
+	});
+	    
 	olMap.getView().on('change:resolution', handleZoom);	
 	olMap.on("moveend", updateUrl);	  
 
-    
 	key1source = new ol.source.Vector();
 	var key1layer = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointStyle(feature, resolution); } });	
-	key1map = new ol.Map({ target: "key1", layers: [ key1layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
+	var key1layerCase = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
+	key1map = new ol.Map({ target: "key1", layers: [ key1layerCase, key1layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	key2source = new ol.source.Vector();
 	var key2layer = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointStyle(feature, resolution); } });	
-	key2map = new ol.Map({ target: "key2", layers: [ key2layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
-
-	var metricItems = $("#metric").children("option");
-
-	for (var i = 0; i < metricItems.length; i++)
-	{
-		metricKey[metricItems[i].value] = i-2;
-	}
+	var key2layerCase = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
+	key2map = new ol.Map({ target: "key2", layers: [ key2layerCase, key2layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	if (top.location!= self.location) { $("#button").css('display', 'block'); }
+}
+
+var displayFeatureInfo = function(pixel)
+{
+	var features = [];
+	olMap.forEachFeatureAtPixel(pixel, function(feature, layer)
+	{
+		features.push(feature);
+	}.bind(this));
+	
+	if (features.length > 0) 
+	{
+		var name = false;
+		var info = [];
+		var i, ii;
+		for (i = 0, ii = features.length; i < ii; ++i) 
+		{
+			if (features[i].get('name'))
+			{
+				if (info.indexOf(features[i].get('name')) < 0)
+				{
+					info.push(features[i].get('name'));
+				}
+				name = true;
+			}
+		}
+		if (name)
+		{
+			document.getElementById('areainfo').innerHTML =  "<div class='areatitle'><br />" + info.join('<br />') || '' + "</div>";
+		}
+		else
+		{
+			document.getElementById('areainfo').innerHTML = '';		
+		}
+	} 
+	else 
+	{
+		document.getElementById('areainfo').innerHTML = '';
+	}
 }
 
 /* This method is designed to be called frequently, to restyle and show/hide lines. */
@@ -651,7 +649,7 @@ function processLines()
 	layerLinesAll.setVisible(false);
 	layerLines.getSource().clear();
 
-	var metric = $("#metric").val();
+	var metric = $("#themetric").val();
 	var features = layerLinesAll.getSource().getFeatures();
 	for (var i in features)
 	{	
@@ -665,18 +663,32 @@ function processLines()
 				{
 					lines[j].hide = false;
 				}
-				if ($("#metric").val() == "total" 
-					&& ($("#year").val() == 2012 || $("#year").val() == 2013) 
-					&& ($("#yearcomp").val() == "none" || $("#yearcomp").val() == 2012 || $("#yearcomp").val() == 2013)
-					&& [ "DLR", "Tramlink"].indexOf(lines[j].network) > -1)
+				if ($("#themetric").val() == "total" 
+					&& ($("#year").val() >= 2012 && $("#year").val() <= 2015) 
+					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2012 && $("#yearcomp").val() <= 2015))
+					&& [ "DLR"].indexOf(lines[j].network) > -1)
 				{
 					lines[j].hide = false;			
 				}
-				/* if ($("#metric").val() == "journeys" && ["Overground", "DLR"].indexOf(lines[j].network) > -1)
+				if ($("#themetric").val() == "total" 
+					&& ($("#year").val() >= 2010) 
+					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2010 && $("#yearcomp").val() <= 2015))
+					&& [ "Tramlink"].indexOf(lines[j].network) > -1)
 				{
 					lines[j].hide = false;			
-				} */
-				if (["tongues", "occupation"].indexOf(metric) > -1)
+				}
+				if ($("#themetric").val() == "total" 
+					&& ($("#year").val() >= 2013 && $("#year").val() <= 2015) 
+					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2014 && $("#yearcomp").val() <= 2015))
+					&& [ "Overground"].indexOf(lines[j].network) > -1)
+				{
+					lines[j].hide = false;			
+				}
+				/* if ($("#themetric").val() == "journeys" && ["Overground", "DLR"].indexOf(lines[j].network) > -1)
+				{
+					lines[j].hide = false;			
+				} */				
+				if (["tongues", "occupation", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
 				{
 					lines[j].hide = false;			
 				}
@@ -746,15 +758,49 @@ function processLines()
 	{
 		for (line in linesForKeySorted)
 		{
-			html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");
+			if (linesForKeySorted[line][0] == "Crossrail")
+			{
+				if (linesForKeySorted[line][0] == "Crossrail")
+				{
+					html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>Elizabeth</div>");							
+				}
+				else
+				{
+					html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
+				}
+			}
+			else
+			{
+				html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
+			}
 		}
 	}
 	html += "</td>";	
 	html += "<td>";
 	
-	var metric = $("#metric").val();
-	if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) > -1)
+	var metric = $("#themetric").val();
+	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
 	{
+	
+		if (demographicMap["houseprices"] == undefined)
+		{
+			demographicMap["houseprices"] = {};
+			for (var i = 250; i <= 1000; i = i + 50)
+			{
+				var ratio = (i-250.0)/750.0;	
+				demographicMap["houseprices"][i] = ["£" + i.toString() + "K", getGBRColour(ratio)]
+			}
+		}
+		if (demographicMap["housepricesdiff"] == undefined)
+		{
+			demographicMap["housepricesdiff"] = {};
+			for (var i = -50; i <= 50; i = i + 5)
+			{
+				var ratio = (i+50.0)/100.0;	
+				demographicMap["housepricesdiff"]['x' + i] = ["£" + i.toString() + "K", getGWRColour(1-ratio)]
+			}
+		}
+	
 		for (demographic in demographicMap[metric])
 		{
 			if (demographicMap[metric][demographic][1] !== undefined && demographicMap[metric][demographic][1] !== "#ffffff" && demographicMap[metric][demographic][1] !== "#222222")
@@ -779,7 +825,10 @@ function processLines()
 			}
 		}
 		html += "</div>";
-		html += "<div id='additionalText'>" + demographicInfo[metric]["additional"] + "</div>";	
+	}
+	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
+	{
+		html += "<div id='additionalText'>" + demographicInfo[metric]["additional"] + "</div>";		
 	}
 		
 	$("#linekey").html(html);
@@ -795,13 +844,27 @@ function processLines()
 		{
 			if (!lines[j].hide)		
 			{
+					var priLine = features[i].clone();
+					//priLine.setId(features[i].get('id') + lines[j].name);
+					priLine.set('strokeColor', features[i].get('lines')[j].colour);
+					priLine.set('strokeWidth', 1.5);
+					priLine.set('strokeLinecap', "butt");		
+					layerLines.getSource().addFeature(priLine);	
+			}
+		}
+		for (var j in lines)
+		{
+			if (!lines[j].hide)		
+			{
 				if (!priLineDrawn)
 				{
 					var priLine = features[i].clone();
 					priLine.setId(features[i].get('id') + lines[j].name);
 					priLine.set('strokeColor', features[i].get('lines')[j].colour);
-					priLine.set('strokeDashstyle', [0.1, 3.9]);
-					priLine.set('strokeLinecap', "round");		
+					priLine.set('strokeWidth', 3);					
+					priLine.set('strokeDashstyle', [4, 0]);
+					//priLine.set('strokeDashstyle', [0.1, 3.9]);
+					priLine.set('strokeLinecap', "square");		
 					layerLines.getSource().addFeature(priLine);	
 					priLineDrawn = true;	
 				}
@@ -810,8 +873,10 @@ function processLines()
 					var secLine = features[i].clone();
 					secLine.setId(features[i].get('id') + lines[j].name);
 					secLine.set('strokeColor', features[i].get('lines')[j].colour);	
-					secLine.set('strokeDashstyle', [0.1, 7.9]);
-					secLine.set('strokeLinecap', "round");
+					secLine.set('strokeWidth', 3);
+					secLine.set('strokeDashstyle', [1, 7]);
+					//secLine.set('strokeDashstyle', [0.1, 7.9]);
+					secLine.set('strokeLinecap', "square");
 					layerLines.getSource().addFeature(secLine);
 					secLineDrawn = true;
 				}
@@ -820,8 +885,10 @@ function processLines()
 					var terLine = features[i].clone();
 					terLine.setId(features[i].get('id') + lines[j].name);
 					terLine.set('strokeColor', features[i].get('lines')[j].colour);	
-					terLine.set('strokeDashstyle', [0.1, 11.9]);
-					terLine.set('strokeLinecap', "round");
+					terLine.set('strokeWidth', 3);
+					terLine.set('strokeDashstyle', [1, 11]);
+					//terLine.set('strokeDashstyle', [0.1, 11.9]);
+					terLine.set('strokeLinecap', "square");
 					layerLines.getSource().addFeature(terLine);
 					terLineDrawn = true;
 				}			
@@ -862,7 +929,7 @@ function processLines()
 function requestData()
 {
 	/*
-	if ($("#metric").val() == "map")
+	if ($("#themetric").val() == "map")
 	{
 		handleMetricChange();
 		return;
@@ -899,7 +966,7 @@ function requestDemographicData()
 {
 	$.ajax(
 	{
-    	url: "data/" + demographicInfo[$("#metric").val()]["file"],
+    	url: "data/" + demographicInfo[$("#themetric").val()]["file"],
     	success: function(data) 
     	{
 	      	handleDemographicData(data);
@@ -980,7 +1047,7 @@ function processOSIs()
 {
 	layerOSICore.getSource().clear();
 
-	if ($('#metric').val() != 'map')
+	if ($('#themetric').val() != 'map')
 	{
 		return;		
 	}
@@ -1010,7 +1077,7 @@ function processOSIs()
 
 function handleDemographicData(data)
 {
-	var val = $("#metric").val();
+	var val = $("#themetric").val();
 	demographicData[val] = data;
 	handleChange();
 }
@@ -1090,7 +1157,7 @@ function showDefaultJourney()
 
 function resetDisplay()
 {
-	if ($("#metric").val() == "journeys")
+	if ($("#themetric").val() == "journeys")
 	{
 		var features = layerPoints.getSource().getFeatures();
 		for (var i in features)
@@ -1143,7 +1210,7 @@ function toggleEnglish()
 
 function handleMetricChange()
 {
-	var metric = $("#metric").val();
+	var metric = $("#themetric").val();
 
 	if ((pointsLoaded == "wards" && ["wardwords", "wardwork"].indexOf(metric) == -1) || (pointsLoaded != "wards" && ["wardwords", "wardwork"].indexOf(metric) > -1))
 	{
@@ -1161,7 +1228,7 @@ function handleMetricChange()
 		toggleLines();		
 	}
 
-	if ((["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) > -1) && demographicData[metric] === undefined)
+	if ((["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1) && demographicData[metric] === undefined)
 	{
 		requestDemographicData();
 		return;
@@ -1193,13 +1260,21 @@ function handleChange()
 {
 	/* console.log('handleChange'); */
 	/* Needed in case we hide/show lines based on the newly selected options. */
-	processLines();	
-	resetDisplay();
-	var metric = $("#metric").val();
+	var metric = $("#themetric").val();
+	
+	if (metric == "closures")
+	{
+		window.location = "/closures/";
+		return;
+	}
 	
 	if (metric == "night")
 	{
 		$("body").css('backgroundColor', '#0c0c00');
+	}
+	else if (metric == "livesontheline")
+	{
+		$("body").css('backgroundColor', '#fff8f8');
 	}
 	else
 	{
@@ -1218,7 +1293,7 @@ function handleChange()
 	var scalingFactor = 0.4;
 	$("#year").prop('disabled', false);
 	$("#yearcomp").prop('disabled', false);
-	$('#title').html("London Tube Data Map");		
+	$('#title').html("Station Entry/Exit Volumes");		
 	
 	if (metric == "journeys")
 	{
@@ -1243,7 +1318,7 @@ function handleChange()
 		{
 			$("#yearcomp").val(2014);
 		}		
-
+		$('#title').html("Journey Destinations");		
 		//$("#year").prop('disabled', true);
 		//$("#yearcomp").val('none');
 		//$('#yearcomp').prop('disabled', true);		
@@ -1251,9 +1326,9 @@ function handleChange()
 	}
 	else if (metric == "am_inout")
 	{
-		if ($("#year").val() > 2012)
+		if ($("#year").val() > 2015)
 		{
-			$("#year").val(2012);
+			$("#year").val(2015);
 		}
 		//$("#year").prop('disabled', true);
 		$("#yearcomp").val('none');
@@ -1261,16 +1336,16 @@ function handleChange()
 	}
 	else if (metric == "wdwe_out")
 	{
-		if ($("#year").val() > 2014)
+		if ($("#year").val() > 2015)
 		{
-			$("#year").val(2014);
+			$("#year").val(2015);
 		}
 		//$("#year").prop('disabled', true);
 		$("#yearcomp").val('none');
 		$('#yearcomp').prop('disabled', true);	
 		scalingFactor = 0.2;	
 	}
-	else if (["tongues", "wardwords", "wardwork", "occupation"].indexOf(metric) > -1)
+	else if (["tongues", "wardwords", "wardwork", "occupation", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
 	{
 		if ($("#year").val() < 2011)
 		{
@@ -1282,10 +1357,15 @@ function handleChange()
 			$("#year").val(2011);
 			$("#year").prop('disabled', true);
 		}
+		if (["livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
+                {
+                        $("#year").val(2019);
+                        $("#year").prop('disabled', true);
+                }
 		
 		$("#yearcomp").val('none');
 		$('#yearcomp').prop('disabled', true);
-		$('#title').html(demographicInfo[metric]["title"] + "<div style='font-size: 20px;'>" + demographicInfo[metric]["subtitle"] + "</div>");		
+		$('#title').html(demographicInfo[metric]["title"] + "<div style='font-size: 16px;'>" + demographicInfo[metric]["subtitle"] + "</div>");		
 		document.title = demographicInfo[metric]["title"];		
 		scalingFactor = demographicInfo[metric]["scale"];
 	}
@@ -1296,24 +1376,31 @@ function handleChange()
 		//$('#year').prop('disabled', true);		
 		$('#yearcomp').prop('disabled', true);	
 		scalingFactor = 15;
+		$('#title').html("Geographical Tube Map");		
 	
 	}
 	else if (metric == "night")
 	{
-	    $("#year").val(2015);
+	    $("#year").val(2017);
 		$("#yearcomp").val('none');
 		$('#year').prop('disabled', true);		
 		$('#yearcomp').prop('disabled', true);	
 		scalingFactor = 15;
+		$('#title').html("Night Tube Map");		
 	
 	}
 	else if (metric == 'total')
 	{
-		if ($("#year").val() == 'none' || $("#year").val() > 2014)
+		console.log($("#year").val());
+		if (!$("#year").val() || $("#year").val() == 'none')
+                {
+                        $("#year").val(2016);
+                }
+		if ($("#year").val() > 2016)
 		{
-			$("#year").val(2014);		
+			$("#year").val(2016);		
 		}
-		scalingFactor = 10;
+		scalingFactor = 0.01;
 	}
 	else
 	{
@@ -1323,6 +1410,9 @@ function handleChange()
 		}	
 	}
 
+	processLines();	
+	resetDisplay();
+
 	var year = $("#year").val();
 	var yearcomp = $("#yearcomp").val();
 
@@ -1330,7 +1420,7 @@ function handleChange()
 	{
 		updateSelectedInfo();
 	}
-		
+	
 	var features = layerPoints.getSource().getFeatures();
 	for (var i in features)
 	{
@@ -1369,22 +1459,42 @@ function handleChange()
 			features[i].set('radius', 0);
 			features[i].set('fillColor', '#ffffff');
 			features[i].set('strokeColor', "#000000");
-			features[i].set('label', "");
+			features[i].set('datalabel', "");
+			features[i].set('geolabel', "");
+            features[i].set('labelcolor', undefined);
 			features[i].set('offsetX', undefined);
 			features[i].set('offsetY', undefined);				
-			features[i].set('strokeWidth', 2);
+			features[i].set('strokeWidth', 4);
+			if (metric == "livesontheline" || metric == "houseprices" || metric ==  "housepricesdiff")
+			{
+				if (features[i].get('cartography')['display_name'])
+				{
+					features[i].set('geolabel', features[i].get('cartography')['display_name']);								
+				}
+				else
+				{
+					features[i].set('geolabel', features[i].get('name'));				
+				}
+                features[i].set('offsetX', 1.5*features[i].get('cartography')['labelX']);
+                features[i].set('offsetY', 1.5*features[i].get('cartography')['labelY']);
+			}
+	
 			if (metric == "map" || metric == "night")
 			{			
 				features[i].set('radius', scalingFactor/1.1);	
 				//features[i].set('strokeWidth', 2);			
 				features[i].set('fillColor', "#ffffff");
 				
-				if (features[i].get('labelX'))
+				if (features[i].get('cartography')['display_name'])
 				{
-					features[i].set('label', features[i].get('name'));
-					features[i].set('offsetX', features[i].get('labelX'));
-					features[i].set('offsetY', features[i].get('labelY'));				
+					features[i].set('geolabel', features[i].get('cartography')['display_name']);								
 				}
+				else
+				{
+					features[i].set('geolabel', features[i].get('name'));				
+				}
+				features[i].set('offsetX', features[i].get('cartography')['labelX']);
+				features[i].set('offsetY', features[i].get('cartography')['labelY']);				
 				
 				var lineCount = 0;
 				var colour = "";
@@ -1475,27 +1585,105 @@ function handleChange()
 					if (demographicMap[metric][max_cap] !== undefined && ratio > demographicInfo[metric]['infolimit'])
 					{
 						features[i].set('fillColor', demographicMap[metric][max_cap][1]);	
-						features[i].set('label', demographicMap[metric][max_cap][0]);
+						features[i].set('datalabel', demographicMap[metric][max_cap][0]);
 					}
 					else
 					{
 						features[i].set('fillColor', "#aaaaaa");
-						features[i].set('label', '');					
+						features[i].set('datalabel', '');					
 						if (!demographicMap[metric][max_cap])
 						{
 							console.log(max_cap);							
 						}
 					}
-					features[i].set('strokeWidth', 2);					
+					features[i].set('strokeWidth', 4);					
 				}
+			}
+			else if (metric == "livesontheline")
+			{
+				var stats = demographicData[metric][features[i].get('id')];
+				features[i].set('radius', scalingFactor*0.15); 
+				features[i].set('labelcolor', demographicMap[metric][stats][1]);
+                features[i].set('datalabel', '' + stats);
+		        features[i].set('strokeWidth', 2.2);
+			}
+			else if (metric == "houseprices")
+			{
+				var stats = demographicData[metric][features[i].get('id')];
+				if (stats)
+				{
+					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
+					features[i].set('radius', scalingFactor*0.15); 
+					/* if (stats[1] == "100")
+					{
+						stats[1] = "100+";
+					} */
+					features[i].set('geolabel', features[i].get('geolabel') + "\n(" + stats[1] + ")"); 
+					//features[i].set('labelcolor', "000000");	
+					ratio = ((stats[0]-250000.0)/750000.0)	
+					if (ratio < 0) { ratio = 0; }
+					if (ratio > 1) { ratio = 1; } 
+					features[i].set('labelcolor', getGBRColour(ratio));
+					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
+					features[i].set('datalabel', '' + 10*parseInt(stats[0]/10000.00));
+					features[i].set('strokeWidth', 2.4);
+				}
+				else
+				{
+					features[i].set('radius', scalingFactor*0.07); 
+					features[i].set('labelcolor', "#000000");				
+					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
+					features[i].set('datalabel', '');
+					features[i].set('strokeWidth', 2.4);				
+				}
+				if (olMap.getView().getZoom() < 13)
+				{
+					features[i].set('geolabel', '');
+				} 
+
+			}
+			else if (metric == "housepricesdiff")
+			{
+				var stats = demographicData[metric][features[i].get('id')];
+				if (stats)
+				{
+					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
+					features[i].set('radius', scalingFactor*0.15); 
+					/* if (stats[1] == "100")
+					{
+						stats[1] = "100+";
+					} */
+					features[i].set('geolabel', features[i].get('geolabel') + "\n(" + stats[1] + ")"); 
+					//features[i].set('labelcolor', "000000");	
+					ratio = ((stats[0]+50000.0)/100000.0)	
+					if (ratio < 0) { ratio = 0; }
+					if (ratio > 1) { ratio = 1; } 
+					features[i].set('labelcolor', getGWRColour(1-ratio));
+					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
+					features[i].set('datalabel', '' + 1*parseInt(stats[0]/1000.00));
+					features[i].set('strokeWidth', 2.4);
+				}
+				else
+				{
+					features[i].set('radius', scalingFactor*0.07); 
+					features[i].set('labelcolor', "#000000");				
+					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
+					features[i].set('datalabel', '');
+					features[i].set('strokeWidth', 2.4);				
+				}
+				if (olMap.getView().getZoom() < 13)
+				{
+					features[i].set('geolabel', '');
+				} 
+
 			}
 			else if (metric == "am_inout" && year != "none")
 			{
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
 				{
-					var entry = features[i].get('yeardata')[year][5];
-					var exit = features[i].get('yeardata')[year][6];
+					var entry = features[i].get('yeardata')[year]['i_w_apk'];
+					var exit = features[i].get('yeardata')[year]['o_w_apk'];
 					var value = entry+exit
 					var ratio = exit*1.0/(entry*1.0+exit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
@@ -1508,8 +1696,8 @@ function handleChange()
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
 				{
-					var wdexit = features[i].get('yeardata')[year][2];
-					var weexit = features[i].get('yeardata')[year][14];
+					var wdexit = features[i].get('yeardata')[year]['o_w_t'];
+					var weexit = features[i].get('yeardata')[year]['o_sa'];
 					var value = wdexit+weexit
 					var ratio = weexit*1.0/(wdexit*1.0+weexit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
@@ -1555,7 +1743,8 @@ function handleChange()
 		{
 			features[i].set('fillColor', "rgba(0, 0, 0, 0)");
 			features[i].set('strokeColor', "rgba(0, 0, 0, 0)");
-			features[i].set('label', "");
+			features[i].set('datalabel', "");
+			features[i].set('geolabel', "");
 		}		
 	}
 	
@@ -1588,9 +1777,10 @@ function handleChange()
 	*/
 	
 	var caption;
-	var fills = ["#ffffff", "#ffffff", "#ffffff"]
-	var strokes = ["#000000", "#000000", "#000000"]
-	var strokeWidths = [1.5, 1.5, 1.5];
+	var fills = ["#ffffff", "#ffffff", "#ffffff"];
+	var strokes = ["#000000", "#000000", "#000000"];
+	var labelcolours = ["#000000", "#000000", "#000000"];
+	var strokeWidths = [3, 3, 3];
 	var labels = ["", "", ""];
 		
 	if (metric == "journeys")
@@ -1598,7 +1788,7 @@ function handleChange()
 		values = [1000, 50]
 		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " journeys end here (red=down)</td><td>Other station (no journeys end here)</td></tr></table><i>Select a station to see journeys<br />that start at it.</i>";
 		fills = ["#ffaa00", "#ffffff"]
-		strokeWidths[0] = 4;
+		strokeWidths[0] = 8;
 	}
 
 	else if (metric == "am_inout")
@@ -1619,8 +1809,40 @@ function handleChange()
 		values = [0.05, 0.10]
 		caption = "<table class='keycaptiontable'><tr><td>5%</td><td>10%</td></tr><tr><td colspan='2'>" + demographicInfo[metric]["keyexample"]+ "</td></tr></table>";
 		fills = [demographicMap[metric][key][1], demographicMap[metric][key][1]]
-		strokeWidths = [2, 2];
+		strokeWidths = [4, 4];
 		labels = [demographicMap[metric][key][0], demographicMap[metric][key][0]]
+	
+	}
+	else if ("livesontheline" == metric)
+	{
+		var key = demographicInfo[metric]["defaultkey"];
+		values = [0.023, 0.023];
+		caption = demographicInfo[metric]["keyexample"];
+		fills = ['#ffffff', '#ffffff'];
+		labelcolours = [demographicMap[metric][75][1], demographicMap[metric][90][1]];
+		strokeWidths = [2.2, 2.2];
+		labels = [demographicMap[metric][75][0], demographicMap[metric][90][0]];
+	}
+	else if ("houseprices" == metric)
+	{
+		var key = demographicInfo[metric]["defaultkey"];
+		values = [0.025, 0.025];
+		caption = demographicInfo[metric]["keyexample"];
+		fills = ['#ffffff', '#ffffff'];
+		labelcolours = [getGBRColour(0), getGBRColour(1)];
+		strokeWidths = [2.6, 2.6];
+		labels = ["250", "1000"];
+	
+	}
+	else if ("housepricesdiff" == metric)
+	{
+		var key = demographicInfo[metric]["defaultkey"];
+		values = [0.025, 0.025];
+		caption = demographicInfo[metric]["keyexample"];
+		fills = ['#ffffff', '#ffffff'];
+		labelcolours = [getGWRColour(1), getGWRColour(0)];
+		strokeWidths = [2.6, 2.6];
+		labels = ["-50", "50"];
 	
 	}
 	else if (metric == "map" || metric == "night")
@@ -1630,11 +1852,11 @@ function handleChange()
 	}
 	else if (metric == "total")
 	{
-		var values = [1, 20]
-		caption = "<table><tr><td>" + values[0] + "M entries & exits</td><td>" + values[1] + "M entries & exits</td></tr></table>";
+		var values = [1000000, 20000000]
+		caption = "<table><tr><td>" + values[0]/1000000 + "M entries & exits</td><td>" + values[1]/1000000 + "M entries & exits</td></tr></table>";
 		if (yearcomp != "none")
 		{	
-			caption = "<table class='keycaptiontable'><tr><td>" + values[0] + "M more entries & exits</td><td>" + values[1] + "M fewer entries & exits</td></tr></table>";
+			caption = "<table class='keycaptiontable'><tr><td>" + values[0]/1000000 + "M more entries & exits</td><td>" + values[1]/1000000 + "M fewer entries & exits</td></tr></table>";
 			strokes = ["#008800", "#FF0000", "#008800"]
 		}
 	}
@@ -1661,20 +1883,20 @@ function handleChange()
 	}
 	
 	var point1 = new ol.Feature({ geometry: new ol.geom.Point([0, 0]) });
-	point1.set('highlight', false);
 	point1.set('fillColor', fills[0]);
 	point1.set('strokeWidth', strokeWidths[0]);
 	point1.set('strokeColor', strokes[0]);
+	point1.set('labelcolor', labelcolours[0]);
 	point1.set('radius', scalingFactor*Math.sqrt(values[0]));
-	point1.set('label', labels[0]);
+	point1.set('datalabel', labels[0]);
 
 	var point2 = new ol.Feature({ geometry: new ol.geom.Point([0, 0]) });
-	point1.set('highlight', false);
 	point2.set('fillColor', fills[1]);
 	point2.set('strokeWidth', strokeWidths[1]);
 	point2.set('strokeColor', strokes[1]);
+	point2.set('labelcolor', labelcolours[1]);
 	point2.set('radius', scalingFactor*Math.sqrt(values[1]));
-	point2.set('label', labels[1]);
+	point2.set('datalabel', labels[1]);
 
 	key1source.clear();
 	key1source.addFeatures([point1]); 
@@ -1690,8 +1912,8 @@ function updateSelectedInfo()
 {
 	var feature = selectClick.getFeatures().item(0);
 
-	var htmlstr = "<h1>" + feature.get('name') + "<div style='padding: 10px 0;'>";
-	var metric = $("#metric").val();
+	var htmlstr = "<span style='font-size: 28px;' title='" + feature.getId() + "'>" + feature.get('name') + "</span><div style='padding: 10px 0;'>";
+	var metric = $("#themetric").val();
 	
 	if (feature.get('lines') != undefined && linesForKey != undefined)
 	{
@@ -1723,7 +1945,7 @@ function updateSelectedInfo()
 	}
 	if (metric == "journeys")
 	{
-		htmlstr += "<h3>Top 20 journeys from this station<br />typical day (RODS data)</h3></h1>";
+		htmlstr += "<h3>Top 20 journeys from this station<br />typical day (RODS data)</h3>";
 
 		/* Reset from previous population. */
 		var features = layerPoints.getSource().getFeatures();
@@ -1873,6 +2095,10 @@ function updateSelectedInfo()
 		}		
 		htmlstr += "</table>";
 	}
+	else if (metric == "livesontheline" || metric == "houseprices" || metric == "housepricesdiff")
+	{
+		htmlstr += "</h1>" + demographicInfo[metric]["subinfo"];
+	}
 	else if (metric == "map" || metric == "night")
 	{
 		htmlstr += "</h1>";	
@@ -1894,23 +2120,23 @@ function updateSelectedInfo()
 			{
 				var year = keys[k];
 				htmlstr += "<tr><th>" + year + "</th>" 
-				+ compareValuesHTML(yeardata, 0, year, prevyear) 
-				+ compareValuesHTML(yeardata, 1, year, prevyear) 
-				+ compareValuesHTML(yeardata, 2, year, prevyear) 
-				+ compareValuesHTML(yeardata, 3, year, prevyear) 
-				+ compareValuesHTML(yeardata, 4, year, prevyear) 
-				+ compareValuesHTML(yeardata, 5, year, prevyear) 
-				+ compareValuesHTML(yeardata, 6, year, prevyear) 
-				+ compareValuesHTML(yeardata, 7, year, prevyear) 
-				+ compareValuesHTML(yeardata, 8, year, prevyear) 
-				+ compareValuesHTML(yeardata, 9, year, prevyear) 
-				+ compareValuesHTML(yeardata, 10, year, prevyear) 
-				+ compareValuesHTML(yeardata, 11, year, prevyear) 
-				+ compareValuesHTML(yeardata, 12, year, prevyear) 
-				+ compareValuesHTML(yeardata, 13, year, prevyear) 
-				+ compareValuesHTML(yeardata, 14, year, prevyear) 
-				+ compareValuesHTML(yeardata, 15, year, prevyear) 
-				+ compareValuesHTML(yeardata, 16, year, prevyear) 
+				+ compareValuesHTML(yeardata, "tf_yr", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_t", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_t", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_pre", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_pre", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_apk", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_apk", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_mid", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_mid", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_ppk", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_ppk", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_w_eve", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_w_eve", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_sa", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_sa", year, prevyear) 
+				+ compareValuesHTML(yeardata, "i_su", year, prevyear) 
+				+ compareValuesHTML(yeardata, "o_su", year, prevyear) 
 				+ "</tr>";
 				prevyear = year;
 			}
@@ -1926,15 +2152,26 @@ function updateSelectedInfo()
 function compareValuesHTML(yeardata, valIndex, year, prevyear)
 {
 	var number = yeardata[year][valIndex];
-	if (valIndex == 0)
-	{
-		number = Math.round(number*100)/100.0;
+	var prevnumber = 0;
+	
+	if (yeardata[prevyear] !== undefined)
+	{	
+		prevnumber = yeardata[prevyear][valIndex];
 	}
-	if (prevyear == 0 || number == yeardata[prevyear][valIndex])
+	if (number === undefined)
+	{
+		return "<td></td>";
+	}
+	if (valIndex == "tf_yr")
+	{
+		number = Math.round(number/10000.0)/100.0;			
+		prevnumber = Math.round(prevnumber/10000.0)/100.0;		
+	}
+	if (prevyear == 0 || number == prevnumber)
 	{ 
 		return "<td>" + number + "</td>";
 	}
-	if (number > yeardata[prevyear][valIndex])
+	if (number > prevnumber)
 	{
 		return "<td style='color: #ccffcc;'>" + number + "</td>";
 	}
@@ -1957,6 +2194,19 @@ function toggleBackground()
 		layerBackground.setVisible(false);
 	}	
 	updateUrl();
+}
+
+function toggleAerial()
+{
+        if ($("#aerialCB").prop('checked'))
+        {
+                layerAerial.setVisible(true);
+        }
+        else
+        {
+                layerAerial.setVisible(false);
+        }
+        updateUrl();
 }
 
 function toggleKey()
@@ -2000,6 +2250,30 @@ function getGWRColour(ratio)
 	var r = (2*ratio);
 	var g = 2-(2*ratio);
 	var b = 1-Math.abs(-1+2*ratio);
+
+	if (r < 0) { r = 0; }
+	if (g < 0) { g = 0; }
+	if (b < 0) { b = 0; }
+	
+	if (r > 0.999 ) { r = 0.999; }
+	if (g > 0.999 ) { g = 0.999; }
+	if (b > 0.999 ) { b = 0.999; }
+
+	var colourHex = rgb2Hex(r, g, b);
+
+	return "#" + colourHex;
+}
+
+function getGBRColour(ratio)
+{
+	var r = (2*ratio);
+	var g = 1.5-(1.5*ratio);
+	var b = 0.75-(5*ratio);
+	
+	if (ratio < 0.5)
+	{
+		g = 0.75;
+	}
 
 	if (r < 0) { r = 0; }
 	if (g < 0) { g = 0; }
@@ -2075,7 +2349,7 @@ function bust()
 
 function updateUrl()
 {
-	var metric = $('#metric').val();
+	var metric = $('#themetric').val();
 	var selected = "";
 	if (selectClick != undefined)
 	{
@@ -2093,6 +2367,8 @@ function updateUrl()
 	layerLines.getVisible() ? layerString += "T" : layerString += "F";
 	layerThames.getVisible() ? layerString += "T" : layerString += "F";
 	layerGLA.getVisible() ? layerString += "T" : layerString += "F";
+    layerAerial.getVisible() ? layerString += "T" : layerString += "F";
+	layerZones.getVisible() ? layerString += "T" : layerString += "F";
 
 	var centre = ol.proj.transform(olMap.getView().getCenter(), "EPSG:3857", "EPSG:4326");
 	var hash = "metric=" + metric;
