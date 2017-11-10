@@ -202,12 +202,11 @@ function init()
 
 		//console.log(feature);
 		//console.log(feature.get('fillColor'));
-
 		return [
 			new ol.style.Style({ 
 				image: new ol.style.Circle({ 
 					radius: feature.get('radius') * zoomFactor, 
-					stroke: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') })))
+					stroke: (feature.get('radius') == 0 ? undefined : (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') }))))
 				}),
 			}),
 		] 
@@ -664,8 +663,8 @@ function processLines()
 					lines[j].hide = false;
 				}
 				if ($("#themetric").val() == "total" 
-					&& ($("#year").val() >= 2012 && $("#year").val() <= 2015) 
-					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2012 && $("#yearcomp").val() <= 2015))
+					&& ($("#year").val() >= 2012 && $("#year").val() <= 2016) 
+					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2012 && $("#yearcomp").val() <= 2016))
 					&& [ "DLR"].indexOf(lines[j].network) > -1)
 				{
 					lines[j].hide = false;			
@@ -1084,6 +1083,7 @@ function handleDemographicData(data)
 
 function handleODData(dataText)
 {
+	console.log(dataText);
 	var rows = dataText.split('\n')
 	var header = rows[0];
 	headerArr = header.split(',');
@@ -1183,14 +1183,17 @@ function switchPoints()
 	if (pointsLoaded == "wards")
 	{
 		layerPoints.setSource(pointSource);
+		layerPointsCase.setSource(pointSource);
 		pointsLoaded = "stations";
 	}
 	else
 	{
 		layerPoints.setSource(pointSource2);
+		layerPointsCase.setSource(pointSource2);
 		pointsLoaded = "wards";
 	}
 	layerPoints.changed();
+	layerPointsCase.changed();
 	selectClick.getFeatures().clear();
 }	
 
@@ -1297,27 +1300,32 @@ function handleChange()
 	
 	if (metric == "journeys")
 	{
-		if ($("#year").val() > 2012)
+		if ($("#year").val() > 2016)
 		{
-			$("#year").val(2014);
+			$("#year").val(2016);
 		}
-		else
+		else if ($("#year").val() < 2012)
 		{
 			$("#year").val(2012);		
 		}
-		
-		if ($("#yearcomp").val() == "none")
+		else if ($("#year").val() == 2013)
 		{
-			$("#yearcomp").val($("#year").val());		
+			$("#year").val(2014);	
 		}
-		if ($("#yearcomp").val() != 2014 && $("#year").val() == 2014)
+		
+		if ($("#yearcomp").val() > 2016)
 		{
-			$("#yearcomp").val(2012);
-		}		
-		if ($("#yearcomp").val() != 2012 && $("#year").val() == 2012)
+			$("#yearcomp").val(2016);
+		}
+		else if ($("#yearcomp").val() < 2012)
 		{
-			$("#yearcomp").val(2014);
+			$("#yearcomp").val(2012);		
 		}		
+		else if ($("#yearcomp").val() == 2014)
+		{
+			$("#yearcomp").val(2014);	
+		}
+
 		$('#title').html("Journey Destinations");		
 		//$("#year").prop('disabled', true);
 		//$("#yearcomp").val('none');
@@ -1326,9 +1334,9 @@ function handleChange()
 	}
 	else if (metric == "am_inout")
 	{
-		if ($("#year").val() > 2015)
+		if ($("#year").val() > 2016)
 		{
-			$("#year").val(2015);
+			$("#year").val(2016);
 		}
 		//$("#year").prop('disabled', true);
 		$("#yearcomp").val('none');
@@ -1336,9 +1344,9 @@ function handleChange()
 	}
 	else if (metric == "wdwe_out")
 	{
-		if ($("#year").val() > 2015)
+		if ($("#year").val() > 2016)
 		{
-			$("#year").val(2015);
+			$("#year").val(2016);
 		}
 		//$("#year").prop('disabled', true);
 		$("#yearcomp").val('none');
@@ -1404,9 +1412,9 @@ function handleChange()
 	}
 	else
 	{
-		if ($("#year").val() == 'none' || $("#year").val() > 2012)
+		if ($("#year").val() == 'none' || $("#year").val() > 2016)
 		{
-			$("#year").val(2012);		
+			$("#year").val(2016);		
 		}	
 	}
 
@@ -1467,7 +1475,7 @@ function handleChange()
 			features[i].set('strokeWidth', 4);
 			if (metric == "livesontheline" || metric == "houseprices" || metric ==  "housepricesdiff")
 			{
-				if (features[i].get('cartography')['display_name'])
+				if (features[i].get('cartography') && ['display_name'])
 				{
 					features[i].set('geolabel', features[i].get('cartography')['display_name']);								
 				}
@@ -1912,7 +1920,9 @@ function updateSelectedInfo()
 {
 	var feature = selectClick.getFeatures().item(0);
 
-	var htmlstr = "<span style='font-size: 28px;' title='" + feature.getId() + "'>" + feature.get('name') + "</span><div style='padding: 10px 0;'>";
+	var htmlstr = "<div style='font-size: 28px;' title='" + feature.getId() + "'>" + feature.get('name') + "</div>"
+	htmlstr += "<div>Zone " + feature.get('zone') + "</div>"; 
+ 	htmlstr += "<div style='padding: 10px 0;'>";
 	var metric = $("#themetric").val();
 	
 	if (feature.get('lines') != undefined && linesForKey != undefined)
@@ -1968,7 +1978,7 @@ function updateSelectedInfo()
 						if (features[j].get('tfl_intid') == toStationName)
 						{
 							matched = true;
-							if (flows[toStationName] > 0 || compflows[toStationName] > 0)
+							if (flows[toStationName] > 0 || (compflows !== undefined && compflows[toStationName] > 0))
 							{
 								var newflows = flows[toStationName];
 								if (newflows === undefined)
@@ -1976,10 +1986,10 @@ function updateSelectedInfo()
 									newflows = 0;
 								}
 
-								var oldflows = compflows[toStationName];
-								if (oldflows === undefined)
+								var oldflows = 0;
+								if (compflows !== undefined && compflows[toStationName] !== undefined)
 								{
-									oldflows = 0;
+									oldflows = compflows[toStationName];
 								}
 								features[j].set('toHereCount', features[j].get('toHereCount') + newflows - oldflows);
 							}
