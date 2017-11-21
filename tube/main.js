@@ -26,7 +26,7 @@ var args = [];
 
 var DEFAULT_ZOOM = 13;
 var DEFAULT_LAT = 51.52;
-var DEFAULT_LON = -0.15;
+var DEFAULT_LON = -0.1;
 
 var currentZoom = DEFAULT_ZOOM;
 var currentLat = DEFAULT_LAT;
@@ -34,6 +34,7 @@ var currentLon = DEFAULT_LON;
 
 var serviceFilter;
 var odRequested = false;
+var scalingFactor;
 
 var demographicData = {};
 var metricKey = {};
@@ -152,7 +153,7 @@ function init()
 		currentLon = parseFloat(args['lon']);		
 	}
 
-	function pointStyle(feature, resolution) 
+	function pointCoreStyle(feature, resolution) 
 	{
 		var zoomFactor = 0.15;
 		if (resolution < 100) { zoomFactor = 0.2; }
@@ -160,37 +161,48 @@ function init()
 		if (resolution < 25) { zoomFactor = 0.4; }
 		if (resolution < 12.5) { zoomFactor = 0.5; }
 
-		//console.log(feature);
-		//console.log(feature.get('fillColor'));
-
 		return [
 			new ol.style.Style({ 
 				image: new ol.style.Circle({ 
 					radius: feature.get('radius') * zoomFactor, 
 					fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
 				}),
+			})
+		] 
+	};
+	
+	function pointLabelStyle(feature, resolution) 
+	{
+		var zoomFactor = 0.15;
+		if (resolution < 100) { zoomFactor = 0.2; }
+		if (resolution < 50) { zoomFactor = 0.3; }
+		if (resolution < 25) { zoomFactor = 0.4; }
+		if (resolution < 12.5) { zoomFactor = 0.5; }
+
+		return [
+			new ol.style.Style({ 
 				text: new ol.style.Text({
 					text: (resolution > 50 ? undefined : feature.get('datalabel')),
 					textAlign: 'center',
-					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 8.5px Cabin Condensed, sans-serif' : 'bold 8px Cabin Condensed, sans-serif'))),
+					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 10px Cabin Condensed, sans-serif' : 'bold 9px Cabin Condensed, sans-serif'))),
 					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 3 })
+					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.75)', width: 3 })
 
 				})
 			}),
 			new ol.style.Style({
 				text: new ol.style.Text({
-                                       text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel'))),
-                                        offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
-                                        offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
-                                        textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-                                        font: (resolution < 12.5 ? '12px Cabin Condensed, sans-serif' : ( resolution < 25 ? '10px  Cabin Condensed, sans-serif' : '7px Cabin Condensed, sans-serif')),
-                                        fill: new ol.style.Fill({ color: "#000000" }),
-                                        stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.6)', width: 3 })
+                    text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n"))),
+					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
+					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
+					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+					font: (resolution < 12.5 ? 'bold 12px Varela Round, sans-serif' : ( resolution < 25 ? 'bold 10px Varela Round, sans-serif' : 'bold 9px Varela Round, sans-serif')),
+					fill: new ol.style.Fill({ color: $('#themetric').val() == "night" ? "#ffffff" : "#000000" }),
+					stroke: new ol.style.Stroke({ color: ($('#themetric').val() == "night" ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.75)'), width: 3 })
 				})
 			})			
 		] 
-	};
+	};	
 	
 	function pointCaseStyle(feature, resolution) 
 	{
@@ -200,28 +212,34 @@ function init()
 		if (resolution < 25) { zoomFactor = 0.4; }
 		if (resolution < 12.5) { zoomFactor = 0.5; }
 
-		//console.log(feature);
-		//console.log(feature.get('fillColor'));
 		return [
 			new ol.style.Style({ 
 				image: new ol.style.Circle({ 
 					radius: feature.get('radius') * zoomFactor, 
-					stroke: (feature.get('radius') == 0 ? undefined : (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') }))))
+					stroke: (
+						feature.get('radius') == 0 
+							? undefined 
+							: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") 
+								? undefined 
+								: (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") 
+									? undefined 
+									: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') }
+								)
+							)
+						)
+					)
 				}),
 			}),
 		] 
 	};	
 
-	function selectStyle(feature, resolution) 
+	function pointSelectStyle(feature, resolution) 
 	{
 		var zoomFactor = 0.15;
 		if (resolution < 100) { zoomFactor = 0.2; }
 		if (resolution < 50) { zoomFactor = 0.3; }
 		if (resolution < 25) { zoomFactor = 0.4; }
 		if (resolution < 12.5) { zoomFactor = 0.5; }
-
-		//console.log(feature);
-		//console.log(feature.get('fillColor'));
 
 		return [
 			new ol.style.Style({ 
@@ -233,21 +251,21 @@ function init()
 				text: new ol.style.Text({
 					text: (resolution > 50 ? undefined : feature.get('datalabel')),
 					textAlign: 'center',
-					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 8.5px Cabin Condensed, sans-serif' : 'bold 8px Cabin Condensed, sans-serif'))),
+					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 10px Cabin Condensed, sans-serif' : 'bold 9px Cabin Condensed, sans-serif'))),
 					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 3 })
+					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
 
 				})
 			}),
 			new ol.style.Style({
 				text: new ol.style.Text({
-                                       text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel'))),
-                                        offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
-                                        offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
-                                        textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-                                        font: (resolution < 12.5 ? '12px Cabin Condensed, sans-serif' : ( resolution < 25 ? '10px  Cabin Condensed, sans-serif' : '7px Cabin Condensed, sans-serif')),
-                                        fill: new ol.style.Fill({ color: "#000000" }),
-                                        stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.6)', width: 3 })
+                    text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n"))),
+					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
+					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
+					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+					font: (resolution < 12.5 ? 'bold 12px Varela Round, sans-serif' : ( resolution < 25 ? 'bold 10px Varela Round, sans-serif' : 'bold 9px Varela Round, sans-serif')),
+					fill: new ol.style.Fill({ color: "#000000" }),
+					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
 				})
 			})			
 		] 
@@ -297,7 +315,8 @@ function init()
 	{
 		return [
 			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 6, color:'rgba(128, 128, 128, 0.25)' })
+				fill: new ol.style.Fill({ color: (["Zone 6", "Zone 4", "Zone 2"].indexOf(feature.get('name')) > -1) ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.0)' }),
+				stroke: new ol.style.Stroke({ width: 3, color:'rgba(128, 128, 128, 0.2)' })
 			})
 		] 	
 	};
@@ -408,9 +427,15 @@ function init()
  	layerPoints = new ol.layer.Vector(
 	{ 
 		source: pointSource, 
-		style: function(feature, resolution) { return pointStyle(feature, resolution); }
+		style: function(feature, resolution) { return pointCoreStyle(feature, resolution); }
 	});
 
+ 	layerPointsLabels = new ol.layer.Vector(
+	{ 
+		source: pointSource, 
+		declutter: true,
+		style: function(feature, resolution) { return pointLabelStyle(feature, resolution); }
+	});
  	layerPointsCase  = new ol.layer.Vector(
 	{ 
 		source: pointSource, 
@@ -501,7 +526,7 @@ function init()
   	
 	olMap = new ol.Map({
 		target: "mapcontainer",
-		layers: [ layerBackground, layerAerial, layerLinesAll, layerThames, layerZones, layerGLA, layerLines, layerOSICase, layerPointsCase, layerOSICore, layerPoints ],
+		layers: [ layerBackground, layerAerial, layerLinesAll, layerThames, layerZones, layerGLA, layerLines, layerOSICase, layerPointsCase, layerOSICore, layerPoints, layerPointsLabels ],
 		controls: ol.control.defaults({}).extend(
 		[
 			new ol.control.ScaleLine({'geodesic': true, 'units': 'metric'}),
@@ -518,6 +543,8 @@ function init()
 		})
 	});
 	
+	layerZones.setVisible(false);
+	
 	if (args['layers'])
 	{
 		if (args['layers'][0] == "F")
@@ -533,8 +560,12 @@ function init()
 		if (args['layers'].length > 5 && args['layers'][5] == "T")
         {
             $("#aerialCB").prop('checked', true);
-			layerAerial.setVisible(true);
-						
+			layerAerial.setVisible(true);						
+		}
+		if (args['layers'].length > 8 && args['layers'][6] == "T")
+        {
+            $("#zonesCB").prop('checked', true);
+			layerZones.setVisible(true);						
 		}
 	}
 
@@ -542,7 +573,7 @@ function init()
 	selectClick = new ol.interaction.Select({
 		layers: [ layerPoints ],
 		condition: ol.events.condition.click,
-		style: function(feature, resolution) { return selectStyle(feature, resolution); }
+		style: function(feature, resolution) { return pointSelectStyle(feature, resolution); }
 	  });
 	 olMap.getInteractions().extend([selectClick]);
 
@@ -591,12 +622,14 @@ function init()
 	olMap.on("moveend", updateUrl);	  
 
 	key1source = new ol.source.Vector();
-	var key1layer = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointStyle(feature, resolution); } });	
+	var key1layer = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointCoreStyle(feature, resolution); } });	
+	var key1layerLabels = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointLabelStyle(feature, resolution); } });	
 	var key1layerCase = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
 	key1map = new ol.Map({ target: "key1", layers: [ key1layerCase, key1layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	key2source = new ol.source.Vector();
-	var key2layer = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointStyle(feature, resolution); } });	
+	var key2layer = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointCoreStyle(feature, resolution); } });	
+	var key2layerLabels = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointLabelStyle(feature, resolution); } });	
 	var key2layerCase = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
 	key2map = new ol.Map({ target: "key2", layers: [ key2layerCase, key2layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
@@ -657,59 +690,29 @@ function processLines()
 		{
 			for (j = 0; j < lines.length; j++)
 			{
-				lines[j].hide = true;
-				if (lines[j].network === "Tube")
+				lines[j].hide = false;
+					
+				//Set up network line hide/display based on the config file.
+				if (metricInfo[metric].availableDataYearsByNetwork)
 				{
-					lines[j].hide = false;
-				}
-				if ($("#themetric").val() == "total" 
-					&& ($("#year").val() >= 2012 && $("#year").val() <= 2016) 
-					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2012 && $("#yearcomp").val() <= 2016))
-					&& [ "DLR"].indexOf(lines[j].network) > -1)
-				{
-					lines[j].hide = false;			
-				}
-				if ($("#themetric").val() == "total" 
-					&& ($("#year").val() >= 2010) 
-					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2010 && $("#yearcomp").val() <= 2015))
-					&& [ "Tramlink"].indexOf(lines[j].network) > -1)
-				{
-					lines[j].hide = false;			
-				}
-				if ($("#themetric").val() == "total" 
-					&& ($("#year").val() >= 2013 && $("#year").val() <= 2015) 
-					&& ($("#yearcomp").val() == "none" || ($("#yearcomp").val() >= 2014 && $("#yearcomp").val() <= 2015))
-					&& [ "Overground"].indexOf(lines[j].network) > -1)
-				{
-					lines[j].hide = false;			
-				}
-				/* if ($("#themetric").val() == "journeys" && ["Overground", "DLR"].indexOf(lines[j].network) > -1)
-				{
-					lines[j].hide = false;			
-				} */				
-				if (["tongues", "occupation", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
-				{
-					lines[j].hide = false;			
-				}
-				if (["wardwork", "wardwords"].indexOf(metric) > -1)
-				{
-					lines[j].hide = false;			
-				}
-				if (metric == "map" || metric == "night")
-				{
-					lines[j].hide = false;			
-					if (metric == "night" && !lines[j].night)
+					var yearsWithData = metricInfo[metric].availableDataYearsByNetwork[lines[j].network]; 				
+					if (!yearsWithData.indexOf($("#networkYear").val()))
 					{
-						lines[j].hide = true;			
+						lines[j].hide = true;
 					}
 				}
+		
+				if (metric == "night" && !lines[j].night)
+				{
+					lines[j].hide = true;			
+				}
 				if (typeof lines[j].closed !== undefined 
-					&& $("#year").val() > lines[j].closed)
+					&& $("#networkYear").val() > lines[j].closed)
 				{
 					lines[j].hide = true;
 				}
 				if (typeof lines[j].opened !== undefined 
-					&& $("#year").val() < lines[j].opened)
+					&& $("#networkYear").val() < lines[j].opened)
 				{
 					lines[j].hide = true;
 				}
@@ -777,7 +780,6 @@ function processLines()
 	html += "</td>";	
 	html += "<td>";
 	
-	var metric = $("#themetric").val();
 	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
 	{
 	
@@ -827,7 +829,7 @@ function processLines()
 	}
 	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
 	{
-		html += "<div id='additionalText'>" + demographicInfo[metric]["additional"] + "</div>";		
+		html += "<div id='additionalText'>" + metricInfo[metric]["additional"] + "</div>";		
 	}
 		
 	$("#linekey").html(html);
@@ -965,7 +967,7 @@ function requestDemographicData()
 {
 	$.ajax(
 	{
-    	url: "data/" + demographicInfo[$("#themetric").val()]["file"],
+    	url: "data/" + metricInfo[$("#themetric").val()]["file"],
     	success: function(data) 
     	{
 	      	handleDemographicData(data);
@@ -1083,7 +1085,6 @@ function handleDemographicData(data)
 
 function handleODData(dataText)
 {
-	console.log(dataText);
 	var rows = dataText.split('\n')
 	var header = rows[0];
 	headerArr = header.split(',');
@@ -1183,16 +1184,19 @@ function switchPoints()
 	if (pointsLoaded == "wards")
 	{
 		layerPoints.setSource(pointSource);
+		layerPointsLabels.setSource(pointSource);
 		layerPointsCase.setSource(pointSource);
 		pointsLoaded = "stations";
 	}
 	else
 	{
 		layerPoints.setSource(pointSource2);
+		layerPointsLabels.setSource(pointSource2);
 		layerPointsCase.setSource(pointSource2);
 		pointsLoaded = "wards";
 	}
 	layerPoints.changed();
+	layerPointsLabels.changed();
 	layerPointsCase.changed();
 	selectClick.getFeatures().clear();
 }	
@@ -1213,13 +1217,116 @@ function toggleEnglish()
 
 function handleMetricChange()
 {
+	console.log('handleMetricChange');
 	var metric = $("#themetric").val();
 
+	if (metric == "closures")
+	{
+		window.location = "/closures/";
+		return;
+	}
+	
+	var currYear = $('#year').val();
+	var currYearcomp = $('#yearcomp').val();
+	var currNetworkYear = $('#networkYear').val();
+	
+	//Setup year menus.
+	$('#year').empty();
+	$('#yearcomp').empty();
+	$('#networkYear').empty();
+	
+	var dataYears = metricInfo[metric].availableDataYears;
+	var tieNetworkToData = metricInfo[metric].tieNetworkToData;
+	var yearcomp = metricInfo[metric].yearcomp;
+	var defaultDataYear = metricInfo[metric].defaultDataYear;
+	var defaultNetworkYear = metricInfo[metric].defaultNetworkYear;
+	
+	for (var i in dataYears)
+	{
+		$('#year').append($('<option>', { value : dataYears[i] }).text(dataYears[i]));	
+	}	
+	if (yearcomp)
+	{
+		$('#yearcomp').append($('<option>', { value : 'none' }).text('None'));	
+		for (var i in dataYears)
+		{
+			$('#yearcomp').append($('<option>', { value : dataYears[i] }).text(dataYears[i]));	
+		}		
+	}
+
+	if (tieNetworkToData)
+	{
+		for (var i in dataYears)
+		{
+			$('#networkYear').append($('<option>', { value : dataYears[i] }).text(dataYears[i]));	
+		}			
+	}
+	else
+	{
+		for (var i = 2003; i <= 2020; i++)
+		{
+			$('#networkYear').append($('<option>', { value : i }).text(i));	
+		}				
+	}
+
+	//Change current view if not available in year menus. 
+	if ([dataYears].indexOf(currYear) == -1)
+	{
+		$('#year').val(defaultDataYear); 
+	}
+	else
+	{
+		$('#year').val(currYear); 	
+	}
+	if (yearcomp)
+	{
+		if ([dataYears].indexOf(currYearcomp) == -1)
+		{
+			$('#yearcomp').val('none'); 	
+		}
+		else
+		{
+			$('#yearcomp').val(currYearcomp); 		
+		}
+	}
+	if (tieNetworkToData)
+	{
+		if ([dataYears].indexOf(currYear) == -1)
+		{
+			$('#networkYear').val(defaultDataYear); 			
+		}
+		else
+		{
+			$('#networkYear').val(currYear); 			
+		}
+	}
+	else
+	{
+		if (currNetworkYear === null)
+		{
+			$('#networkYear').val(defaultNetworkYear); 			
+		}
+		else
+		{
+			$('#networkYear').val(currNetworkYear); 			
+		}
+	}
+	
+	$('#yearcomp').prop('disabled', !yearcomp);
+	$('#networkYear').prop('disabled', tieNetworkToData);
+
+	scalingFactor = metricInfo[metric]["scale"];	
+	document.title = metricInfo[metric]["title"];		
+	$('#title').html(metricInfo[metric]["title"]);
+	$('#subtitle').html(metricInfo[metric]["subtitle"]);		
+
+	//Change geographies.
 	if ((pointsLoaded == "wards" && ["wardwords", "wardwork"].indexOf(metric) == -1) || (pointsLoaded != "wards" && ["wardwords", "wardwork"].indexOf(metric) > -1))
 	{
 		switchPoints();
 	}
 
+	//Metric-specific map display.
 	if (["wardwords", "wardwork"].indexOf(metric) > -1)
 	{
 		$("#linesCB").prop('checked', false);
@@ -1230,13 +1337,30 @@ function handleMetricChange()
 		$("#linesCB").prop('checked', true);
 		toggleLines();		
 	}
-
-	if ((["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1) && demographicData[metric] === undefined)
+	if (metric == "map")
 	{
-		requestDemographicData();
-		return;
+        $("#zonesCB").prop('checked', true);
+		layerZones.setVisible(true);
+	}
+	if (metric == "night")
+	{
+		$("body").css('backgroundColor', '#0c0c00');
+	}
+	else
+	{
+		$("body").css('backgroundColor', '#fff8f8');	
 	}
 	
+	if (["wardwords", "tongues"].indexOf(metric) > -1)
+	{
+		$("#englishB").css('display', 'table-cell');
+	}
+	else
+	{
+		$("#englishB").css('display', 'none');
+	}	
+
+	//Request additional data and build the map from the data.
 	if (metric == "journeys")
 	{
 		if (!odRequested)
@@ -1247,9 +1371,15 @@ function handleMetricChange()
 		{
 			showDefaultJourney();
 		}
+	}		
+	else if ((["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1) && demographicData[metric] === undefined)
+	{
+		requestDemographicData();
 	}
-	
-	handleChange();
+	else
+	{	
+		handleChange();
+	}
 }
 
 function handleZoom()
@@ -1261,161 +1391,14 @@ function handleZoom()
 
 function handleChange()
 {
-	/* console.log('handleChange'); */
+	console.log('handleChange');
 	/* Needed in case we hide/show lines based on the newly selected options. */
-	var metric = $("#themetric").val();
-	
-	if (metric == "closures")
-	{
-		window.location = "/closures/";
-		return;
-	}
-	
-	if (metric == "night")
-	{
-		$("body").css('backgroundColor', '#0c0c00');
-	}
-	else if (metric == "livesontheline")
-	{
-		$("body").css('backgroundColor', '#fff8f8');
-	}
-	else
-	{
-		$("body").css('backgroundColor', '#fff8f8');	
-	}
-	
-	if (["wardwords", "tongues"].indexOf(metric) > -1)
-	{
-		$("#englishB").css('display', 'inline');
-	}
-	else
-	{
-		$("#englishB").css('display', 'none');
-	}
-	
-	var scalingFactor = 0.4;
-	$("#year").prop('disabled', false);
-	$("#yearcomp").prop('disabled', false);
-	$('#title').html("Station Entry/Exit Volumes");		
-	
-	if (metric == "journeys")
-	{
-		if ($("#year").val() > 2016)
-		{
-			$("#year").val(2016);
-		}
-		else if ($("#year").val() < 2012)
-		{
-			$("#year").val(2012);		
-		}
-		else if ($("#year").val() == 2013)
-		{
-			$("#year").val(2014);	
-		}
-		
-		if ($("#yearcomp").val() > 2016)
-		{
-			$("#yearcomp").val(2016);
-		}
-		else if ($("#yearcomp").val() < 2012)
-		{
-			$("#yearcomp").val(2012);		
-		}		
-		else if ($("#yearcomp").val() == 2014)
-		{
-			$("#yearcomp").val(2014);	
-		}
 
-		$('#title').html("Journey Destinations");		
-		//$("#year").prop('disabled', true);
-		//$("#yearcomp").val('none');
-		//$('#yearcomp').prop('disabled', true);		
-		scalingFactor = 1.6;
-	}
-	else if (metric == "am_inout")
+	var metric = $("#themetric").val();
+
+	if (metricInfo[metric].tieNetworkToData)
 	{
-		if ($("#year").val() > 2016)
-		{
-			$("#year").val(2016);
-		}
-		//$("#year").prop('disabled', true);
-		$("#yearcomp").val('none');
-		$('#yearcomp').prop('disabled', true);		
-	}
-	else if (metric == "wdwe_out")
-	{
-		if ($("#year").val() > 2016)
-		{
-			$("#year").val(2016);
-		}
-		//$("#year").prop('disabled', true);
-		$("#yearcomp").val('none');
-		$('#yearcomp').prop('disabled', true);	
-		scalingFactor = 0.2;	
-	}
-	else if (["tongues", "wardwords", "wardwork", "occupation", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
-	{
-		if ($("#year").val() < 2011)
-		{
-			$("#year").val(2011);
-		}
-		
-		if (["wardwords", "wardwork"].indexOf(metric) > -1)
-		{
-			$("#year").val(2011);
-			$("#year").prop('disabled', true);
-		}
-		if (["livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
-                {
-                        $("#year").val(2019);
-                        $("#year").prop('disabled', true);
-                }
-		
-		$("#yearcomp").val('none');
-		$('#yearcomp').prop('disabled', true);
-		$('#title').html(demographicInfo[metric]["title"] + "<div style='font-size: 16px;'>" + demographicInfo[metric]["subtitle"] + "</div>");		
-		document.title = demographicInfo[metric]["title"];		
-		scalingFactor = demographicInfo[metric]["scale"];
-	}
-	else if (metric == "map")
-	{
-	    //$("#year").val(2015);
-		$("#yearcomp").val('none');
-		//$('#year').prop('disabled', true);		
-		$('#yearcomp').prop('disabled', true);	
-		scalingFactor = 15;
-		$('#title').html("Geographical Tube Map");		
-	
-	}
-	else if (metric == "night")
-	{
-	    $("#year").val(2017);
-		$("#yearcomp").val('none');
-		$('#year').prop('disabled', true);		
-		$('#yearcomp').prop('disabled', true);	
-		scalingFactor = 15;
-		$('#title').html("Night Tube Map");		
-	
-	}
-	else if (metric == 'total')
-	{
-		console.log($("#year").val());
-		if (!$("#year").val() || $("#year").val() == 'none')
-                {
-                        $("#year").val(2016);
-                }
-		if ($("#year").val() > 2016)
-		{
-			$("#year").val(2016);		
-		}
-		scalingFactor = 0.01;
-	}
-	else
-	{
-		if ($("#year").val() == 'none' || $("#year").val() > 2016)
-		{
-			$("#year").val(2016);		
-		}	
+		$("#networkYear").val($("#year").val());
 	}
 
 	processLines();	
@@ -1429,6 +1412,7 @@ function handleChange()
 		updateSelectedInfo();
 	}
 	
+
 	var features = layerPoints.getSource().getFeatures();
 	for (var i in features)
 	{
@@ -1436,8 +1420,8 @@ function handleChange()
 		var show = false;
 		for (var j in feature.get('lines'))
 		{
-			if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#year").val()) && 
-					(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#year").val()))
+			if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#networkYear").val()) && 
+					(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#networkYear").val()))
 			{
 				if (serviceFilter !== undefined)
 				{
@@ -1475,7 +1459,7 @@ function handleChange()
 			features[i].set('strokeWidth', 4);
 			if (metric == "livesontheline" || metric == "houseprices" || metric ==  "housepricesdiff")
 			{
-				if (features[i].get('cartography') && ['display_name'])
+				if (features[i].get('cartography') && features[i].get('cartography')['display_name'])
 				{
 					features[i].set('geolabel', features[i].get('cartography')['display_name']);								
 				}
@@ -1510,8 +1494,8 @@ function handleChange()
 				{
 					for (var j in feature.get('lines'))
 					{
-						if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#year").val()) && 
-								(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#year").val()))
+						if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#networkYear").val()) && 
+								(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#networkYear").val()))
 						{
 							lineCount++;
 							colour = linesForKey[feature.get('lines')[j].name];
@@ -1590,7 +1574,7 @@ function handleChange()
 					var ratio = max/(totalpop*1.0)
 				
 					features[i].set('radius', scalingFactor*Math.sqrt(ratio));
-					if (demographicMap[metric][max_cap] !== undefined && ratio > demographicInfo[metric]['infolimit'])
+					if (demographicMap[metric][max_cap] !== undefined && ratio > metricInfo[metric]['infolimit'])
 					{
 						features[i].set('fillColor', demographicMap[metric][max_cap][1]);	
 						features[i].set('datalabel', demographicMap[metric][max_cap][0]);
@@ -1634,7 +1618,7 @@ function handleChange()
 					features[i].set('labelcolor', getGBRColour(ratio));
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 10*parseInt(stats[0]/10000.00));
-					features[i].set('strokeWidth', 2.4);
+					features[i].set('strokeWidth', 4);
 				}
 				else
 				{
@@ -1642,7 +1626,7 @@ function handleChange()
 					features[i].set('labelcolor', "#000000");				
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
-					features[i].set('strokeWidth', 2.4);				
+					features[i].set('strokeWidth', 4);				
 				}
 				if (olMap.getView().getZoom() < 13)
 				{
@@ -1669,7 +1653,7 @@ function handleChange()
 					features[i].set('labelcolor', getGWRColour(1-ratio));
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 1*parseInt(stats[0]/1000.00));
-					features[i].set('strokeWidth', 2.4);
+					features[i].set('strokeWidth', 4);
 				}
 				else
 				{
@@ -1677,7 +1661,7 @@ function handleChange()
 					features[i].set('labelcolor', "#000000");				
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
-					features[i].set('strokeWidth', 2.4);				
+					features[i].set('strokeWidth', 4);				
 				}
 				if (olMap.getView().getZoom() < 13)
 				{
@@ -1685,7 +1669,7 @@ function handleChange()
 				} 
 
 			}
-			else if (metric == "am_inout" && year != "none")
+			else if (metric == "am_inout")
 			{
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
@@ -1699,7 +1683,7 @@ function handleChange()
 					/* console.log(ratio); */
 				}		
 			}
-			else if (metric == "wdwe_out" && year != "none")
+			else if (metric == "wdwe_out")
 			{
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
@@ -1713,7 +1697,7 @@ function handleChange()
 					/* console.log(ratio); */
 				}		
 			}
-			else if (year != "none" && yearcomp != "none")
+			else if (yearcomp != "none")
 			{
 				if (features[i].get('yeardata') !== undefined && features[i].get('yeardata')[year] !== undefined)
 				{
@@ -1737,7 +1721,7 @@ function handleChange()
 				}
 		
 			}
-			else if (year != "none")
+			else
 			{
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
@@ -1813,9 +1797,9 @@ function handleChange()
 	}
 	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) > -1)
 	{
-		var key = demographicInfo[metric]["defaultkey"];
+		var key = metricInfo[metric]["defaultkey"];
 		values = [0.05, 0.10]
-		caption = "<table class='keycaptiontable'><tr><td>5%</td><td>10%</td></tr><tr><td colspan='2'>" + demographicInfo[metric]["keyexample"]+ "</td></tr></table>";
+		caption = "<table class='keycaptiontable'><tr><td>5%</td><td>10%</td></tr><tr><td colspan='2'>" + metricInfo[metric]["keyexample"]+ "</td></tr></table>";
 		fills = [demographicMap[metric][key][1], demographicMap[metric][key][1]]
 		strokeWidths = [4, 4];
 		labels = [demographicMap[metric][key][0], demographicMap[metric][key][0]]
@@ -1823,9 +1807,9 @@ function handleChange()
 	}
 	else if ("livesontheline" == metric)
 	{
-		var key = demographicInfo[metric]["defaultkey"];
+		var key = metricInfo[metric]["defaultkey"];
 		values = [0.023, 0.023];
-		caption = demographicInfo[metric]["keyexample"];
+		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [demographicMap[metric][75][1], demographicMap[metric][90][1]];
 		strokeWidths = [2.2, 2.2];
@@ -1833,9 +1817,9 @@ function handleChange()
 	}
 	else if ("houseprices" == metric)
 	{
-		var key = demographicInfo[metric]["defaultkey"];
+		var key = metricInfo[metric]["defaultkey"];
 		values = [0.025, 0.025];
-		caption = demographicInfo[metric]["keyexample"];
+		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGBRColour(0), getGBRColour(1)];
 		strokeWidths = [2.6, 2.6];
@@ -1844,9 +1828,9 @@ function handleChange()
 	}
 	else if ("housepricesdiff" == metric)
 	{
-		var key = demographicInfo[metric]["defaultkey"];
+		var key = metricInfo[metric]["defaultkey"];
 		values = [0.025, 0.025];
-		caption = demographicInfo[metric]["keyexample"];
+		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGWRColour(1), getGWRColour(0)];
 		strokeWidths = [2.6, 2.6];
@@ -2082,13 +2066,13 @@ function updateSelectedInfo()
 			return a < b ? 1 : (a > b ? -1 : 0);
 		});
 
-		htmlstr += "<div style='font-size: 18px;' title='Population: " + sum + "'>" + demographicInfo[metric]["subinfo"] + "</div></h1>";
+		htmlstr += "<div style='font-size: 18px;' title='Population: " + sum + "'>" + metricInfo[metric]["subinfo"] + "</div></h1>";
 		htmlstr += "<table id='keysubtable'>";
 		for (var i = 0; i < tuples.length; i++) 
 		{
 			var key = tuples[i][0];
 			var value = tuples[i][1];
-			if (value > 0 && value/(sum*1.0) >= demographicInfo[metric]["infolimit"] && value >= demographicInfo[metric]["infolimit"]*1000) 
+			if (value > 0 && value/(sum*1.0) >= metricInfo[metric]["infolimit"] && value >= metricInfo[metric]["infolimit"]*1000) 
 			{
 				htmlstr += "<tr><td>";
 				if ( demographicMap[metric][key] !== undefined)
@@ -2107,7 +2091,7 @@ function updateSelectedInfo()
 	}
 	else if (metric == "livesontheline" || metric == "houseprices" || metric == "housepricesdiff")
 	{
-		htmlstr += "</h1>" + demographicInfo[metric]["subinfo"];
+		htmlstr += "</h1>" + metricInfo[metric]["subinfo"];
 	}
 	else if (metric == "map" || metric == "night")
 	{
@@ -2239,6 +2223,13 @@ function toggleLines()
 	layerLines.setVisible(($("#linesCB").prop('checked')));
 	updateUrl();
 }
+
+function toggleZones()
+{
+	layerZones.setVisible(($("#zonesCB").prop('checked')));
+	updateUrl();
+}
+
 
 function filterLine(lineName)
 {
@@ -2386,7 +2377,7 @@ function updateUrl()
 	{
 		hash += "&year=" + $('#year').val();
 	}
-	if ($('#yearcomp').val() != 'none')
+	if ($('#yearcomp').val() != 'none' && metricInfo[metric].yearcomp)
 	{
 		hash += "&yearcomp=" + $('#yearcomp').val();
 	}	

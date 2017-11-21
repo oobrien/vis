@@ -95,7 +95,6 @@ a:link, a:visited
 #englishB
 {
 	display: none;
-	margin-top: 10px;
 }
 
 #supertitle
@@ -108,12 +107,27 @@ a:link, a:visited
 {
 	clear: both;
 	font-size: 28px; 
+}
+
+#subtitle
+{
+	font-size: 16px;
 	padding-bottom: 10px;
+}
+
+#optionstable
+{
+	font-size: 11px; 
+}
+
+#optionstable tr
+{
 }
 
 
 #optionstable td 
 { 
+	margin-top: 5px;
 	padding-left: 10px; 
 	padding-right: 10px;
 	border-radius: 10px;

@@ -13,14 +13,14 @@
 	<meta name="viewport" content="width=device-width, initial-scale=0.7, user-scalable=no, minimal-ui">
 
 	<title>Tube Creature</title>
-	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/openlayers/v4.4.2-dist/ol.css" />	
+	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.css" />	
 	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
 	<link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin+Condensed" rel="stylesheet">
 	
-	<script type="text/javascript" src="js/jquery-1.12.4.js"></script>	     
-	<script type="text/javascript" src="js/proj4.js"></script>	     
-	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.4.2-dist/ol-debug.js"></script> 
+	<script type="text/javascript" src="http://lib.oomap.co.uk/jquery-1.12.4.js"></script>	     
+	<script type="text/javascript" src="http://lib.oomap.co.uk/proj4.js"></script>	     
+	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol-debug.js"></script> 
 	<script type="text/javascript" src="config.js"></script>
 	<script type="text/javascript" src="main.js"></script>
 	<script>
@@ -81,98 +81,79 @@
 		<div id='creature'><div id='p1'>&nbsp;</div><div id='p2'>&nbsp;</div><div id='p3'>&nbsp;</div><div id='p4'>&nbsp;</div><div id='p5'>&bull;&bull;</div></div>
 		<div id="supertitle">Tube Creature</div>
 		<div id="title">London Tube Data Maps</div>
-		<table id='optionstable' style='font-size: 11px; border-collapse:collapse;'>
+		<div id="subtitle">Loading...</div>
+		<table id='optionstable'>
 			<tr>
-
-			<td style='background-color: #5577bb;'>
-				Metric</td><td colspan='4' style='background-color: #5577bb;'><select id='themetric' onchange='handleMetricChange()'>
-				<option value='map'>Network Map</option>
-				<option value='night'>Night Tube Map</option>
-				<option value='total' selected='selected'>Annual Entries/Exits</option>
-				<option value='in'>Weekday Entries</option>
-				<option value='out'>Weekday Exits</option>
-				<option value='early_in'>Weekday Early Entry</option>
-				<option value='early_out'>Weekday Early Exit</option>
-				<option value='am_in'>Weekday AM Peak Entry</option>
-				<option value='am_out'>Weekday AM Peak Exit</option>
-				<option value='mid_in'>Weekday Interpeak Entry</option>
-				<option value='mid_out'>Weekday Interpeak Exit</option>
-				<option value='pm_in'>Weekday PM Peak Entry</option>
-				<option value='pm_out'>Weekday PM Peak Exit</option>
-				<option value='late_in'>Weekday Evening Entry</option>
-				<option value='late_out'>Weekday Evening Exit</option>
-				<option value='sat_in'>Saturday Entry</option>
-				<option value='sat_out'>Saturday Exit</option>
-				<option value='sun_in'>Sunday Entry</option>
-				<option value='sun_out'>Sunday Exit</option>
-				<option value='am_inout'>Entries vs Exits (weekday AM peak)</option>
-				<option value='wdwe_out'>Weekday vs Saturday Exits</option>
-				<option value='journeys'>Journey Destinations</option>
-				<option value='tongues'>Tube Tongues</option>
-				<option value='wardwords'>Tube Tongues (wards)</option>
-				<option value='occupation'>Working Lines</option>
-				<option value='wardwork'>Working Lines (wards)</option>
-				<option value='livesontheline'>Lives on the Line</option>
-				<option value='houseprices'>House Prices</option>
-				<option value='housepricesdiff'>House Prices &Delta;</option>
-				<option value='closures'>Tube Disruption Map (live!)</option>
-				<!-- <option value='crossrail'>Crossrail</option>
-				<option value='overground'>Overground</option> -->
-
-			</select></td>
-				</tr>
-				<tr><td style='height: 5px;' colspan='5'></td>
-				<tr>
-	
-						<td style='background-color: #7788aa;'>
-				Year</td><td style='background-color: #7788aa;'><select id='year' onchange='handleChange()'>
-				<option value='none'> </option>
-				<option value=2003>2003</option>
-				<option value=2004>2004</option>
-				<option value=2005>2005</option>
-				<option value=2006>2006</option>
-				<option value=2007>2007</option>
-				<option value=2008>2008</option>
-				<option value=2009>2009</option>
-				<option value=2010>2010</option>
-				<option value=2011>2011</option>
-				<option value=2012>2012</option>
-				<option value=2013>2013</option>
-				<option value=2014>2014</option>
-				<option value=2015 selected='selected'>2015</option>
-				<option value=2016>2016</option>
-				<option value=2017>2017</option>
-				<option value=2018>2018</option>
-				<option value=2019>2019</option>
-				<option value=2020>2020</option>
-			</select></td>
-			<td></td>
-			<td style='background-color: #778899;'>
-				Compare with</td><td style='background-color: #778899;'><select id='yearcomp' onchange='handleChange()'>
-				<option value='none' selected='selected'> </option>
-				<option value=2003>2003</option>
-				<option value=2004>2004</option>
-				<option value=2005>2005</option>
-				<option value=2006>2006</option>
-				<option value=2007>2007</option>
-				<option value=2008>2008</option>
-				<option value=2009>2009</option>
-				<option value=2010>2010</option>
-				<option value=2011>2011</option>
-				<option value=2012>2012</option>
-				<option value=2013>2013</option>
-				<option value=2014>2014</option>
-				<option value=2015>2015</option>
-				<option value=2016>2016</option>
-			</select></td>
-		
+				<td style='background-color: #5577bb;'>
+					Metric
+				</td>
+				<td colspan='4' style='background-color: #5577bb;'>
+					<select id='themetric' onchange='handleMetricChange()'>
+						<option value='map'>Network Map</option>
+						<option value='night'>Night Tube Map</option>
+						<option value='total' selected='selected'>Annual Entries/Exits</option>
+						<option value='in'>Weekday Entries</option>
+						<option value='out'>Weekday Exits</option>
+						<option value='early_in'>Weekday Early Entry</option>
+						<option value='early_out'>Weekday Early Exit</option>
+						<option value='am_in'>Weekday AM Peak Entry</option>
+						<option value='am_out'>Weekday AM Peak Exit</option>
+						<option value='mid_in'>Weekday Interpeak Entry</option>
+						<option value='mid_out'>Weekday Interpeak Exit</option>
+						<option value='pm_in'>Weekday PM Peak Entry</option>
+						<option value='pm_out'>Weekday PM Peak Exit</option>
+						<option value='late_in'>Weekday Evening Entry</option>
+						<option value='late_out'>Weekday Evening Exit</option>
+						<option value='sat_in'>Saturday Entry</option>
+						<option value='sat_out'>Saturday Exit</option>
+						<option value='sun_in'>Sunday Entry</option>
+						<option value='sun_out'>Sunday Exit</option>
+						<option value='am_inout'>Entries vs Exits (AM peak)</option>
+						<option value='wdwe_out'>Weekday vs Saturday Exits</option>
+						<option value='journeys'>Journey Destinations</option>
+						<option value='tongues'>Tube Tongues</option>
+						<option value='wardwords'>Tube Tongues (wards)</option>
+						<option value='occupation'>Working Lines</option>
+						<option value='wardwork'>Working Lines (wards)</option>
+						<option value='livesontheline'>Lives on the Line</option>
+						<option value='houseprices'>House Prices</option>
+						<option value='housepricesdiff'>House Prices &Delta;</option>
+						<option value='closures'>Tube Disruption Map (live!)</option>
+						<!-- <option value='crossrail'>Crossrail</option>
+						<option value='overground'>Overground</option> -->
+					</select>
+				</td>
 			</tr>
+			<tr>	
+				<td style='background-color: #7788aa;'>
+					Data Year</td><td style='background-color: #7788aa;'>
+					<select id='year' onchange='handleChange()'>
+					</select>
+				</td>
+				<td></td>
+				<td style='background-color: #778899;'>
+					Compare with</td><td style='background-color: #778899;'>
+					<select id='yearcomp' onchange='handleChange()'>
+					</select>
+				</td>
+			</tr>	
+			<tr>	
+				<td style='background-color: #7788aa;'>
+					Network Year</td><td style='background-color: #7788aa;'>
+					<select id='networkYear' onchange='handleChange()'>
+					</select>
+				</td>
+				<td></td>
+				<td id='englishB' style='background-color: #7788aa;' colspan='2'><button onclick='toggleEnglish()' />Show/hide English</button>
+				</td>
+			</tr>
+			
 		</table>
 		<div style='margin-top: 10px;'>
 			<input type='checkbox' id='backgroundCB' checked='checked' onclick='toggleBackground()' />Background map
-                        <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Aerial imagery
+            <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Aerial image
 			<input type='checkbox' id='linesCB' checked='checked' onclick='toggleLines()' />Lines
-			<div><button onclick='toggleEnglish()' id='englishB' />Show/hide English</button></div>
+			<input type='checkbox' id='zonesCB' onclick='toggleZones()' />Zones
 		</div>
 	</div>
 

@@ -66,7 +66,7 @@ demographicMap["tongues"] = {
 	"c095": ["Afrikaans", "#ffffff"],
 	"c096": ["Other Nigerian languages (not Yoruba, Igbo)"],
 	"c100": ["Miscellaneous languages"],
-	"x": ["No significant population", '#aaaaaa']
+	"x": ["None significant", '#aaaaaa']
 };
 
 demographicMap["wardwords"] = demographicMap["tongues"];
@@ -143,22 +143,178 @@ demographicMap["livesontheline"] = {
 demographicMap["houseprices"];
 demographicMap["housepricesdiff"];
 
+var metricInfo = {};
 
-var demographicInfo = {};
+metricInfo["map"] = {
+	"title": "Geographical Tube Map",
+	"subtitle": "The tube network in real life",
+ 	"defaultDataYear": 2017,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+ 	"defaultNetworkYear": 2017,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": false,
+ 	"scale": 15,
+};
 
-demographicInfo["tongues"] = {
+metricInfo["night"] = {
+	"title": "Night Tube Map",
+	"subtitle": "Friday/Saturday late nights",
+ 	"defaultDataYear": 2017,
+ 	"availableDataYears": [2017],
+ 	"defaultNetworkYear": 2017,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": false,
+ 	"scale": 15,
+};
+
+metricInfo["total"] = {
+	"title": "London Tube Data Map",
+	"subtitle": "Station Entry/Exit Volumes",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 		"DLR": [2012, 2013, 2014, 2015, 2016],
+ 		"Tramlink": [2010, 2011, 2012, 2013, 2014],
+ 		"Overground": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": true,
+ 	"scale": 0.01,
+};
+
+metricInfo["in"] = {
+	"title": "London Tube Data Map",
+	"subtitle": "Station Entry/Exit Volumes",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 		"DLR": [2012, 2013, 2014, 2015, 2016],
+ 		"Tramlink": [],
+ 		"Overground": [],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": true,
+ 	"scale": 0.3,
+};
+
+metricInfo["out"] = metricInfo["in"];
+
+metricInfo["early_in"] = {
+	"title": "London Tube Data Map",
+	"subtitle": "Station Entry/Exit Volumes",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
+ 		"DLR": [],
+ 		"Tramlink": [],
+ 		"Overground": [],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": true,
+ 	"scale": 0.4,
+};
+
+metricInfo["early_out"] = metricInfo["early_in"];
+metricInfo["am_in"] = metricInfo["early_in"];
+metricInfo["am_out"] = metricInfo["early_in"];
+metricInfo["mid_in"] = metricInfo["early_in"];
+metricInfo["mid_out"] = metricInfo["early_in"];
+metricInfo["pm_in"] = metricInfo["early_in"];
+metricInfo["pm_out"] = metricInfo["early_in"];
+metricInfo["late_in"] = metricInfo["early_in"];
+metricInfo["late_out"] = metricInfo["early_in"];
+
+metricInfo["sat_in"] = metricInfo["in"];
+metricInfo["sat_out"] = metricInfo["in"];
+metricInfo["sun_in"] = metricInfo["in"];
+
+metricInfo["am_inout"] = {
+	"title": "London Tube Data Map",
+	"subtitle": "AM peak Entry vs Exit Volumes",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
+ 		"DLR": [],
+ 		"Tramlink": [],
+ 		"Overground": [],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": false,
+ 	"scale": 0.4,
+};
+
+metricInfo["wdwe_out"] = {
+	"title": "London Tube Data Map",
+	"subtitle": "Weekday vs Weekend Exit Volumes",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
+ 		"DLR": [],
+ 		"Tramlink": [],
+ 		"Overground": [],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": false,
+ 	"scale": 0.2,
+};
+
+metricInfo["journeys"] = {
+	"title": "Journey Destinations",
+	"subtitle": "For selected start station",
+ 	"defaultDataYear": 2016,
+ 	"availableDataYears": [2012, 2014, 2015, 2016],
+ 	"availableDataYearsByNetwork": {
+ 		"Tube": [2012, 2014, 2015, 2016],
+ 		"DLR": [],
+ 		"Tramlink": [],
+ 		"Overground": [],
+ 		"Emirates Air Line": [],
+ 		"Crossrail": []
+ 	}, 
+ 	"defaultNetworkYear": 2016,
+ 	"tieNetworkToData": true,
+ 	"yearcomp": true,
+ 	"scale": 1.6,
+};
+
+metricInfo["tongues"] = {
 	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp;<br />Chatgaya. Chinese ao excludes those who specified<br />Mandarin or Cantonese. Tagalog includes Filipino.<br /><br /><i>Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire<br />&amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.</i>",
 	"file": "qs204ew_tubebuffer200m.json",
 	"title": "Tube Tongues",
-	"subtitle": "Second languages at tube stops",
+	"subtitle": "Second languages near London's tube stations",
 	"subinfo": "Top primary languages spoken<br />by people living near here:", 
 	"keyexample": "...of people living near here speak French - the second most common.",
  	"defaultkey": "c012",
+ 	"defaultDataYear": 2011,
+ 	"availableDataYears": [2011],
+ 	"defaultNetworkYear": 2019,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.005,
- 	"scale": 220
+ 	"scale": 220,
+ 	"yearcomp": false,
 };
 
-demographicInfo["wardwords"] = {
+metricInfo["wardwords"] = {
 	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp;<br />Chatgaya. Chinese ao excludes those who specified<br />Mandarin or Cantonese. Tagalog includes Filipino.<br /><br /><i>Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire<br />&amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.</i>",
 	"file": "qs204ew_wardsingle.json",
 	"title": "Tube Tongues (Wards)",
@@ -166,11 +322,16 @@ demographicInfo["wardwords"] = {
 	"subinfo": "Top primary languages spoken<br />by people living in this ward:", 
 	"keyexample": "...of people living in this ward speak French - the second most common.",
  	"defaultkey": "c012",
+ 	"defaultDataYear": 2011,
+ 	"availableDataYears": [2011],
+ 	"defaultNetworkYear": 2011,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.005,
- 	"scale": 220
+ 	"scale": 220,
+ 	"yearcomp": false,
 };
 
-demographicInfo["occupation"] = {
+metricInfo["occupation"] = {
 	"additional": "I am using highly abbreviated names to avoid clutter<br />on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names.<br />* = professional, ^ = associate professional,<br />as = assistant/cashier, md = manager/director,<br />med = media, elem = elementary, $ = financial.<br /><br /><i>Working Lines was inspired by<br /><a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.</i>",
  	"file": "qs606ew_tubebuffer200m.json",
  	"title": "Working Lines",
@@ -178,11 +339,16 @@ demographicInfo["occupation"] = {
  	"subinfo": "Top occupations of people<br />living near here:",
  	"keyexample": "...of people living near here have artistic, literary or media occupations - the most popular job type locally.",
  	"defaultkey": "c049",
+ 	"defaultDataYear": 2011,
+ 	"availableDataYears": [2011],
+ 	"defaultNetworkYear": 2019,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.03,
- 	"scale": 220
+ 	"scale": 220,
+ 	"yearcomp": false,
  };
 
-demographicInfo["wardwork"] = {
+metricInfo["wardwork"] = {
 	"additional": "I am using highly abbreviated names to avoid clutter<br />on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names.<br />* = professional, ^ = associate professional,<br />as = assistant/cashier, md = manager/director,<br />med = media, elem = elementary, $ = financial.<br /><br /><i>Working Lines was inspired by<br /><a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.</i>",
  	"file": "qs606ew_wardsingle.json",
  	"title": "Working Lines (Wards)",
@@ -190,11 +356,16 @@ demographicInfo["wardwork"] = {
  	"subinfo": "Top occupations of people<br />living in this ward:",
  	"keyexample": "...of people living in this ward have artistic, literary or media occupations - the most popular job type locally.",
  	"defaultkey": "c049",
+ 	"defaultDataYear": 2011,
+ 	"availableDataYears": [2011],
+ 	"defaultNetworkYear": 2011,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.03,
- 	"scale": 220
+ 	"scale": 220,
+ 	"yearcomp": false,
  };
  
- demographicInfo["livesontheline"] = {
+ metricInfo["livesontheline"] = {
 	"additional": "Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a><br />by James Cheshire.</i>",
  	"file": "livesontheline20092013.json",
  	"title": "Lives on the Line",
@@ -202,11 +373,16 @@ demographicInfo["wardwork"] = {
  	"subinfo": "Life expectancies at birth<br />of people living in MSOAs<br />touching a 200m buffer around<br />the centroid of this station,<br />2009-13, Male+Female average",
  	"keyexample": "The number indicates the life expectancy at birth",
  	"defaultkey": "82",
+ 	"defaultDataYear": 2013,
+ 	"availableDataYears": [2013],
+ 	"defaultNetworkYear": 2019,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.01,
- 	"scale": 220
- };
+ 	"scale": 220,
+  	"yearcomp": false,
+};
 
- demographicInfo["houseprices"] = {
+ metricInfo["houseprices"] = {
 		"additional": "Using near-live property data<br />for 2-bed houses/flats, from Zoopla.<br />Excludes listings over 1 year or<br />last updated more than 6 months ago.<br />Also excludes shared ownership/equity.<br />Aim to refresh data weekly.<br /><br /><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='images/powered-by-zoopla.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a>",
  	"file": "../houseprices/getzoopladata.php",
  	"title": "House Prices (Zoopla)",
@@ -214,11 +390,16 @@ demographicInfo["wardwork"] = {
  	"subinfo": "House prices<br />for properties within<br />a square 1000m box around<br />the centroid of this station,<br />near-live.",
  	"keyexample": "The number indicates the average house prices",
  	"defaultkey": "500000",
+ 	"defaultDataYear": 2017,
+ 	"availableDataYears": [2017],
+ 	"defaultNetworkYear": 2019,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.01,
- 	"scale": 220
- };
+ 	"scale": 220,
+  	"yearcomp": false,
+};
 
- demographicInfo["housepricesdiff"] = {
+ metricInfo["housepricesdiff"] = {
 		"additional": "Using near-live property data<br />for 2-bed houses/flats, from Zoopla.<br />Excludes listings over 1 year or<br />last updated more than 6 months ago.<br />Also excludes shared ownership/equity.<br />Aim to refresh data weekly.<br /><br /><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='images/powered-by-zoopla.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a>",
  	"file": "../houseprices/getzoopladiffdata.php",
  	"title": "House Price Changes (Zoopla)",
@@ -226,7 +407,12 @@ demographicInfo["wardwork"] = {
  	"subinfo": "House prices<br />for properties within<br />a square 1000m box around<br />the centroid of this station,<br />near-live.",
  	"keyexample": "The number indicates the average house prices change between the last week and three months before",
  	"defaultkey": "10000",
+ 	"defaultDataYear": 2017,
+ 	"availableDataYears": [2017],
+ 	"defaultNetworkYear": 2019,
+ 	"tieNetworkToData": false,
  	"infolimit": 0.01,
- 	"scale": 220
- };
+ 	"scale": 220,
+  	"yearcomp": false,
+};
 
