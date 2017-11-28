@@ -152,6 +152,7 @@ metricInfo["map"] = {
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
  	"defaultNetworkYear": 2017,
  	"tieNetworkToData": true,
+ 	"keyValues": [0.7, 0.7],
  	"yearcomp": false,
  	"scale": 15,
 };
@@ -163,6 +164,7 @@ metricInfo["night"] = {
  	"availableDataYears": [2017],
  	"defaultNetworkYear": 2017,
  	"tieNetworkToData": true,
+ 	"keyValues": [0.7, 0.7],
  	"yearcomp": false,
  	"scale": 15,
 };
@@ -182,6 +184,7 @@ metricInfo["total"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [1000000, 20000000],
  	"yearcomp": true,
  	"scale": 0.01,
 };
@@ -201,6 +204,7 @@ metricInfo["in"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [1000, 5000],
  	"yearcomp": true,
  	"scale": 0.3,
 };
@@ -211,7 +215,7 @@ metricInfo["early_in"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Station Entry/Exit Volumes",
  	"defaultDataYear": 2016,
- 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  		"DLR": [],
@@ -222,6 +226,7 @@ metricInfo["early_in"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [1000, 5000],
  	"yearcomp": true,
  	"scale": 0.4,
 };
@@ -239,12 +244,13 @@ metricInfo["late_out"] = metricInfo["early_in"];
 metricInfo["sat_in"] = metricInfo["in"];
 metricInfo["sat_out"] = metricInfo["in"];
 metricInfo["sun_in"] = metricInfo["in"];
+metricInfo["sun_out"] = metricInfo["in"];
 
 metricInfo["am_inout"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "AM peak Entry vs Exit Volumes",
  	"defaultDataYear": 2016,
- 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  		"DLR": [],
@@ -255,6 +261,7 @@ metricInfo["am_inout"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [10000, 10000],
  	"yearcomp": false,
  	"scale": 0.4,
 };
@@ -274,6 +281,7 @@ metricInfo["wdwe_out"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [10000, 10000],
  	"yearcomp": false,
  	"scale": 0.2,
 };
@@ -293,6 +301,7 @@ metricInfo["journeys"] = {
  	}, 
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
+ 	"keyValues": [1000, 50],
  	"yearcomp": true,
  	"scale": 1.6,
 };
@@ -309,6 +318,7 @@ metricInfo["tongues"] = {
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2019,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.05, 0.10],
  	"infolimit": 0.005,
  	"scale": 220,
  	"yearcomp": false,
@@ -326,6 +336,7 @@ metricInfo["wardwords"] = {
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2011,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.05, 0.10],
  	"infolimit": 0.005,
  	"scale": 220,
  	"yearcomp": false,
@@ -343,6 +354,7 @@ metricInfo["occupation"] = {
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2019,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.05, 0.10],
  	"infolimit": 0.03,
  	"scale": 220,
  	"yearcomp": false,
@@ -360,6 +372,7 @@ metricInfo["wardwork"] = {
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2011,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.05, 0.10],
  	"infolimit": 0.03,
  	"scale": 220,
  	"yearcomp": false,
@@ -377,6 +390,7 @@ metricInfo["wardwork"] = {
  	"availableDataYears": [2013],
  	"defaultNetworkYear": 2019,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.023, 0.023],
  	"infolimit": 0.01,
  	"scale": 220,
   	"yearcomp": false,
@@ -394,6 +408,7 @@ metricInfo["wardwork"] = {
  	"availableDataYears": [2017],
  	"defaultNetworkYear": 2019,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.025, 0.025],
  	"infolimit": 0.01,
  	"scale": 220,
   	"yearcomp": false,
@@ -411,6 +426,7 @@ metricInfo["wardwork"] = {
  	"availableDataYears": [2017],
  	"defaultNetworkYear": 2019,
  	"tieNetworkToData": false,
+ 	"keyValues": [0.025, 0.025],
  	"infolimit": 0.01,
  	"scale": 220,
   	"yearcomp": false,

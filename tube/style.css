@@ -30,6 +30,7 @@ a:link, a:visited
 	left: 0; 
 	margin: 0 auto; 
 	padding: 10px 20px 15px 20px; 
+	width: 200px;
 	opacity: 0.8; 
 	border-bottom-right-radius: 20px; 
 	text-align: left; 
@@ -125,12 +126,16 @@ a:link, a:visited
 }
 
 
-#optionstable td 
+#optionstable div div
 { 
-	margin-top: 5px;
-	padding-left: 10px; 
-	padding-right: 10px;
+	margin: 5px 0;
+	padding: 2px 8px; 
 	border-radius: 10px;
+} 
+
+#optionstable div input
+{ 
+width: 80px;
 } 
 
 @media screen

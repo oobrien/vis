@@ -82,12 +82,12 @@
 		<div id="supertitle">Tube Creature</div>
 		<div id="title">London Tube Data Maps</div>
 		<div id="subtitle">Loading...</div>
-		<table id='optionstable'>
-			<tr>
-				<td style='background-color: #5577bb;'>
+		<div id='optionstable'>
+			<div>
+				<div style='float: left; style='background-color: #5577bb;'>
 					Metric
-				</td>
-				<td colspan='4' style='background-color: #5577bb;'>
+				</div>
+				<div style='background-color: #5577bb;'>
 					<select id='themetric' onchange='handleMetricChange()'>
 						<option value='map'>Network Map</option>
 						<option value='night'>Night Tube Map</option>
@@ -122,36 +122,39 @@
 						<!-- <option value='crossrail'>Crossrail</option>
 						<option value='overground'>Overground</option> -->
 					</select>
-				</td>
-			</tr>
-			<tr>	
-				<td style='background-color: #7788aa;'>
-					Data Year</td><td style='background-color: #7788aa;'>
+				</div>
+			</div>
+			<div>
+				<div style='float: left; width: 80px; background-color: #7788aa;'>
+					Data Year</div>
+				<div style='background-color: #7788aa;'>
 					<select id='year' onchange='handleChange()'>
 					</select>
-				</td>
-				<td></td>
-				<td style='background-color: #778899;'>
-					Compare with</td><td style='background-color: #778899;'>
+				</div>
+			</div>
+			<div>
+				<div style='float:left; width: 80px; background-color: #778899;'>
+					Compare with</div>
+				<div style='background-color: #778899;'>
 					<select id='yearcomp' onchange='handleChange()'>
 					</select>
-				</td>
-			</tr>	
-			<tr>	
-				<td style='background-color: #7788aa;'>
-					Network Year</td><td style='background-color: #7788aa;'>
+				</div>
+			</div>
+			<div>
+				<div style='float: left; width: 80px; background-color: #7788aa;'>
+					Network Year</div>
+				<div style='background-color: #7788aa;'>
 					<select id='networkYear' onchange='handleChange()'>
 					</select>
-				</td>
-				<td></td>
-				<td id='englishB' style='background-color: #7788aa;' colspan='2'><button onclick='toggleEnglish()' />Show/hide English</button>
-				</td>
-			</tr>
-			
-		</table>
+				</div>
+			</div>
+			<div id='englishB' style='background-color: #7788aa;' colspan='2'>
+				<button onclick='toggleEnglish()' />Show/hide English</button>
+			</div>
+		</div>
 		<div style='margin-top: 10px;'>
-			<input type='checkbox' id='backgroundCB' checked='checked' onclick='toggleBackground()' />Background map
-            <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Aerial image
+			<input type='checkbox' id='backgroundCB' checked='checked' onclick='toggleBackground()' />Basemap
+            <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Satellite 
 			<input type='checkbox' id='linesCB' checked='checked' onclick='toggleLines()' />Lines
 			<input type='checkbox' id='zonesCB' onclick='toggleZones()' />Zones
 		</div>

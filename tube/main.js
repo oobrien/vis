@@ -63,8 +63,6 @@ var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Cros
 	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "R", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
 var linesForKey;
 
-var hidelabels = ['940GZZLUTCR', '910G950', '940GZZDLCAN', '940GZZLUNGW', '940GZZDLPOP', '940GZZLUCGN', '940GZZLUERB', '940GZZLUCST', '940GZZLUMMT', '910GWLTHQRD', '940GZZCRCEN', '940GZZCRWEL', '940GZZLUESQ', '940GZZLULSQ', '940GZZLUSPU', '940GZZLUBND', '940GZZDLRAL', '910GBTHNLGR', '940GZZLUGPS', '940GZZLUEMB', '940GZZLURGP'];
-
 function init()
 {
 	//URL ARGUMENTS
@@ -173,35 +171,43 @@ function init()
 	
 	function pointLabelStyle(feature, resolution) 
 	{
+		if (resolution > 50) { return null; }
+		
 		var zoomFactor = 0.15;
+		var metricFontSize = 9;
+		var labelFontSize = 9;
 		if (resolution < 100) { zoomFactor = 0.2; }
-		if (resolution < 50) { zoomFactor = 0.3; }
-		if (resolution < 25) { zoomFactor = 0.4; }
-		if (resolution < 12.5) { zoomFactor = 0.5; }
+		if (resolution < 50) { zoomFactor = 0.3; metricFontSize = 10; }
+		if (resolution < 25) { zoomFactor = 0.4; metricFontSize = 12; labelFontSize = 10; }
+		if (resolution < 12.5) { zoomFactor = 0.5; metricFontSize = 14; labelFontSize = 12; }
 
-		return [
-			new ol.style.Style({ 
-				text: new ol.style.Text({
-					text: (resolution > 50 ? undefined : feature.get('datalabel')),
-					textAlign: 'center',
-					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 10px Cabin Condensed, sans-serif' : 'bold 9px Cabin Condensed, sans-serif'))),
-					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.75)', width: 3 })
-
-				})
+		var metricLabel = new ol.style.Style({ 
+			text: new ol.style.Text({
+				text: feature.get('datalabel'),
+				textAlign: 'center',
+				font: 'bold ' + metricFontSize + 'px Cabin Condensed, sans-serif',
+				fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
+				stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.75)', width: 3 })
 			}),
-			new ol.style.Style({
-				text: new ol.style.Text({
-                    text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n"))),
-					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
-					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
-					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-					font: (resolution < 12.5 ? 'bold 12px Varela Round, sans-serif' : ( resolution < 25 ? 'bold 10px Varela Round, sans-serif' : 'bold 9px Varela Round, sans-serif')),
-					fill: new ol.style.Fill({ color: $('#themetric').val() == "night" ? "#ffffff" : "#000000" }),
-					stroke: new ol.style.Stroke({ color: ($('#themetric').val() == "night" ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.75)'), width: 3 })
-				})
-			})			
-		] 
+			zIndex: 1,
+
+		});
+			
+		var nameLabel = new ol.style.Style({
+			text: new ol.style.Text({
+				text: feature.get('geolabel').replace(" &", " &").replace(" ", "\n"),
+				offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor*1.1 : 0),
+				offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor*1.3 : 0),
+				textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+				font: 'bold ' + metricFontSize + 'px Varela Round, sans-serif',
+				fill: new ol.style.Fill({ color: $('#themetric').val() == "night" ? "#ffffff" : "#000000" }),
+				stroke: new ol.style.Stroke({ color: ($('#themetric').val() == "night" ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.75)'), width: 3 })
+			}),
+			zIndex: 2,
+		});			
+
+		return [metricLabel, nameLabel];
+
 	};	
 	
 	function pointCaseStyle(feature, resolution) 
@@ -259,7 +265,7 @@ function init()
 			}),
 			new ol.style.Style({
 				text: new ol.style.Text({
-                    text: (resolution > 50 ? undefined : (resolution > 25 && (hidelabels.indexOf(feature.get('id')) > -1 || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n"))),
+                    text: (resolution > 50 ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n")),
 					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
 					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
 					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
@@ -315,7 +321,7 @@ function init()
 	{
 		return [
 			new ol.style.Style({ 
-				fill: new ol.style.Fill({ color: (["Zone 6", "Zone 4", "Zone 2"].indexOf(feature.get('name')) > -1) ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.0)' }),
+				fill: new ol.style.Fill({ color: (["Zone 6", "Zone 4", "Zone 2"].indexOf(feature.get('name')) >= 0) ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.0)' }),
 				stroke: new ol.style.Stroke({ width: 3, color:'rgba(128, 128, 128, 0.2)' })
 			})
 		] 	
@@ -427,19 +433,19 @@ function init()
  	layerPoints = new ol.layer.Vector(
 	{ 
 		source: pointSource, 
-		style: function(feature, resolution) { return pointCoreStyle(feature, resolution); }
+		style: pointCoreStyle,
 	});
 
  	layerPointsLabels = new ol.layer.Vector(
 	{ 
 		source: pointSource, 
 		declutter: true,
-		style: function(feature, resolution) { return pointLabelStyle(feature, resolution); }
+		style: pointLabelStyle,
 	});
  	layerPointsCase  = new ol.layer.Vector(
 	{ 
 		source: pointSource, 
-		style: function(feature, resolution) { return pointCaseStyle(feature, resolution); }
+		style: pointCaseStyle,
 	});
 
  	var lineAllSource = new ol.source.Vector({
@@ -451,7 +457,7 @@ function init()
  	layerLinesAll = new ol.layer.Vector(
 	{ 
 		source: lineAllSource, 
-		style: function(feature, resolution) { return lineStyle(feature, resolution); }
+		style: lineStyle,
 	});
 
 	lineAllSource.once('change', function() 
@@ -468,7 +474,7 @@ function init()
  	layerLines = new ol.layer.Vector(
 	{ 
 		source: lineSource, 
-		style: function(feature, resolution) { return lineStyle(feature, resolution); }
+		style: lineStyle,
 	});
 	
 	var osiSource = new ol.source.Vector({
@@ -477,13 +483,13 @@ function init()
 	layerOSICore = new ol.layer.Vector(
 	{
 		source: osiSource,
-		style: function(feature, resolution) { return osicoreStyle(feature, resolution); }
+		style: osicoreStyle,
 	});
 
 	var layerOSICase = new ol.layer.Vector(
 	{
 		source: osiSource,
-		style: function(feature, resolution) { return osicaseStyle(feature, resolution); }
+		style: osicaseStyle,
 	});
 
 
@@ -496,7 +502,7 @@ function init()
  	layerGLA = new ol.layer.Vector(
 	{ 
 		source: glaSource, 
-		style: function(feature, resolution) { return glaStyle(feature, resolution); }
+		style: glaStyle
 	});
 
 	var zoneSource = new ol.source.Vector({
@@ -508,7 +514,7 @@ function init()
  	layerZones = new ol.layer.Vector(
 	{ 
 		source: zoneSource, 
-		style: function(feature, resolution) { return zoneStyle(feature, resolution); }
+		style: zoneStyle,
 	});
 
 
@@ -521,7 +527,7 @@ function init()
  	layerThames = new ol.layer.Vector(
 	{ 
 		source: thamesSource, 
-		style: function(feature, resolution) { return thamesStyle(feature, resolution); }
+		style: thamesStyle,
 	});
   	
 	olMap = new ol.Map({
@@ -622,15 +628,15 @@ function init()
 	olMap.on("moveend", updateUrl);	  
 
 	key1source = new ol.source.Vector();
-	var key1layer = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointCoreStyle(feature, resolution); } });	
-	var key1layerLabels = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointLabelStyle(feature, resolution); } });	
-	var key1layerCase = new ol.layer.Vector({ source: key1source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
+	var key1layer = new ol.layer.Vector({ source: key1source, style: pointCoreStyle });	
+	var key1layerLabels = new ol.layer.Vector({ source: key1source, style: pointLabelStyle });	
+	var key1layerCase = new ol.layer.Vector({ source: key1source, style: pointCaseStyle });	
 	key1map = new ol.Map({ target: "key1", layers: [ key1layerCase, key1layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	key2source = new ol.source.Vector();
-	var key2layer = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointCoreStyle(feature, resolution); } });	
-	var key2layerLabels = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointLabelStyle(feature, resolution); } });	
-	var key2layerCase = new ol.layer.Vector({ source: key2source, style: function(feature, resolution) { return pointCaseStyle(feature, resolution); } });	
+	var key2layer = new ol.layer.Vector({ source: key2source, style: pointCoreStyle });	
+	var key2layerLabels = new ol.layer.Vector({ source: key2source, style: pointLabelStyle });	
+	var key2layerCase = new ol.layer.Vector({ source: key2source, style: pointCaseStyle });	
 	key2map = new ol.Map({ target: "key2", layers: [ key2layerCase, key2layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	if (top.location!= self.location) { $("#button").css('display', 'block'); }
@@ -682,6 +688,14 @@ function processLines()
 	layerLines.getSource().clear();
 
 	var metric = $("#themetric").val();
+	
+	var year = $("#year").val();
+	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) >= 0)
+	{
+		year = $("#networkYear").val();
+	}
+	year = parseInt(year);
+	
 	var features = layerLinesAll.getSource().getFeatures();
 	for (var i in features)
 	{	
@@ -695,8 +709,8 @@ function processLines()
 				//Set up network line hide/display based on the config file.
 				if (metricInfo[metric].availableDataYearsByNetwork)
 				{
-					var yearsWithData = metricInfo[metric].availableDataYearsByNetwork[lines[j].network]; 				
-					if (!yearsWithData.indexOf($("#networkYear").val()))
+					var yearsWithData = metricInfo[metric].availableDataYearsByNetwork[lines[j].network]; 	
+					if (yearsWithData.indexOf(year) < 0)
 					{
 						lines[j].hide = true;
 					}
@@ -707,12 +721,12 @@ function processLines()
 					lines[j].hide = true;			
 				}
 				if (typeof lines[j].closed !== undefined 
-					&& $("#networkYear").val() > lines[j].closed)
+					&& year > lines[j].closed)
 				{
 					lines[j].hide = true;
 				}
 				if (typeof lines[j].opened !== undefined 
-					&& $("#networkYear").val() < lines[j].opened)
+					&& year < lines[j].opened)
 				{
 					lines[j].hide = true;
 				}
@@ -756,7 +770,7 @@ function processLines()
 			b = b[0];
 			return a < b ? -1 : (a > b ? 1 : 0);
 	});
-	if (["wardwords", "wardwork"].indexOf(metric) == -1)
+	if (["wardwords", "wardwork"].indexOf(metric) < 0)
 	{
 		for (line in linesForKeySorted)
 		{
@@ -780,7 +794,7 @@ function processLines()
 	html += "</td>";	
 	html += "<td>";
 	
-	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
+	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) >= 0)
 	{
 	
 		if (demographicMap["houseprices"] == undefined)
@@ -813,7 +827,7 @@ function processLines()
 
 	html += "</td></tr></table>";
 	
-	if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) > -1)
+	if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) >= 0)
 	{
 		html += "<div id='keyItemExtra'><div class='keyBall' style='background-color: #ffffff;'>&nbsp;</div>";
 		var first = true;
@@ -827,7 +841,7 @@ function processLines()
 		}
 		html += "</div>";
 	}
-	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1)
+	if (metricInfo[metric]["additional"])
 	{
 		html += "<div id='additionalText'>" + metricInfo[metric]["additional"] + "</div>";		
 	}
@@ -1270,7 +1284,7 @@ function handleMetricChange()
 	}
 
 	//Change current view if not available in year menus. 
-	if ([dataYears].indexOf(currYear) == -1)
+	if (currYear == null || dataYears.indexOf(parseInt(currYear)) < 0)
 	{
 		$('#year').val(defaultDataYear); 
 	}
@@ -1280,7 +1294,7 @@ function handleMetricChange()
 	}
 	if (yearcomp)
 	{
-		if ([dataYears].indexOf(currYearcomp) == -1)
+		if (currYearcomp == null || dataYears.indexOf(parseInt(currYearcomp)) < 0)
 		{
 			$('#yearcomp').val('none'); 	
 		}
@@ -1291,7 +1305,7 @@ function handleMetricChange()
 	}
 	if (tieNetworkToData)
 	{
-		if ([dataYears].indexOf(currYear) == -1)
+		if (currYear == null || dataYears.indexOf(parseInt(currYear)) < 0)
 		{
 			$('#networkYear').val(defaultDataYear); 			
 		}
@@ -1321,13 +1335,13 @@ function handleMetricChange()
 	$('#subtitle').html(metricInfo[metric]["subtitle"]);		
 
 	//Change geographies.
-	if ((pointsLoaded == "wards" && ["wardwords", "wardwork"].indexOf(metric) == -1) || (pointsLoaded != "wards" && ["wardwords", "wardwork"].indexOf(metric) > -1))
+	if ((pointsLoaded == "wards" && ["wardwords", "wardwork"].indexOf(metric) < 0) || (pointsLoaded != "wards" && ["wardwords", "wardwork"].indexOf(metric) >= 0))
 	{
 		switchPoints();
 	}
 
 	//Metric-specific map display.
-	if (["wardwords", "wardwork"].indexOf(metric) > -1)
+	if (["wardwords", "wardwork"].indexOf(metric) >= 0)
 	{
 		$("#linesCB").prop('checked', false);
 		toggleLines();	
@@ -1351,7 +1365,7 @@ function handleMetricChange()
 		$("body").css('backgroundColor', '#fff8f8');	
 	}
 	
-	if (["wardwords", "tongues"].indexOf(metric) > -1)
+	if (["wardwords", "tongues"].indexOf(metric) >= 0)
 	{
 		$("#englishB").css('display', 'table-cell');
 	}
@@ -1372,7 +1386,7 @@ function handleMetricChange()
 			showDefaultJourney();
 		}
 	}		
-	else if ((["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) > -1) && demographicData[metric] === undefined)
+	else if (metricInfo[metric].defaultkey !== undefined && demographicData[metric] === undefined)
 	{
 		requestDemographicData();
 	}
@@ -1412,7 +1426,6 @@ function handleChange()
 		updateSelectedInfo();
 	}
 	
-
 	var features = layerPoints.getSource().getFeatures();
 	for (var i in features)
 	{
@@ -1539,7 +1552,7 @@ function handleChange()
 					selectClick.getFeatures().item(0).set('radius', 20);
 				}
 			}
-			else if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) > -1)
+			else if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) >= 0)
 			{
 				if (demographicData[metric][features[i].get('tfl_intid')] !== undefined)
 				{
@@ -1628,11 +1641,6 @@ function handleChange()
 					features[i].set('datalabel', '');
 					features[i].set('strokeWidth', 4);				
 				}
-				if (olMap.getView().getZoom() < 13)
-				{
-					features[i].set('geolabel', '');
-				} 
-
 			}
 			else if (metric == "housepricesdiff")
 			{
@@ -1663,11 +1671,6 @@ function handleChange()
 					features[i].set('datalabel', '');
 					features[i].set('strokeWidth', 4);				
 				}
-				if (olMap.getView().getZoom() < 13)
-				{
-					features[i].set('geolabel', '');
-				} 
-
 			}
 			else if (metric == "am_inout")
 			{
@@ -1768,37 +1771,33 @@ function handleChange()
 	} 
 	*/
 	
-	var caption;
+	var caption = metricInfo[metric]["keyexample"];
 	var fills = ["#ffffff", "#ffffff", "#ffffff"];
 	var strokes = ["#000000", "#000000", "#000000"];
 	var labelcolours = ["#000000", "#000000", "#000000"];
 	var strokeWidths = [3, 3, 3];
 	var labels = ["", "", ""];
+	var key = metricInfo[metric]["defaultkey"];
 		
 	if (metric == "journeys")
 	{
-		values = [1000, 50]
-		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " journeys end here (red=down)</td><td>Other station (no journeys end here)</td></tr></table><i>Select a station to see journeys<br />that start at it.</i>";
+		caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " journeys end here (red=down)</td><td>Other station (no journeys end here)</td></tr></table><i>Select a station to see journeys<br />that start at it.</i>";
 		fills = ["#ffaa00", "#ffffff"]
 		strokeWidths[0] = 8;
 	}
 
 	else if (metric == "am_inout")
 	{
-		values = [10000, 10000]
-		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + "&nbsp;entries, 0 exits</td><td>" + values[1]/4 + " entries, " + 3*values[1]/4 + " exits</td></tr></table>";
+		caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + "&nbsp;entries, 0 exits</td><td>" + metricInfo[metric].keyValues[1]/4 + " entries, " + 3*metricInfo[metric].keyValues[1]/4 + " exits</td></tr></table>";
 		fills = ["#00ff00", "#ff8888"]
 	}
 	else if (metric == "wdwe_out")
 	{
-		values = [10000, 10000]
-		caption = "<table class='keycaptiontable'><tr><td>" + values[0] + "&nbsp;weekday exits, 0 weekend exits</td><td>" + values[1]/4 + " weekday exits, " + 3*values[1]/4 + " weekend exits</td></tr></table>";
+		caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + "&nbsp;weekday exits, 0 weekend exits</td><td>" + metricInfo[metric].keyValues[1]/4 + " weekday exits, " + 3*metricInfo[metric].keyValues[1]/4 + " weekend exits</td></tr></table>";
 		fills = ["#00ff00", "#ff8888"]
 	}
-	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) > -1)
+	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) >= 0)
 	{
-		var key = metricInfo[metric]["defaultkey"];
-		values = [0.05, 0.10]
 		caption = "<table class='keycaptiontable'><tr><td>5%</td><td>10%</td></tr><tr><td colspan='2'>" + metricInfo[metric]["keyexample"]+ "</td></tr></table>";
 		fills = [demographicMap[metric][key][1], demographicMap[metric][key][1]]
 		strokeWidths = [4, 4];
@@ -1807,8 +1806,6 @@ function handleChange()
 	}
 	else if ("livesontheline" == metric)
 	{
-		var key = metricInfo[metric]["defaultkey"];
-		values = [0.023, 0.023];
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [demographicMap[metric][75][1], demographicMap[metric][90][1]];
@@ -1817,8 +1814,6 @@ function handleChange()
 	}
 	else if ("houseprices" == metric)
 	{
-		var key = metricInfo[metric]["defaultkey"];
-		values = [0.025, 0.025];
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGBRColour(0), getGBRColour(1)];
@@ -1828,8 +1823,6 @@ function handleChange()
 	}
 	else if ("housepricesdiff" == metric)
 	{
-		var key = metricInfo[metric]["defaultkey"];
-		values = [0.025, 0.025];
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGWRColour(1), getGWRColour(0)];
@@ -1839,37 +1832,34 @@ function handleChange()
 	}
 	else if (metric == "map" || metric == "night")
 	{
-		var values = [0.7, 0.7]
 		caption = "Station, Multiple-line station";
 	}
 	else if (metric == "total")
 	{
-		var values = [1000000, 20000000]
-		caption = "<table><tr><td>" + values[0]/1000000 + "M entries & exits</td><td>" + values[1]/1000000 + "M entries & exits</td></tr></table>";
+		caption = "<table><tr><td>" + metricInfo[metric].keyValues[0]/1000000 + "M entries & exits</td><td>" + metricInfo[metric].keyValues[1]/1000000 + "M entries & exits</td></tr></table>";
 		if (yearcomp != "none")
 		{	
-			caption = "<table class='keycaptiontable'><tr><td>" + values[0]/1000000 + "M more entries & exits</td><td>" + values[1]/1000000 + "M fewer entries & exits</td></tr></table>";
+			caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0]/1000000 + "M more entries & exits</td><td>" + metricInfo[metric].keyValues[1]/1000000 + "M fewer entries & exits</td></tr></table>";
 			strokes = ["#008800", "#FF0000", "#008800"]
 		}
 	}
 	else 
 	{
-		var values = [1000, 5000]
 		if (yearcomp != "none")
 		{	
-			caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " more entries</td><td>" + values[1] + " fewer entries</td></tr></table>";		
+			caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " more entries</td><td>" + metricInfo[metric].keyValues[1] + " fewer entries</td></tr></table>";		
 			if (metric.substr(metric.length - 4) == "_out")
 			{
-				caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " more exits</td><td>" + values[1] + " fewer exits</td></tr></table>";
+				caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " more exits</td><td>" + metricInfo[metric].keyValues[1] + " fewer exits</td></tr></table>";
 			}
 			strokes = ["#008800", "#FF0000"]
 		}
 		else
 		{
-			caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " entries</td><td>" + values[1] + " entries</td></tr></table>";		
+			caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " entries</td><td>" + metricInfo[metric].keyValues[1] + " entries</td></tr></table>";		
 			if (metric.substr(metric.length - 4) == "_out")
 			{
-				caption = "<table class='keycaptiontable'><tr><td>" + values[0] + " exits</td><td>" + values[1] + " exits</td></tr></table>";		
+				caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " exits</td><td>" + metricInfo[metric].keyValues[1] + " exits</td></tr></table>";		
 			}	
 		}
 	}
@@ -1879,7 +1869,7 @@ function handleChange()
 	point1.set('strokeWidth', strokeWidths[0]);
 	point1.set('strokeColor', strokes[0]);
 	point1.set('labelcolor', labelcolours[0]);
-	point1.set('radius', scalingFactor*Math.sqrt(values[0]));
+	point1.set('radius', scalingFactor*Math.sqrt(metricInfo[metric].keyValues[0]));
 	point1.set('datalabel', labels[0]);
 
 	var point2 = new ol.Feature({ geometry: new ol.geom.Point([0, 0]) });
@@ -1887,7 +1877,7 @@ function handleChange()
 	point2.set('strokeWidth', strokeWidths[1]);
 	point2.set('strokeColor', strokes[1]);
 	point2.set('labelcolor', labelcolours[1]);
-	point2.set('radius', scalingFactor*Math.sqrt(values[1]));
+	point2.set('radius', scalingFactor*Math.sqrt(metricInfo[metric].keyValues[1]));
 	point2.set('datalabel', labels[1]);
 
 	key1source.clear();
@@ -2042,7 +2032,7 @@ function updateSelectedInfo()
 			//Defer. We call this again once the OD data is actually in.
 		}		
 	}
-	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) > -1)
+	else if (["tongues", "occupation", "wardwords", "wardwork"].indexOf(metric) >= 0)
 	{
 		/* Set up HTML table. */
 		var tuples = [];
@@ -2331,7 +2321,7 @@ function rgb2Hex(r, g, b)
 
 /*
 function hex2rgb(hex) {
-    if (hex.lastIndexOf('#') > -1) {
+    if (hex.lastIndexOf('#') >= 0) {
         hex = hex.replace(/#/, '0x');
     } else {
         hex = '0x' + hex;
