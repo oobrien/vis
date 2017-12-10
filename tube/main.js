@@ -20,52 +20,269 @@ var layerLinesAll;
 var layerBackground;
 var layerAerial;
 var pointsLoaded = "stations";
+var pointSource;
+var pointSourceNR;
+var pointSource2;
+var lineAllSource;
+var lineSourceNR;
+
 var selectClick;
 var showEnglish = false;
+var keys = ['unused', 'metric', 'year', 'yearcomp', 'filter', 'selected', 'layers', 'zoom', 'lon', 'lat'];
+var primaryOrder = ["Tube", "DLR", "Rail", "Tramlink", "Emirates Air Line"];
 var args = [];
 
 var DEFAULT_ZOOM = 13;
 var DEFAULT_LAT = 51.52;
 var DEFAULT_LON = -0.1;
 
+//NR Tickets
+var skewFactor = 3.0;
+var boundary = 1.0/4.0;
+var wasShowingZones = false;
+
 var currentZoom = DEFAULT_ZOOM;
 var currentLat = DEFAULT_LAT;
 var currentLon = DEFAULT_LON;
 
 var serviceFilter;
-var odRequested = false;
+var odLoaded = false;
 var scalingFactor;
 
 var demographicData = {};
-var metricKey = {};
-
-metricKey["total"] = "tf_yr";
-metricKey["in"] = "i_w_t";
-metricKey["out"] = "o_w_t"; 
-metricKey["early_in"] = "i_w_pre"; 
-metricKey["early_out"] = "o_w_pre"; 
-metricKey["am_in"] = "i_w_apk"; 
-metricKey["am_out"] = "o_w_apk"; 
-metricKey["mid_in"] = "i_w_mid"; 
-metricKey["mid_out"] = "o_w_mid"; 
-metricKey["pm_in"] = "i_w_ppk"; 
-metricKey["pm_out"] = "o_w_ppk";
-metricKey["late_in"] = "i_w_eve"; 
-metricKey["late_out"] = "o_w_eve"; 
-metricKey["sat_in"] = "i_sa"; 
-metricKey["sat_out"] = "o_sa"; 
-metricKey["sun_in"] = "i_su"; 
-metricKey["sun_out"] = "o_su"; 
 
 var osis = {};
 
-var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Crossrail": "X", "DLR": "L", "District": "D", "East London": "E", 
-	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "TfL Rail": "R", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W" };
+var serviceFilterCodes = { "Bakerloo": "B", "Central": "C", "Circle": "I", "Crossrail": "X", "DLR": "L", "District": "D", 
+	"Emirates Air Line": "A", "Hammersmith & City": "H", "Jubilee": "J", "Metropolitan": "M", "Northern": "N", "London Overground": "O", "Piccadilly": "P", "Tramlink": "T", "Victoria": "V", "Waterloo & City": "W", "National Rail": "NR" };
 var linesForKey;
+
+//Closures map
+var disruptedSegCount = 0;
+var disruptedSegs = [""];
+var tfl_app_id = "8ee22a25";
+var tfl_app_key = "f5b2bb26fbd6fe285da0c9f2bd4d28bc";
+var blink = true;
+var noBlinking = false;
+var blinkTimer;
+var dataTimer;
+var countdown;
+
+function pointCoreStyle(feature, resolution) 
+{
+	var zoomFactor = 0.15;
+	if (resolution < 100) { zoomFactor = 0.2; }
+	if (resolution < 50) { zoomFactor = 0.3; }
+	if (resolution < 25) { zoomFactor = 0.4; }
+	if (resolution < 12.5) { zoomFactor = 0.5; }
+
+	return [
+		new ol.style.Style({ 
+			image: new ol.style.Circle({ 
+				radius: feature.get('radius') * zoomFactor,
+				fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
+			}),
+		})
+	] 
+};
+
+function pointLabelStyle(feature, resolution) 
+{
+	if (resolution > 50 && pointsLoaded != "nrstations") { return null; }
+	if (resolution > 200) { return null; }
+	
+	var zoomFactor = 0.15;
+	var metricFontSize = 9;
+	var labelFontSize = 9;
+	if (resolution < 100) { zoomFactor = 0.2; labelFontSize = 10; }
+	if (resolution < 50) { zoomFactor = 0.3; metricFontSize = 10; labelFontSize = 10; }
+	if (resolution < 25) { zoomFactor = 0.4; metricFontSize = 12; labelFontSize = 10; }
+	if (resolution < 12.5) { zoomFactor = 0.5; metricFontSize = 14; labelFontSize = 13; }
+
+	var metricLabel = new ol.style.Style({ 
+		text: new ol.style.Text({
+			text: feature.get('datalabel'),
+			textAlign: 'center',
+			font: 'bold ' + metricFontSize + 'px Cabin Condensed, sans-serif',
+			fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
+			stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.75)', width: 3 })
+		}),
+		zIndex: 1,
+
+	});
+		
+	var nameLabel = new ol.style.Style({
+		text: new ol.style.Text({
+			text: feature.get('geolabel').replace(" &", " &").replace(" ", "\n"),
+			offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor*1.1 : 0),
+			offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor*1.3 : 0),
+			textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+			font: 'bold ' + labelFontSize + 'px Varela Round, sans-serif',
+			fill: new ol.style.Fill({ color: $('#themetric').val() == "night" ? "#ffffff" : "#000000" }),
+			stroke: new ol.style.Stroke({ color: ($('#themetric').val() == "night" ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.75)'), width: 3 })
+		}),
+		zIndex: 2,
+	});			
+
+	return [metricLabel, nameLabel];
+
+};	
+
+function pointCaseStyle(feature, resolution) 
+{
+	var zoomFactor = 0.15;
+	if (resolution < 100) { zoomFactor = 0.2; }
+	if (resolution < 50) { zoomFactor = 0.3; }
+	if (resolution < 25) { zoomFactor = 0.4; }
+	if (resolution < 12.5) { zoomFactor = 0.5; }
+
+	return [
+		new ol.style.Style({ 
+			image: new ol.style.Circle({ 
+				radius: feature.get('radius') * zoomFactor, 
+				stroke: (
+					feature.get('radius') == 0 || ($('#themetric').val() == "osi" && feature.get('osi') == false)
+						? undefined 
+						: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night" && $('#themetric').val() != "osi" && $('#themetric').val() != "closures") 
+							? new ol.style.Stroke({ width: 2, color: feature.get('strokeColor') })
+							: (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") 
+								? new ol.style.Stroke({ width: 2, color: feature.get('strokeColor') })
+								: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') })
+						)
+					)
+				)
+			}),
+		}),
+	] 
+};	
+
+function pointSelectStyle(feature, resolution) 
+{
+	var zoomFactor = 0.15;
+	var metricFontSize = 9;
+	var labelFontSize = 9;
+	if (resolution < 100) { zoomFactor = 0.2; labelFontSize = 10; }
+	if (resolution < 50) { zoomFactor = 0.3; metricFontSize = 10; }
+	if (resolution < 25) { zoomFactor = 0.4; metricFontSize = 12; labelFontSize = 10; }
+	if (resolution < 12.5) { zoomFactor = 0.5; metricFontSize = 14; labelFontSize = 13; }
+
+	return [
+		new ol.style.Style({ 
+			image: new ol.style.Circle({ 
+				radius: feature.get('radius') * zoomFactor, 
+				fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
+				stroke: (
+					feature.get('radius') == 0 || ($('#themetric').val() == "osi" && feature.get('osi') == false)
+						? undefined 
+						: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night" && $('#themetric').val() != "osi" && $('#themetric').val() != "closures") 
+							? new ol.style.Stroke({ width: 2, color: feature.get('strokeColor') })
+							: (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") 
+								? new ol.style.Stroke({ width: 2, color: feature.get('strokeColor') })
+								: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') })
+						)
+					)
+				)
+			}),
+			text: new ol.style.Text({
+				text: (resolution > 50 ? undefined : feature.get('datalabel')),
+				textAlign: 'center',
+				font: 'bold ' + metricFontSize + 'px Cabin Condensed, sans-serif',
+				fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
+				stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
+
+			})
+		}),
+		new ol.style.Style({
+			text: new ol.style.Text({
+				text: (resolution > 50 ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n")),
+				offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor*1.1 : 0),
+				offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor*1.3 : 0),
+				textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
+				font: 'bold ' + labelFontSize + 'px Varela Round, sans-serif',
+				fill: new ol.style.Fill({ color: "#000000" }),
+				stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
+			})
+		})			
+	] 
+};	
+
+function lineStyle(feature, resolution) 
+{
+	return [
+		new ol.style.Style({ 
+			stroke: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor'), lineCap: feature.get('strokeLinecap'), lineDash: feature.get('strokeDashstyle') })
+		})
+	] 
+};
+
+	
+function osicaseStyle(feature, resolution) 
+{
+	return [
+		new ol.style.Style({ 
+			stroke: new ol.style.Stroke({ width: 5.5, color: '#000000' })
+		})
+	] 
+};
+
+function osicoreStyle(feature, resolution) 
+{
+	return [
+		new ol.style.Style({ 
+			stroke: new ol.style.Stroke({ width: 2.5, color: '#ff88dd' })
+		})
+	] 
+};
+
+
+function glaStyle(feature, resolution)
+{
+	return [
+		new ol.style.Style({ 
+			stroke: new ol.style.Stroke({ width: 7, color:'rgba(100, 65, 0, 0.2)' })
+		})
+	] 	
+};
+
+function zoneStyle(feature, resolution)
+{
+	return [
+		new ol.style.Style({ 
+			fill: new ol.style.Fill({ color: (["Zone 2", "Zone 4"].indexOf(feature.get('name')) >= 0) ? 'rgba(0,0,0,0.06)' : (["Zone 6"].indexOf(feature.get('name')) >= 0) ? 'rgba(0,0,0,0.09)' : 'rgba(0,0,0,0.0)' }),
+			//stroke: new ol.style.Stroke({ width: 3, color:'rgba(128, 128, 128, 0.2)' })
+		})
+	] 	
+};
+
+function thamesStyle(feature, resolution)
+{
+	return [
+		new ol.style.Style({ 
+			fill: new ol.style.Fill({ color: 'rgba(128,190,205,0.6)' })
+		})
+	] 
+};
 
 function init()
 {
-	//URL ARGUMENTS
+	//TODO Historic - convert & to # and remove the x=
+	/* Specified by user in URL. */
+	var hash = window.location.hash;
+
+	if (hash.length > 0)
+	{
+		var elements = hash.split('#');
+		var pieces = elements[1].split('/');
+		for(var i = 0; i < keys.length; i++)
+		{
+			if (pieces[i])
+			{
+				args[keys[i]] = pieces[i];			
+			}
+		}
+	}
+
+	//URL ARGUMENTS - historic conversion. 
 	var hash = window.location.hash;
 	if (hash.length > 0)
 	{
@@ -80,40 +297,12 @@ function init()
 				args[pair[0]] = pair[1];
 			}
 		}
-
-		if (elements[0] == 'map') { args['metric'] = "map"; }
-		if (elements[0] == 'night') { args['metric'] = "night"; }
-		if (elements[0] == 'tongues') { args['metric'] = "tongues"; }
-		if (elements[0] == 'wardwords') { args['metric'] = "wardwords"; }
-		if (elements[0] == 'occupation') { args['metric'] = "occupation"; }
-		if (elements[0] == 'wardwork') { args['metric'] = "wardwork"; }
-		if (elements[0] == 'in') { args['metric'] = "in"; }
-		if (elements[0] == 'out') { args['metric'] = "out"; }
-		if (elements[0] == 'early_in') { args['metric'] = "early_in"; }
-		if (elements[0] == 'early_out') { args['metric'] = "early_out"; }
-		if (elements[0] == 'am_in') { args['metric'] = "am_in"; }
-		if (elements[0] == 'am_out') { args['metric'] = "am_out"; }
-		if (elements[0] == 'mid_in') { args['metric'] = "mid_in"; }
-		if (elements[0] == 'mid_out') { args['metric'] = "mid_out"; }
-		if (elements[0] == 'pm_in') { args['metric'] = "pm_in"; }
-		if (elements[0] == 'pm_out') { args['metric'] = "pm_out"; }
-		if (elements[0] == 'late_in') { args['metric'] = "late_in"; }
-		if (elements[0] == 'late_out') { args['metric'] = "late_out"; }
-		if (elements[0] == 'sat_in') { args['metric'] = "sat_in"; }
-		if (elements[0] == 'sat_out') { args['metric'] = "sat_out"; }
-		if (elements[0] == 'sun_in') { args['metric'] = "sun_in"; }
-		if (elements[0] == 'sun_out') { args['metric'] = "sun_out"; }
-
-		for(var i = 0; i < elements.length; i++)
-		{
-			var pair = elements[i].split('=');
-			if (pair.length > 1)
-			{
-				args[pair[0]] = pair[1];
-			}
-		}
 	}
 	
+	if (args['zoom']) { currentZoom = parseInt(args['zoom']); }
+	if (args['lon']) { currentLon = parseFloat(args['lon']); }
+	if (args['lat']) { currentLat = parseFloat(args['lat']); }
+
 	if (args['metric'])
 	{
 		$('#themetric').val(args['metric']);
@@ -131,211 +320,15 @@ function init()
 				serviceFilter = key;
 			}
 		}
-	}
-	if (args['year'])
-	{
-		$('#year').val(args['year']);
-	}
-	if (args['yearcomp'])
-	{
-		$('#yearcomp').val(args['yearcomp']);
-	}
-				
-	if (args['zoom'])
-	{
-		currentZoom = args['zoom'];
-	}
-	if (args['lat'] && args['lon'])
-	{
-		currentLat = parseFloat(args['lat']); /* Necessary for lat (only) for some reason, otherwise was going to 90-val. Very odd... */
-		currentLon = parseFloat(args['lon']);		
-	}
+	}				
 
-	function pointCoreStyle(feature, resolution) 
+	var colourList = ["", "#ff0000", "#ff4400", "#ff8800", "#ffbb00", "#ffff00", "#aaff00", "#66ff00", "#00ff00", "#00ff44", "#00ff88", "#00ffbb", "#00ffff"]
+
+	for (var i = 1; i <= 12; i++)
 	{
-		var zoomFactor = 0.15;
-		if (resolution < 100) { zoomFactor = 0.2; }
-		if (resolution < 50) { zoomFactor = 0.3; }
-		if (resolution < 25) { zoomFactor = 0.4; }
-		if (resolution < 12.5) { zoomFactor = 0.5; }
-
-		return [
-			new ol.style.Style({ 
-				image: new ol.style.Circle({ 
-					radius: feature.get('radius') * zoomFactor, 
-					fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
-				}),
-			})
-		] 
-	};
-	
-	function pointLabelStyle(feature, resolution) 
-	{
-		if (resolution > 50) { return null; }
-		
-		var zoomFactor = 0.15;
-		var metricFontSize = 9;
-		var labelFontSize = 9;
-		if (resolution < 100) { zoomFactor = 0.2; }
-		if (resolution < 50) { zoomFactor = 0.3; metricFontSize = 10; }
-		if (resolution < 25) { zoomFactor = 0.4; metricFontSize = 12; labelFontSize = 10; }
-		if (resolution < 12.5) { zoomFactor = 0.5; metricFontSize = 14; labelFontSize = 12; }
-
-		var metricLabel = new ol.style.Style({ 
-			text: new ol.style.Text({
-				text: feature.get('datalabel'),
-				textAlign: 'center',
-				font: 'bold ' + metricFontSize + 'px Cabin Condensed, sans-serif',
-				fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
-				stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 0.75)', width: 3 })
-			}),
-			zIndex: 1,
-
-		});
-			
-		var nameLabel = new ol.style.Style({
-			text: new ol.style.Text({
-				text: feature.get('geolabel').replace(" &", " &").replace(" ", "\n"),
-				offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor*1.1 : 0),
-				offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor*1.3 : 0),
-				textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-				font: 'bold ' + metricFontSize + 'px Varela Round, sans-serif',
-				fill: new ol.style.Fill({ color: $('#themetric').val() == "night" ? "#ffffff" : "#000000" }),
-				stroke: new ol.style.Stroke({ color: ($('#themetric').val() == "night" ? 'rgba(0, 0, 0, 0.75)' : 'rgba(255, 255, 255, 0.75)'), width: 3 })
-			}),
-			zIndex: 2,
-		});			
-
-		return [metricLabel, nameLabel];
-
-	};	
-	
-	function pointCaseStyle(feature, resolution) 
-	{
-		var zoomFactor = 0.15;
-		if (resolution < 100) { zoomFactor = 0.2; }
-		if (resolution < 50) { zoomFactor = 0.3; }
-		if (resolution < 25) { zoomFactor = 0.4; }
-		if (resolution < 12.5) { zoomFactor = 0.5; }
-
-		return [
-			new ol.style.Style({ 
-				image: new ol.style.Circle({ 
-					radius: feature.get('radius') * zoomFactor, 
-					stroke: (
-						feature.get('radius') == 0 
-							? undefined 
-							: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") 
-								? undefined 
-								: (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") 
-									? undefined 
-									: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor') }
-								)
-							)
-						)
-					)
-				}),
-			}),
-		] 
-	};	
-
-	function pointSelectStyle(feature, resolution) 
-	{
-		var zoomFactor = 0.15;
-		if (resolution < 100) { zoomFactor = 0.2; }
-		if (resolution < 50) { zoomFactor = 0.3; }
-		if (resolution < 25) { zoomFactor = 0.4; }
-		if (resolution < 12.5) { zoomFactor = 0.5; }
-
-		return [
-			new ol.style.Style({ 
-				image: new ol.style.Circle({ 
-					radius: feature.get('radius') * zoomFactor, 
-					fill: new ol.style.Fill({ color: (resolution > 50 && feature.get('labelcolor') ? feature.get('labelcolor') : feature.get('fillColor') )}),
-					stroke: (resolution > 100 && ($('#themetric').val() != "map" && $('#themetric').val() != "night") ? undefined : (resolution > 50 && ($('#themetric').val() == "livesontheline" || $('#themetric').val() == "houseprices" || $('#themetric').val() == "housepricesdiff") ? undefined : new ol.style.Stroke({ width: feature.get('strokeWidth')*2, color: feature.get('strokeColor') })))
-				}),
-				text: new ol.style.Text({
-					text: (resolution > 50 ? undefined : feature.get('datalabel')),
-					textAlign: 'center',
-					font: (resolution < 12.5 ? 'bold 14px Cabin Condensed, sans-serif' : ( resolution < 25 ? 'bold 12px  Cabin Condensed, sans-serif' : (resolution < 50 ? 'bold 10px Cabin Condensed, sans-serif' : 'bold 9px Cabin Condensed, sans-serif'))),
-					fill: new ol.style.Fill({ color: (feature.get('labelcolor') ? feature.get('labelcolor') : "#000000") }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
-
-				})
-			}),
-			new ol.style.Style({
-				text: new ol.style.Text({
-                    text: (resolution > 50 ? undefined : feature.get('geolabel').replace(" &", " &").replace(" ", "\n")),
-					offsetX: ( feature.get('offsetX') ? feature.get('offsetX')*zoomFactor : 0),
-					offsetY: ( feature.get('offsetY') ? feature.get('offsetY')*zoomFactor : 0),
-					textAlign: ( feature.get('offsetX') ? (feature.get('offsetX') > 0 ? 'left' : 'right') : 'center'),
-					font: (resolution < 12.5 ? 'bold 12px Varela Round, sans-serif' : ( resolution < 25 ? 'bold 10px Varela Round, sans-serif' : 'bold 9px Varela Round, sans-serif')),
-					fill: new ol.style.Fill({ color: "#000000" }),
-					stroke: new ol.style.Stroke({ color: 'rgba(255, 255, 255, 1)', width: 4 })
-				})
-			})			
-		] 
-	};	
-	
-	
-		
-	function lineStyle(feature, resolution) 
-	{
-		return [
-			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: feature.get('strokeWidth'), color: feature.get('strokeColor'), lineCap: feature.get('strokeLinecap'), lineDash: feature.get('strokeDashstyle') })
-			})
-		] 
-	};
-	
-		
-	function osicaseStyle(feature, resolution) 
-	{
-		return [
-			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 5.5, color: '#000000' })
-			})
-		] 
-	};
-	
-	function osicoreStyle(feature, resolution) 
-	{
-		return [
-			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 2.5, color: '#ff88dd' })
-			})
-		] 
-	};
-	
-	
-	function glaStyle(feature, resolution)
-	{
-		return [
-			new ol.style.Style({ 
-				stroke: new ol.style.Stroke({ width: 6, color:'rgba(128, 0, 0, 0.5)' })
-			})
-		] 	
-	};
-
-	function zoneStyle(feature, resolution)
-	{
-		return [
-			new ol.style.Style({ 
-				fill: new ol.style.Fill({ color: (["Zone 6", "Zone 4", "Zone 2"].indexOf(feature.get('name')) >= 0) ? 'rgba(0,0,0,0.05)' : 'rgba(0,0,0,0.0)' }),
-				stroke: new ol.style.Stroke({ width: 3, color:'rgba(128, 128, 128, 0.2)' })
-			})
-		] 	
-	};
-
-	
-	function thamesStyle(feature, resolution)
-	{
-		return [
-			new ol.style.Style({ 
-				fill: new ol.style.Fill({ color: 'rgba(128,190,205,0.6)' })
-			})
-		] 
-	};
+		$('#c' + i).css('backgroundColor', colourList[i]); 
+		$('#c' + i).css('color', 'black'); 
+	}	
 
     //	url: "http://casa.oobrien.com/tiles/futurecity/{z}/{x}/{y}.png",
 	//	url: "http://2.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?app_id=YyCiz5fA5sFK593ZqCEG&app_code=hfwTGH-20M2rP3HyyWIltA",
@@ -345,7 +338,7 @@ function init()
 			url: "http://2.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day.grey/{z}/{x}/{y}/256/png8?app_id=YyCiz5fA5sFK593ZqCEG&app_code=hfwTGH-20M2rP3HyyWIltA",
 			crossOrigin: null,
 			//attribution: "Map data &copy; <a href='http://osm.org/'>OSM</a>"
-			attributions: [ new ol.Attribution({ 'html': "Map data &copy; <a href='https://developer.here.com/'>HERE Maps/Navteq</a>" })]
+			attributions: [ "<br />Background map and aerial imagery &copy; <a href='https://developer.here.com/'>HERE Maps/Navteq</a>. "]
 		}),
 		opacity: 0.25
 	});
@@ -358,16 +351,15 @@ function init()
                 opacity: 0.6
         });	
  	
-	 pointSource = new ol.source.Vector({
+	pointSource = new ol.source.Vector({
 		url: 'data/tfl_stations.json',
 		defaultProjection: 'EPSG:4326',
 		format: new ol.format.GeoJSON(),
-		attributions: [ 
-			new ol.Attribution({ 'html': "metrics &copy; <a href='http://www.tfl.gov.uk/corporate/publications-and-reports/underground-services-performance'>TfL</a>, " 
-				+ "<a href='https://www.whatdotheyknow.com/request/most_recent_passenger_numbers_pe#incoming-351969'>WDTK</a>, " 
-				+ "<a href='http://www.ons.gov.uk/'>ONS</a>. "
-				+ "<a href='https://gist.github.com/oobrien/8525859'>Lines/stations</a> on GitHub." 
-			})
+		attributions: [ "<br />Metrics, live disruption data and OSI links &copy; <a href='http://www.tfl.gov.uk/'>TfL</a>. " 
+				+ "Some metrics &copy; <a href='https://www.whatdotheyknow.com/request/most_recent_passenger_numbers_pe#incoming-351969'>What Do They Know</a>, " 
+				+ "<a href='orr.gov.uk/statistics/published-stats/station-usage-estimates'>ORR and Steer Davies Gleave</a>. "
+				+ "<br />London tube/rail network map &copy; Oliver O'Brien, parts derived from OpenStreetMap, &copy; OpenStreetMap contributors. "
+				+ "<br />TfL station locations from OpenStreetMap. The <a href='https://github.com/oobrien/vis'>lines/stations geographic data</a> is on GitHub." 
 		]
 	}) 
 		
@@ -383,17 +375,19 @@ function init()
 				features[j].set('strokeColor', "#000000");
 				features[j].set('datalabel', "");
 				features[j].set('geolabel', "");
+				features[j].set('osi', false);
 				features[j].set('strokeWidth', 3);
-				if (features[j].get('id'))
+				features[j].set('alt_stat_id', features[j].get('tfl_statid')); //Legacy ID used for older stats (2003-2013).
+				features[j].set('stat_id', features[j].get('nlc_id')); //Used for newer TfL stats (2014 onwards).
+				features[j].setId(features[j].get('id'));
+
+				var lines = features[j].get('lines');
+				for (var k in lines)
 				{
-					features[j].setId(features[j].get('id'));
+					if (lines[k].name == "East London") { features[j].get('lines')[k].name = "London Overground"; }
+					if (lines[k].name == "TfL Rail") { features[j].get('lines')[k].name = "Crossrail"; }									
 				}
-				else
-				{
-					features[j].setId(features[j].get('name'));
-				}				
 			}					
-  	  	
 			requestData();	
 			requestOSIData();		
 		}
@@ -403,10 +397,7 @@ function init()
 		url: 'data/london_wards_2011_centroids.json',
 		defaultProjection: 'EPSG:4326',
 		format: new ol.format.GeoJSON(),
-		attributions: [ 
-			new ol.Attribution({ 'html': "metrics &copy; <a href='http://www.ons.gov.uk/'>ONS</a>." 
-			})
-		]
+		attributions: [ "<br />Demographic metrics and ward boundaries &copy; <a href='http://www.ons.gov.uk/'>ONS</a>." ],
 	}) 
 		
 	pointSource2.once('change', function() 
@@ -422,11 +413,39 @@ function init()
 				features[j].set('datalabel', "");
 				features[j].set('geolabel', "");
 				features[j].set('strokeWidth', 3);
-				features[j].set('tfl_intid', features[j].getId()); //Eugh.
 			}				
 			//if (["wardwork", "wardwords"].indexOf($('#themetric').val()) > -1)
 		
-			handleMetricChange();
+			handleMetricChange(true);
+		}
+	});
+	
+	pointSourceNR = new ol.source.Vector({
+		url: 'data/nr_stations.json',
+		defaultProjection: 'EPSG:4326',
+		format: new ol.format.GeoJSON(),
+		attributions: [ "<br />Station locations and metrics &copy; ORR & SDG." ],
+	}) 
+		
+	pointSourceNR.once('change', function() 
+	{
+		if (pointSourceNR.getState() == 'ready') 
+		{
+			var features = pointSourceNR.getFeatures();
+			for (var j in features)
+			{
+				features[j].set('radius', 15);
+				features[j].set('fillColor', "#ffffff");
+				features[j].set('strokeColor', "#000000");
+				features[j].set('datalabel', "");
+				features[j].set('geolabel', features[j].get('name'));				
+				features[j].set('strokeWidth', 3);
+				features[j].setId(features[j].get('tlc_id'));
+				features[j].set('stat_id', features[j].get('tlc_id')); //We use the TLC codes for NR because they are the nicest looking!
+			}					
+			
+  	  		requestData();
+			//requestNRData();	
 		}
 	});
 	
@@ -448,10 +467,11 @@ function init()
 		style: pointCaseStyle,
 	});
 
- 	var lineAllSource = new ol.source.Vector({
+ 	lineAllSource = new ol.source.Vector({
 		url: 'data/tfl_lines.json',
 		defaultProjection: 'EPSG:4326',
-		format: new ol.format.GeoJSON()
+		format: new ol.format.GeoJSON(),
+		//Attribution is elsewhere as this source is hidden normally.
 	}) 
 	
  	layerLinesAll = new ol.layer.Vector(
@@ -464,16 +484,39 @@ function init()
 	{
 		if (lineAllSource.getState() == 'ready') 
 		{
-			handleMetricChange();
+			var features = lineAllSource.getFeatures();
+			for (var j in features)
+			{ 	
+				var lines = features[j].get('lines');
+				for (var k in lines)
+				{
+					if (lines[k].name == "East London") { features[j].get('lines')[k].name = "London Overground"; }
+					if (lines[k].name == "TfL Rail") { features[j].get('lines')[k].name = "Crossrail"; }									
+				}
+			}		
+			handleMetricChange(true);
 		}
 	});
+
+ 	lineSourceNR = new ol.source.Vector({
+		url: 'data/nr_lines.json',
+		defaultProjection: 'EPSG:4326',
+		format: new ol.format.GeoJSON(),
+		attributions: [ "<br />National Rail network &copy; Crown Copyright and database right OS with modifications by Oliver O'Brien." ],
+	}) 
+
+	lineSourceNR.once('change', function() 
+	{
+		if (lineSourceNR.getState() == 'ready') 
+		{	
+			console.log('lineSourceNR loaded!');
+			handleMetricChange(true);
+		}
+	});	
  	
-	var lineSource = new ol.source.Vector({
-	});
-		
  	layerLines = new ol.layer.Vector(
 	{ 
-		source: lineSource, 
+		source: new ol.source.Vector({}), 
 		style: lineStyle,
 	});
 	
@@ -496,7 +539,9 @@ function init()
 	var glaSource = new ol.source.Vector({
 		url: 'data/2247.json',
 		defaultProjection: 'EPSG:4326',
-		format: new ol.format.GeoJSON()
+		format: new ol.format.GeoJSON(),
+		attributions: [ "<br />GLA boundary and Thames Crown Copyright & database right OS." ],
+
 	}) 
 
  	layerGLA = new ol.layer.Vector(
@@ -508,7 +553,8 @@ function init()
 	var zoneSource = new ol.source.Vector({
 		url: 'data/zones1to6.json',
 		defaultProjection: 'EPSG:4326',
-		format: new ol.format.GeoJSON()
+		format: new ol.format.GeoJSON(),
+		attributions: [ "<br />Zones &copy; Oliver O'Brien, derived from multiple sources including TfL, Wikipedia, ORR and OSM data." ],
 	}) 
 
  	layerZones = new ol.layer.Vector(
@@ -517,11 +563,10 @@ function init()
 		style: zoneStyle,
 	});
 
-
 	var thamesSource = new ol.source.Vector({
 		url: 'data/river_thames_simp.json',
 		defaultProjection: 'EPSG:4326',
-		format: new ol.format.GeoJSON()
+		format: new ol.format.GeoJSON(),
 	}) 
 
  	layerThames = new ol.layer.Vector(
@@ -536,16 +581,17 @@ function init()
 		controls: ol.control.defaults({}).extend(
 		[
 			new ol.control.ScaleLine({'geodesic': true, 'units': 'metric'}),
-			new ol.control.ZoomSlider({'className': 'ol-zoomslider'})
+			//new ol.control.ZoomSlider({'className': 'ol-zoomslider'})
 				
 		]),
 		view: new ol.View({		
 			projection: "EPSG:3857",
 			maxZoom: 16,
-			minZoom: 10,
+			minZoom: 7,
 			zoom: currentZoom,
 			center: ol.proj.transform([currentLon, currentLat], "EPSG:4326", "EPSG:3857"), 
-			extent: ol.proj.transformExtent([-1.5, 51, 1.0, 52], "EPSG:4326", "EPSG:3857")
+			//extent: ol.proj.transformExtent([-1.5, 51, 1.0, 52], "EPSG:4326", "EPSG:3857")
+			extent: ol.proj.transformExtent([-8, 49, 2, 62], "EPSG:4326", "EPSG:3857")
 		})
 	});
 	
@@ -558,20 +604,20 @@ function init()
             $("#backgroundCB").prop('checked', false);
 			layerBackground.setVisible(false);
 		}
+		if (args['layers'].length > 1 && args['layers'][1] == "T")
+        {
+            $("#aerialCB").prop('checked', true);
+			layerAerial.setVisible(true);						
+		}
 		if (args['layers'].length > 2 && args['layers'][2] == "F")
 		{
             $("#linesCB").prop('checked', false);
 			layerLines.setVisible(false);
 		}
-		if (args['layers'].length > 5 && args['layers'][5] == "T")
-        {
-            $("#aerialCB").prop('checked', true);
-			layerAerial.setVisible(true);						
-		}
-		if (args['layers'].length > 8 && args['layers'][6] == "T")
+		if (args['layers'].length > 3 && args['layers'][3] == "T")
         {
             $("#zonesCB").prop('checked', true);
-			layerZones.setVisible(true);						
+			layerZones.setVisible(true);
 		}
 	}
 
@@ -604,16 +650,20 @@ function init()
 			{
 				handleChange();
 			}
+			else if ($("#themetric").val() == "closures")
+			{
+				//NOOP
+			}
 			else
 			{
-				updateSelectedInfo();		
+				updateSelectedInfo(popupFeature);		
 			};
 		}
 		else
 		{
 			resetDisplay();
 			$("#info").css('display', 'none');
-			$("#info").html('');
+			$("#infotitle").html('');
 		}
 		updateUrl();
 	});
@@ -640,14 +690,32 @@ function init()
 	key2map = new ol.Map({ target: "key2", layers: [ key2layerCase, key2layer ], controls: [], view: new ol.View({ center: [0, 0], zoom: olMap.getView().getZoom() }) });
 
 	if (top.location!= self.location) { $("#button").css('display', 'block'); }
+	
+	$("#closebutton").button().click(function() 
+	{
+		$('#info').css('display', 'none');
+		selectClick.getFeatures().clear();
+	});
 }
 
 var displayFeatureInfo = function(pixel)
 {
 	var features = [];
+	var stationPresent = false;
 	olMap.forEachFeatureAtPixel(pixel, function(feature, layer)
 	{
-		features.push(feature);
+		if (layer == layerPoints || layer == layerPointsCase || layer == layerPointsLabels)
+		{
+			stationPresent = true;
+		}
+		if (layer == layerZones && stationPresent)
+		{
+			//NOOP - For now, don't show zone information when hovering over the station, because it might not be the correct zone for the station (if a multizone station).
+		}
+		else if (layer != layerLines)
+		{
+			features.push(feature);
+		}
 	}.bind(this));
 	
 	if (features.length > 0) 
@@ -665,19 +733,28 @@ var displayFeatureInfo = function(pixel)
 				}
 				name = true;
 			}
+			else if (features[i].get('id'))
+			{
+				if (info.indexOf(features[i].get('id')) < 0)
+				{
+					info.push(features[i].get('id'));
+				}
+				name = true;
+			}
 		}
 		if (name)
 		{
-			document.getElementById('areainfo').innerHTML =  "<div class='areatitle'><br />" + info.join('<br />') || '' + "</div>";
+			$('#areainfo').css('display', 'block');
+			$('#areainfo').html(info.join('<br />'));
 		}
 		else
 		{
-			document.getElementById('areainfo').innerHTML = '';		
+			$('#areainfo').css('display', 'none');
 		}
 	} 
 	else 
 	{
-		document.getElementById('areainfo').innerHTML = '';
+		$('#areainfo').css('display', 'none');
 	}
 }
 
@@ -685,10 +762,43 @@ var displayFeatureInfo = function(pixel)
 function processLines()
 {
 	layerLinesAll.setVisible(false);
-	layerLines.getSource().clear();
-
-	var metric = $("#themetric").val();
+	console.log('processLines');
 	
+	var metric = $("#themetric").val();
+		
+	if (["nrmap", "nrtotal", "nrtickets"].indexOf(metric) >= 0)
+	{
+		var features = layerLines.getSource().getFeatures();
+		for (var i in features)
+		{	
+			features[i].set('strokeColor', "rgba(0, 0, 0, 0.2)");
+			features[i].set('strokeWidth', 3);					
+			//features[i].set('strokeDashstyle', [4, 6]);
+			features[i].set('strokeLinecap', "round");		
+		}
+		//layerGLA.setVisible(false);
+		layerThames.setVisible(false);
+		if (layerZones.getVisible())
+		{
+			wasShowingZones = true;
+			layerZones.setVisible(false);
+		}
+		$("#linekey").html("");
+		return;
+	}
+	else
+	{
+		//layerGLA.setVisible(true);
+		layerThames.setVisible(true);
+		if (wasShowingZones)
+		{
+			layerZones.setVisible(true);
+			wasShowingZones = false;
+		}	
+	}
+
+	layerLines.setSource(new ol.source.Vector({}));
+
 	var year = $("#year").val();
 	if (["tongues", "wardwords", "occupation", "wardwork", "livesontheline", "houseprices", "housepricesdiff"].indexOf(metric) >= 0)
 	{
@@ -742,7 +852,7 @@ function processLines()
 		}
 	}	
 
-	var html = "<table style='width: 100%'><tr><td style='vertical-align: top;'>";
+	var html = "<div style='text-align: left;'>Line filter:</div><table style='width: 100%; margin: 5px 0 10px 0;'><tr><td style='vertical-align: top;'>";
 	/* Build up the unique lines, ordered, for key. */
  	linesForKey = {};
 
@@ -759,6 +869,21 @@ function processLines()
 		}
 	} 	
 
+	//var tubeCreatureOrder = ["", "Bakerloo","Central","Circle","District","Hammersmith & City","Jubilee","Metropolitan","Northern","Piccadilly","Victoria", "Waterloo & City","London Overground"];
+
+	/*
+	for (var i = 1; i <= 12; i++)
+	{
+		//$('#c' + i).css('backgroundColor', linesForKey[tubeCreatureOrder[i]]); 
+		//$('#c' + i).css('color', 'black'); 
+	}
+	*/	
+	//$('#creaturehead').css('backgroundColor', linesForKey["London Overground"]); 
+	//$('#c3').css('color', 'black');
+	//$('#c5').css('color', 'black');
+	//$('#c6').css('color', 'black');
+	//$('#c11').css('color', 'black');
+
 	var linesForKeySorted = [];
 	for (var k in linesForKey)
 	{
@@ -774,9 +899,9 @@ function processLines()
 	{
 		for (line in linesForKeySorted)
 		{
-			if (linesForKeySorted[line][0] == "Crossrail")
+		/*	if (linesForKeySorted[line][0] == "Crossrail/TfL Rail")
 			{
-				if (linesForKeySorted[line][0] == "Crossrail")
+				if (linesForKeySorted[line][0] == "Crossrail/TfL Rail")
 				{
 					html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>Elizabeth</div>");							
 				}
@@ -786,9 +911,9 @@ function processLines()
 				}
 			}
 			else
-			{
+			{ */
 				html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
-			}
+			//}
 		}
 	}
 	html += "</td>";	
@@ -853,8 +978,9 @@ function processLines()
 		var priLineDrawn = false;
 		var secLineDrawn = false;
 		var terLineDrawn = false;
-		
+
 		var lines = features[i].get('lines');
+		
 		for (var j in lines)
 		{
 			if (!lines[j].hide)		
@@ -950,7 +1076,6 @@ function requestData()
 		return;
 	}
 	*/
-
 	$.ajax(
 	{
     	url: 'data/stats.json',
@@ -958,6 +1083,7 @@ function requestData()
     	{
 	      	handleData(data);
     	},
+    	error: function(obj, error) { console.log(error); },
     	dataType: 'json',
     	async:true
   	});
@@ -993,7 +1119,7 @@ function requestDemographicData()
 
 function requestODData()
 {
-	odRequested = true;
+	console.log('requestODData');
 	$.ajax(
 	{
     	url: "data/rods_od.csv",
@@ -1005,6 +1131,69 @@ function requestODData()
   	});
 }
 
+function requestDisruptionData()
+{
+	clearInterval(blinkTimer);
+	clearInterval(dataTimer);
+	blinkTimer = null;
+	dataTimer = null;
+	
+	$('#loadingDisruption').css('display', 'block');
+	
+	var theurl = "";
+	//var timerange = $('#dates').val();
+	var timerange = "live";
+	
+	var today = moment().format('YYYY-MM-DD');
+	/*
+	var thissa = moment().day(6).format('YYYY-MM-DD'); //Doesn't work when viewing on Sundays.
+	var thissu = moment().day(6).add(1, 'days').format('YYYY-MM-DD'); //Doesn't work when viewing on Sundays.
+	var nextsa = moment().day(13).format('YYYY-MM-DD');
+	var nextsu = moment().day(13).add(1, 'days').format('YYYY-MM-DD');
+	*/			
+	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	/*
+	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + today + '&endDate=' + today + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "2015-05-31") { theurl = "/data/2015-05-31.json"; }
+	if (timerange == "2017-01-09") { theurl = "/data/2017-01-09.json"; }
+	*/
+	if (timerange == "live") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	/*
+	if (timerange == "today") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + today + '&endDate=' + today + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "thiswe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "nextwe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	if (timerange == "2015-05-31") { thestationurl = "/data/2015-05-31-stations.json"; }
+	if (timerange == "2017-01-09") { thestationurl = "/data/2017-01-09-stations.json"; }
+	*/
+	
+	$.ajax(
+	{
+		url: theurl,
+		success: function(data)
+		{
+			handleDisruptionData(data);
+		},
+		dataType: 'json',
+		async:true
+	});
+	$.ajax(
+	{
+		url: thestationurl,
+		success: function(data)
+		{
+			handleStationDisruptionData(data);
+		},
+		error: function()
+		{
+			handleStationDisruptionData(null);
+		},
+		dataType: 'json',
+		async:true
+	});
+	
+}
 
 function handleData(data)
 {
@@ -1013,7 +1202,7 @@ function handleData(data)
 	{
 		for (var j in features)
 		{
-			if (features[j].get('tfl_statid') == i || features[j].get('tfl_intid') == i)
+			if (features[j].getId() == i || features[j].get('stat_id') == i || features[j].get('alt_stat_id') == i)
 			{
 				if (features[j].get('yeardata') !== undefined)
 				{
@@ -1049,7 +1238,7 @@ function handleData(data)
 		features[i].set('toHereCount', 0);
 	}
 	
-	handleMetricChange();
+	handleMetricChange(true);
 }
 
 function handleOSIData(data)
@@ -1062,14 +1251,12 @@ function processOSIs()
 {
 	layerOSICore.getSource().clear();
 
-	if ($('#themetric').val() != 'map')
+	if ($('#themetric').val() != 'map' && $('#themetric').val() != 'osi')
 	{
 		return;		
 	}
 	var source = layerPoints.getSource();
 	var osiYear = $('#year').val();
-	
-	layerOSICore.getSource().clear();
 	
 	if (!osis[osiYear])
 	{
@@ -1081,11 +1268,14 @@ function processOSIs()
 		var start = osis[osiYear][pair][0];
 		var end = osis[osiYear][pair][1];
 		var geom = new ol.geom.LineString([ source.getFeatureById(start).getGeometry().getCoordinates(), source.getFeatureById(end).getGeometry().getCoordinates()]);
-		var feature = new ol.Feature({ geometry: geom});
+		var feature = new ol.Feature({ geometry: geom });
 		if (source.getFeatureById(start).get('fillColor') != 'rgba(0, 0, 0, 0)' && source.getFeatureById(end).get('fillColor') != 'rgba(0, 0, 0, 0)')
 		{
 			layerOSICore.getSource().addFeature(feature);		
 		}
+		
+		layerPoints.getSource().getFeatureById(start).set('osi', true);
+		layerPoints.getSource().getFeatureById(end).set('osi', true);
 	}
 
 }
@@ -1099,6 +1289,7 @@ function handleDemographicData(data)
 
 function handleODData(dataText)
 {
+	console.log('handleODData');
 	var rows = dataText.split('\n')
 	var header = rows[0];
 	headerArr = header.split(',');
@@ -1115,7 +1306,7 @@ function handleODData(dataText)
 		var features = layerPoints.getSource().getFeatures();
 		for (var j in features)
 		{
-			if (features[j].get('tfl_intid') == rowName)
+			if (features[j].get('stat_id') == rowName)
 			{
 				matched = true;
 				if (features[j].get('flows') === undefined)
@@ -1146,8 +1337,404 @@ function handleODData(dataText)
 			//console.log("Ignoring data for journeys from: " + rowName); 
 		}
 	}
+	
+	odLoaded = true;
 	showDefaultJourney();
 	handleChange();
+}
+
+function handleStationDisruptionData(statusJSON)
+{
+	var stations = layerPoints.getSource().getFeatures();
+	for (var i in stations)
+	{	
+		stations[i].set('closed', false);
+		stations[i].set('partclosed', false);
+	}
+
+	for (var sj in statusJSON)
+	{
+		var station = statusJSON[sj];
+		for (var i in stations)
+		{	
+			if (stations[i].getId() == station.stationAtcoCode && (station.description.includes("is closed") || station.description.includes("be closed") || station.description.includes(': Closed -')) && station.type == "Part Closure")
+			{
+				if (stations[i].get('altid'))
+				{
+					stations[i].set('partclosed', true);		
+					console.log(stations[i].get('name') + " - marking as part closed as this station has two areas and IDs (e.g. Overground ID and Underground ID) and TfL doesn't let us know whether both or just one are closed. Note that both MIGHT be closed.");		
+				}
+				else
+				{
+					stations[i].set('closed', true);
+				}
+			}
+			if (stations[i].getId() == station.stationAtcoCode && station.type == "Part Closure")
+			{
+				stations[i].set('partclosed', true);
+			}
+		}
+	}
+	
+	/* Manually close stations on the GOBLIN until Feb 2017 */
+/*	
+	for (var i in stations)
+	{	
+		if (["910GUPRHLWY", "910GCROUCHH", "910GHRGYGL", "910GSTOTNHM", "910GWLTHQRD", "910GLEYTNMR", "910GLYTNSHR", "910GWNSTDPK", "910GWDGRNPK"].indexOf(stations[i].getId()) > -1) { stations[i].set('closed', true); }
+		//if ([].indexOf(stations[i].getId()) > -1) { stations[i].set('partclosed', true); }
+	}
+*/	
+	
+	var open = 0;
+	var pc = 0;
+	var closed = 0;
+	for (var i in stations)
+	{
+		if (stations[i].get('hide')) { continue; }
+		if (stations[i].get('closed')) { closed++; }
+		else if (stations[i].get('partclosed')) { pc++; }
+		else open++;
+	}
+	
+	$('#countopen').html(open);
+	$('#countpc').html(pc);
+	$('#countclosed').html(closed);		
+}
+
+function handleDisruptionData(statusJSON)
+{
+	console.log('handleDisruptionData');
+	disruptedSegs = [];
+	disruptedSegCount = 0;
+
+	var features = layerLinesAll.getSource().getFeatures();
+	for (var i in features)
+	{	
+		var lines = features[i].get('lines');
+		if (lines)
+		{
+			for (j = 0; j < lines.length; j++)
+			{
+				features[i].get('lines')[j].end_sid_disrupted = false;
+				features[i].get('lines')[j].otend_sid_disrupted = false;
+				features[i].get('lines')[j].ot2end_sid_disrupted = false;
+			}
+		}
+	}
+	
+	/* Manually close GOBLIN until Feb 2018 */
+	
+	markClosed("910GGOSPLOK", "910GUPRHLWY", "Rail", "London Overground");	
+	markClosed("910GUPRHLWY", "910GCROUCHH", "Rail", "London Overground");
+	markClosed("910GCROUCHH", "910GHRGYGL", "Rail", "London Overground");
+	markClosed("910GHRGYGL", "910GSTOTNHM", "Rail", "London Overground");
+	markClosed("910GSTOTNHM", "910GBLCHSRD", "Rail", "London Overground");
+	markClosed("910GBLCHSRD", "910GWLTHQRD", "Rail", "London Overground");
+	markClosed("910GWLTHQRD", "910GLEYTNMR", "Rail", "London Overground");
+	markClosed("910GLEYTNMR", "910GLYTNSHR", "Rail", "London Overground");
+	markClosed("910GLYTNSHR", "910GWNSTDPK", "Rail", "London Overground");
+	markClosed("910GWNSTDPK", "910GWDGRNPK", "Rail", "London Overground");
+	markClosed("910GWDGRNPK", "910GBARKING", "Rail", "London Overground");
+
+	
+	for (var sj in statusJSON)
+	{
+		var line = statusJSON[sj];
+		var lineid = line.id;
+		var linename = line.name;
+		var network = line.modeName;
+		var startcode = null;
+		var endcode = null;
+		
+		if (network == "tube") { network = "Tube"; }
+		if (network == "overground") { network = "Rail"; }
+		if (network == "dlr") { network = "DLR"; }
+		if (network == "tram") { linename = "Tramlink"; network="Tramlink"; }
+		if (network == "tflrail") { network = "Rail"; }		
+		if (linename == "TFL Rail") { linename = "TfL Rail"; } //Upstream typo.
+				
+		if (line.lineStatuses)
+		{
+			
+			for (var j in line.lineStatuses)
+			{
+				var ls = line.lineStatuses[j];
+				/*
+				if (ls.disruption && ls.disruption.affectedStops && ls.disruption.closureText != "specialService")
+				{
+					for (var l in ls.disruption.affectedStops)
+					{
+						var as0 = ls.disruption.affectedStops[l];
+						//console.log(as0.id);
+						
+						for (var i in stations)
+						{	
+							if (stations[i].getId() == as0.id)
+							{
+								stations[i].set('closed', true);
+							}
+						}
+						//TODO Future enhancement: Show station alert dots.
+					}				
+				} */
+				/* This is problematic, as sometimes TfL use special service and show the service using the disruption sequence, and sometimes they indicate a closed line with special service. Using the former for now. */	
+				if (ls.disruption && ls.disruption.closureText != "minorDelays" && ls.disruption.closureText != "specialService" && ls.disruption.affectedRoutes)
+				{	
+					for (var k in ls.disruption.affectedRoutes)
+					{
+						var ar = ls.disruption.affectedRoutes[k];
+						if (ar.routeSectionNaptanEntrySequence)
+						{
+							for (var m in ar.routeSectionNaptanEntrySequence)
+							{
+								var rsnes = ar.routeSectionNaptanEntrySequence[m];
+								if (rsnes.stopPoint)
+								{
+									if (!startcode)
+									{
+										startcode = rsnes.stopPoint.id;
+									}
+									else
+									{
+										startcode = endcode;
+										endcode = rsnes.stopPoint.id;
+									}
+									markClosed(startcode, endcode, network, linename);
+								}
+							}
+						}
+					}
+					if ((ls.disruption.isBlocking && ls.disruption.isWholeLine && ls.statusSeverityDescription == "Suspended") 
+						|| (ls.disruption.isWholeLine && ls.disruption.closureText == "severeDelays") //Victoria line 16-Jan-2017
+					)
+					{
+						var segmentId = '#' + network + "-" + linename + "_";
+						//console.log(segmentId);
+
+						for (var f in features)
+						{	
+							var disrupted = false;
+							var flines = features[f].get('lines');
+							if (flines)
+							{
+								for (j = 0; j < flines.length; j++)
+								{
+									if (flines[j].network == network && flines[j].name == linename)
+									{
+										features[f].get('lines')[j].end_sid_disrupted = true;
+										features[f].get('lines')[j].otend_sid_disrupted = true;
+										features[f].get('lines')[j].ot2end_sid_disrupted = true;
+										disruptedSegCount++;
+										disrupted = true;
+									}
+								}
+							}
+							if (disrupted) { disruptedSegCount--; } //We counted by station rather than segment, so subtract one (as segments = stations - 1)
+						}						
+					}
+				}
+			}
+		}
+	}
+	
+	clearInterval(blinkTimer);
+	clearInterval(dataTimer);
+	
+	handleChange();
+
+
+	var interval_ms_blink = 1000;
+	var interval_ms = 600000;
+	$('#loadingDisruption').css('display', 'none');
+	if (!noBlinking)
+	{
+		blinkTimer = setInterval(flashLines, interval_ms_blink); //Every second (blink on/off)
+	}
+	//if ($('#dates').val() == "live")
+	//{
+		
+		dataTimer = setInterval(requestDisruptionData, interval_ms); //Every 10 minutes
+		countdown = interval_ms/interval_ms_blink;
+	//}
+	//else
+	//{
+	//	dataTimer = setInterval(requestDisruptionData, 3600000); //Hourly	
+	//}
+	$('#countsegments').html(disruptedSegCount);
+
+}
+
+function markClosed(startcode, endcode, network, linename)
+{
+	var segmentId = '#' + network + "-" + linename + "_" + startcode + "_" + endcode;
+	var altId = '#' + network + "-" + linename + "_" + endcode + "_" + startcode;
+	if (disruptedSegs.indexOf(segmentId) < 0 && disruptedSegs.indexOf(altId) < 0 && startcode != null && endcode != null && startcode != endcode)
+	{		
+		disruptedSegs.push(segmentId);
+		disruptedSegCount++;
+	}
+	if (startcode && endcode && startcode != endcode)
+	{
+		//console.log(segmentId);
+
+		var features = layerLinesAll.getSource().getFeatures();
+		for (var f in features)
+		{	
+			var flines = features[f].get('lines');
+			if (flines)
+			{
+				for (j = 0; j < flines.length; j++)
+				{
+					if (flines[j].network == network && flines[j].name == linename)
+					{
+						if (startcode == flines[j].start_sid || endcode == flines[j].start_sid)
+						{
+							if (startcode == flines[j].end_sid || endcode == flines[j].end_sid) 
+							{
+								features[f].get('lines')[j].end_sid_disrupted = true;
+							}
+							if (startcode == flines[j].otend_sid || endcode == flines[j].otend_sid) 
+							{
+								features[f].get('lines')[j].otend_sid_disrupted = true;
+							}
+							if (startcode == flines[j].ot2end_sid || endcode == flines[j].ot2end_sid) 
+							{
+								features[f].get('lines')[j].ot2end_sid_disrupted = true;
+							}
+						}															
+					}
+				}
+			}
+		}
+	}
+}
+
+function sortLinesByDisruption(a, b)
+{
+	if (!a.end_sid_disrupted && !b.end_sid_disrupted && !a.otend_sid_disrupted && !b.otend_sid_disrupted && !a.ot2end_sid_disrupted && !b.ot2end_sid_disrupted) return 0;
+	if (a.end_sid_disrupted || a.otend_sid_disrupted || a.ot2end_sid_disrupted) return 1;
+	if (b.end_sid_disrupted || b.otend_sid_disrupted || b.ot2end_sid_disrupted) return -1;
+	return 0;
+}
+
+function flashLines()
+{
+	var stations = layerPoints.getSource().getFeatures();
+	for (var i in stations)
+	{
+		if (stations[i].get('closed') && !stations[i].get('hide')) 
+		{
+			if (blink && !noBlinking)
+			{
+				stations[i].set('fillColor', 'rgba(0,0,0,0)');
+				stations[i].set('strokeColor', 'rgba(0,0,0,0)');		
+				stations[i].set('label', '');	
+			}
+			else if (!blink && !noBlinking)
+			{
+				stations[i].set('fillColor', "#ff0000");					
+				stations[i].set('strokeColor', stations[i].get('strokeColorNormal'));		
+				stations[i].set('label', stations[i].get('labelNormal'));		
+			}
+		}
+		else if (stations[i].get('partclosed') && !stations[i].get('hide'))
+		{
+			if (!blink || noBlinking)
+			{
+				stations[i].set('fillColor', "#ffaa00");					
+			}
+			else
+			{
+				stations[i].set('fillColor', "#ffffff");								
+			}			
+		}
+	}
+	
+	if (blink && !noBlinking)
+	{
+		key2source.getFeatures()[0].set('fillColor', 'rgba(0,0,0,0)');
+		key2source.getFeatures()[0].set('strokeColor', 'rgba(0,0,0,0)');
+		key1source.getFeatures()[0].set('fillColor', '#ffffff');	
+		$('#blinking').css('color', 'rgba(0,0,0,0)');
+	}
+	else
+	{
+		key2source.getFeatures()[0].set('fillColor', '#ff0000');
+		key2source.getFeatures()[0].set('strokeColor', '#000000');
+		key1source.getFeatures()[0].set('fillColor', '#ffaa00');
+		$('#blinking').css('color', 'white');
+	}
+
+	layerLines.setSource(new ol.source.Vector({}));
+
+	var features = layerLinesAll.getSource().getFeatures();
+	for (var i in features)
+	{	
+		var priLineDrawn = false;
+		var secLineDrawn = false;
+		var terLineDrawn = false;
+		
+		var lines = features[i].get('lines');
+		
+		lines.sort(sortLinesByDisruption);
+		
+		for (var j in lines)
+		{
+			var disrupted = (lines[j].end_sid_disrupted && (!lines[j].otend_sid || lines[j].otend_sid_disrupted) && (!lines[j].ot2end_sid || lines[j].ot2end_sid_disrupted));
+
+			if (!lines[j].hide)		
+			{
+				var line = features[i].clone();
+				line.setId(features[i].get('id') + lines[j].name);
+				line.set('strokeLinecap', "butt");							
+				if (!priLineDrawn)
+				{
+					line.set('strokeDashstyle', [8, 0]);
+					if (disrupted)
+					{
+						line.set('strokeDashstyle', [0.1, 7.9]);					
+					}
+					priLineDrawn = true;	
+				}
+				else if (!secLineDrawn)
+				{
+					line.set('strokeDashstyle', [8, 8]);
+					if (disrupted)
+					{
+						line.set('strokeDashstyle', [0.1, 15.9]);					
+					}
+					secLineDrawn = true;
+				}
+				else if (!terLineDrawn)
+				{
+					line.set('strokeDashstyle', [4, 4]);
+					if (disrupted)
+					{
+						line.set('strokeDashstyle', [0.1, 11.9]);					
+					}
+					terLineDrawn = true;
+				}
+
+				line.set('strokeColor', features[i].get('lines')[j].colour);
+				if (disrupted)
+				{
+					line.set('strokeLinecap', "round");							
+					if ((blink && !noBlinking) || (!blink && noBlinking))
+					{
+						line.set('strokeColor', 'rgba(0,0,0,0)');
+					}
+				}
+				line.set('strokeWidth', olMap.getView().getZoom() - 8); //Was 5
+				layerLines.getSource().addFeature(line);	
+			}
+		}
+	}
+	if (!noBlinking)
+	{
+		blink = !blink;
+	}
+	$('#countdown').html(countdown);
+	countdown--;
 }
 
 function showDefaultJourney()
@@ -1160,13 +1747,12 @@ function showDefaultJourney()
 			features[j].set('toHereCount', 0);
 		}		
 		$("#info").css('display', 'none');
-		$("#info").html("");
-		console.log(features[defaultJourneyStart]);
+		$("#infotitle").html("");
 		selectClick.getFeatures().push(features[defaultJourneyStart]);
 	}
 	else
 	{
-		updateSelectedInfo();
+		updateSelectedInfo(layerPoints.getSource().getFeatures()[defaultJourneyStart]);
 	}	
 }
 
@@ -1192,28 +1778,37 @@ function resetDisplay()
 	}
 }
 
-function switchPoints()
+function switchPoints(pointsSet)
 {
 	console.log('switchPoints');
-	if (pointsLoaded == "wards")
+	if (pointsSet == "stations")
 	{
+		layerLinesAll.setSource(lineAllSource);
 		layerPoints.setSource(pointSource);
 		layerPointsLabels.setSource(pointSource);
 		layerPointsCase.setSource(pointSource);
-		pointsLoaded = "stations";
 	}
-	else
+	else if (pointsSet == "wards")
 	{
+		layerLinesAll.setSource(lineAllSource);
 		layerPoints.setSource(pointSource2);
 		layerPointsLabels.setSource(pointSource2);
 		layerPointsCase.setSource(pointSource2);
-		pointsLoaded = "wards";
 	}
+	else if (pointsSet == "nrstations")
+	{
+		layerLines.setSource(lineSourceNR);
+		//layerLines.changed();
+		layerPoints.setSource(pointSourceNR);
+		layerPointsLabels.setSource(pointSourceNR);
+		layerPointsCase.setSource(pointSourceNR);
+	}
+	pointsLoaded = pointsSet;
 	layerPoints.changed();
 	layerPointsLabels.changed();
 	layerPointsCase.changed();
 	selectClick.getFeatures().clear();
-}	
+}
 
 function toggleEnglish()
 {
@@ -1229,16 +1824,24 @@ function toggleEnglish()
 	handleChange();
 }
 
-function handleMetricChange()
+function handleMetricChange(initialLoad)
 {
 	console.log('handleMetricChange');
+
+	clearInterval(blinkTimer);
+	clearInterval(dataTimer);
+	blinkTimer = null;
+	dataTimer = null;
+
 	var metric = $("#themetric").val();
 
+	/*
 	if (metric == "closures")
 	{
 		window.location = "/closures/";
 		return;
 	}
+	*/
 	
 	var currYear = $('#year').val();
 	var currYearcomp = $('#yearcomp').val();
@@ -1259,15 +1862,29 @@ function handleMetricChange()
 	{
 		$('#year').append($('<option>', { value : dataYears[i] }).text(dataYears[i]));	
 	}	
+	$('#yearcomp').append($('<option>', { value : 'same' }).text('None'));	
 	if (yearcomp)
 	{
-		$('#yearcomp').append($('<option>', { value : 'none' }).text('None'));	
 		for (var i in dataYears)
 		{
 			$('#yearcomp').append($('<option>', { value : dataYears[i] }).text(dataYears[i]));	
 		}		
 	}
-
+	
+	if (initialLoad)
+	{
+		if (args['year'])
+		{
+			$('#year').val(args['year']);
+			currYear = args['year'];
+		}
+		if (args['yearcomp'])
+		{
+			$('#yearcomp').val(args['yearcomp']);
+			currYearcomp = args['yearcomp'];
+		}
+	}
+	
 	if (tieNetworkToData)
 	{
 		for (var i in dataYears)
@@ -1296,7 +1913,7 @@ function handleMetricChange()
 	{
 		if (currYearcomp == null || dataYears.indexOf(parseInt(currYearcomp)) < 0)
 		{
-			$('#yearcomp').val('none'); 	
+			$('#yearcomp').val('same'); 	
 		}
 		else
 		{
@@ -1330,14 +1947,40 @@ function handleMetricChange()
 	$('#networkYear').prop('disabled', tieNetworkToData);
 
 	scalingFactor = metricInfo[metric]["scale"];	
-	document.title = metricInfo[metric]["title"];		
+	//document.title = metricInfo[metric]["title"];		
 	$('#title').html(metricInfo[metric]["title"]);
 	$('#subtitle').html(metricInfo[metric]["subtitle"]);		
 
 	//Change geographies.
-	if ((pointsLoaded == "wards" && ["wardwords", "wardwork"].indexOf(metric) < 0) || (pointsLoaded != "wards" && ["wardwords", "wardwork"].indexOf(metric) >= 0))
+	if (["nrmap", "nrtotal", "nrtickets"].indexOf(metric) >= 0)	
 	{
-		switchPoints();
+		if (pointsLoaded != "nrstations")
+		{
+			switchPoints("nrstations");
+		}
+	}
+	else
+	{
+		if (["wardwords", "wardwork"].indexOf(metric) >= 0)	
+		{
+			if (pointsLoaded != "wards") 
+			{
+				switchPoints("wards"); 
+			}
+		}
+		else if (pointsLoaded != "stations")
+		{
+			switchPoints("stations");
+		}
+		
+		//Let's jump back to London, if we were outside of the boundary.
+		var centre = olMap.getView().getCenter();
+		var extent = layerGLA.getSource().getExtent();
+		if (!ol.extent.containsCoordinate(extent, centre))
+		{
+			olMap.getView().setCenter(ol.proj.transform([DEFAULT_LON, DEFAULT_LAT], "EPSG:4326", "EPSG:3857"));
+			if (olMap.getView().getZoom() < 11) { olMap.getView().setZoom(11); }
+		}
 	}
 
 	//Metric-specific map display.
@@ -1375,9 +2018,10 @@ function handleMetricChange()
 	}	
 
 	//Request additional data and build the map from the data.
+	$('#areainfo').css('display', 'none');
 	if (metric == "journeys")
 	{
-		if (!odRequested)
+		if (!odLoaded)
 		{
 			requestODData();
 		}
@@ -1385,7 +2029,14 @@ function handleMetricChange()
 		{
 			showDefaultJourney();
 		}
-	}		
+	}	
+	else if (metric == "closures")
+	{
+		$('#closures').css('display', 'block');
+		$("#info").css('display', 'none');
+
+		requestDisruptionData();
+	}	
 	else if (metricInfo[metric].defaultkey !== undefined && demographicData[metric] === undefined)
 	{
 		requestDemographicData();
@@ -1394,6 +2045,19 @@ function handleMetricChange()
 	{	
 		handleChange();
 	}
+	
+	if (args['selected'])
+	{
+		var features = layerPoints.getSource().getFeatures();
+		for (var i in features)
+		{
+			if (features[i].getId() == args['selected'])
+			{					
+				selectClick.getFeatures().clear();
+				selectClick.getFeatures().push(features[i]);
+			}
+		}
+	}	
 }
 
 function handleZoom()
@@ -1423,7 +2087,7 @@ function handleChange()
 
 	if (selectClick.getFeatures().getLength() > 0)
 	{
-		updateSelectedInfo();
+		updateSelectedInfo(selectClick.getFeatures().item(0));
 	}
 	
 	var features = layerPoints.getSource().getFeatures();
@@ -1444,8 +2108,20 @@ function handleChange()
 					}
 				}
 				else
-				{
-					show = true;
+				{ 
+					if (metricInfo[metric].availableDataYearsByNetwork === undefined)
+					{
+						show = true;
+					}
+					else
+					{ 
+						var year = $("#year").val();
+						var network = feature.get('lines')[j].network;
+						if (metricInfo[metric].availableDataYearsByNetwork[network].indexOf(parseInt(year)) >= 0)
+						{
+							show = true;
+						}
+					}
 				}
 			}
 		}
@@ -1470,7 +2146,7 @@ function handleChange()
 			features[i].set('offsetX', undefined);
 			features[i].set('offsetY', undefined);				
 			features[i].set('strokeWidth', 4);
-			if (metric == "livesontheline" || metric == "houseprices" || metric ==  "housepricesdiff")
+			if (metric == "livesontheline" || metric == "houseprices" || metric == "housepricesdiff")
 			{
 				if (features[i].get('cartography') && features[i].get('cartography')['display_name'])
 				{
@@ -1483,10 +2159,16 @@ function handleChange()
                 features[i].set('offsetX', 1.5*features[i].get('cartography')['labelX']);
                 features[i].set('offsetY', 1.5*features[i].get('cartography')['labelY']);
 			}
-	
-			if (metric == "map" || metric == "night")
+			
+			if (metric == "map" || metric == "night" || metric == "osi" || metric == "closures")
 			{			
 				features[i].set('radius', scalingFactor/1.1);	
+				
+				if (metric == "closures")
+				{
+					features[i].set('radius', scalingFactor/1.5);	
+				}
+				
 				//features[i].set('strokeWidth', 2);			
 				features[i].set('fillColor', "#ffffff");
 				
@@ -1500,7 +2182,13 @@ function handleChange()
 				}
 				features[i].set('offsetX', features[i].get('cartography')['labelX']);
 				features[i].set('offsetY', features[i].get('cartography')['labelY']);				
-				
+
+				if (metric == "osi" && !features[i].get('osi'))
+				{
+					features[i].set('radius', scalingFactor/3);					
+					features[i].set('geolabel', "");					
+				}
+								
 				var lineCount = 0;
 				var colour = "";
 				if (linesForKey !== undefined)
@@ -1529,6 +2217,17 @@ function handleChange()
 				}
 				//features[i].set('label', features[i].getId());
 			}
+			else if (metric == "nrmap")
+			{
+				features[i].set('fillColor', "#ffffff");
+				features[i].set('strokeColor', "#000000");
+				features[i].set('strokeWidth', 3);
+				features[i].set('datalabel', "");
+				features[i].set('geolabel', features[i].get('name'));				
+				features[i].set('radius', scalingFactor/1.1);	
+				features[i].set('offsetX', 40);
+				features[i].set('offsetY', 0);	
+			}
 			else if (metric == "journeys")
 			{
 				if (features[i].get('flows') !== undefined)
@@ -1554,9 +2253,9 @@ function handleChange()
 			}
 			else if (["tongues", "wardwords", "occupation", "wardwork"].indexOf(metric) >= 0)
 			{
-				if (demographicData[metric][features[i].get('tfl_intid')] !== undefined)
+				if (demographicData[metric][features[i].get('stat_id')] !== undefined)
 				{
-					var stats = demographicData[metric][features[i].get('tfl_intid')];
+					var stats = demographicData[metric][features[i].get('stat_id')];
 					var totalpop = stats.c001;
 				
 					var max = -Infinity, x, max_cap;
@@ -1603,18 +2302,22 @@ function handleChange()
 					}
 					features[i].set('strokeWidth', 4);					
 				}
+				else
+				{
+					console.log("Unmapped data for " + features[i].get('stat_id'));
+				}
 			}
 			else if (metric == "livesontheline")
 			{
-				var stats = demographicData[metric][features[i].get('id')];
+				var stats = demographicData[metric][features[i].getId()];
 				features[i].set('radius', scalingFactor*0.15); 
 				features[i].set('labelcolor', demographicMap[metric][stats][1]);
                 features[i].set('datalabel', '' + stats);
-		        features[i].set('strokeWidth', 2.2);
+		        features[i].set('strokeWidth', 3);
 			}
 			else if (metric == "houseprices")
 			{
-				var stats = demographicData[metric][features[i].get('id')];
+				var stats = demographicData[metric][features[i].getId()];
 				if (stats)
 				{
 					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
@@ -1631,7 +2334,7 @@ function handleChange()
 					features[i].set('labelcolor', getGBRColour(ratio));
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 10*parseInt(stats[0]/10000.00));
-					features[i].set('strokeWidth', 4);
+					features[i].set('strokeWidth', 3);
 				}
 				else
 				{
@@ -1639,12 +2342,12 @@ function handleChange()
 					features[i].set('labelcolor', "#000000");				
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
-					features[i].set('strokeWidth', 4);				
+					features[i].set('strokeWidth', 3);				
 				}
 			}
 			else if (metric == "housepricesdiff")
 			{
-				var stats = demographicData[metric][features[i].get('id')];
+				var stats = demographicData[metric][features[i].getId()];
 				if (stats)
 				{
 					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
@@ -1661,7 +2364,7 @@ function handleChange()
 					features[i].set('labelcolor', getGWRColour(1-ratio));
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 1*parseInt(stats[0]/1000.00));
-					features[i].set('strokeWidth', 4);
+					features[i].set('strokeWidth', 3);
 				}
 				else
 				{
@@ -1669,7 +2372,7 @@ function handleChange()
 					features[i].set('labelcolor', "#000000");				
 					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
-					features[i].set('strokeWidth', 4);				
+					features[i].set('strokeWidth', 3);				
 				}
 			}
 			else if (metric == "am_inout")
@@ -1677,8 +2380,8 @@ function handleChange()
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
 				{
-					var entry = features[i].get('yeardata')[year]['i_w_apk'];
-					var exit = features[i].get('yeardata')[year]['o_w_apk'];
+					var entry = features[i].get('yeardata')[year]['am_in'];
+					var exit = features[i].get('yeardata')[year]['am_out'];
 					var value = entry+exit
 					var ratio = exit*1.0/(entry*1.0+exit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
@@ -1691,8 +2394,8 @@ function handleChange()
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
 				{
-					var wdexit = features[i].get('yeardata')[year]['o_w_t'];
-					var weexit = features[i].get('yeardata')[year]['o_sa'];
+					var wdexit = features[i].get('yeardata')[year]['out'];
+					var weexit = features[i].get('yeardata')[year]['sat_out'];
 					var value = wdexit+weexit
 					var ratio = weexit*1.0/(wdexit*1.0+weexit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
@@ -1700,15 +2403,98 @@ function handleChange()
 					/* console.log(ratio); */
 				}		
 			}
-			else if (yearcomp != "none")
+			else if (metric == "peaktime")
 			{
+				if (features[i].get('yeardata') !== undefined
+					&& features[i].get('yeardata')[year] !== undefined)
+				{
+					var rt = features[i].get('yeardata')[year]['early_in']+features[i].get('yeardata')[year]['am_in'];
+					var gt = features[i].get('yeardata')[year]['mid_in']+features[i].get('yeardata')[year]['pm_in']+features[i].get('yeardata')[year]['late_in'];
+					var bt = features[i].get('yeardata')[year]['sun_in'];
+					var total = rt+gt+bt
+
+					var radius = scalingFactor*Math.sqrt(features[i].get('yeardata')[year]['total']/364);
+					if (radius < 10) { radius = 10; }
+					features[i].set('radius', radius);
+					
+					if (rt === undefined) { rt = 0; }
+					if (gt === undefined) { gt = 0; }
+					if (bt === undefined) { bt = 0; }
+										
+					var r = rt*1.0/total;
+					var g = gt*1.0/total;
+					var b = bt*1.0/total;
+		
+					//Emphasise extreme values so they look less "grey".
+					//console.log(features[i].get('stat_id'));
+					//console.log(r, g, b);
+					r = enhance(r, skewFactor, boundary);
+					g = enhance(g, skewFactor, boundary);
+					b = enhance(b, skewFactor, boundary);
+					//console.log(r, g, b);
+					var colourHex = rgb2Hex(r, g, b);
+					//console.log(colourHex);
+					features[i].set('fillColor', '#' + colourHex);
+					
+					/*
+					if (features[i].get('radius') > 50)
+					{
+						features[i].set('geolabel', features[i].get('name'));				
+					}*/
+					/* console.log(ratio); */
+				}		
+			}
+			else if (metric == "nrtickets")
+			{
+				if (features[i].get('yeardata') !== undefined
+					&& features[i].get('yeardata')[year] !== undefined)
+				{
+					var rt = features[i].get('yeardata')[year]['s_yr'];
+					var gt = features[i].get('yeardata')[year]['r_yr'];
+					var bt = features[i].get('yeardata')[year]['f_yr'];
+					var total = features[i].get('yeardata')[year]['total'];
+
+					var radius = scalingFactor*Math.sqrt(total);
+					if (radius < 10) { radius = 10; }
+					features[i].set('radius', radius);
+					
+					if (rt === undefined) { rt = 0; }
+					if (gt === undefined) { gt = 0; }
+					if (bt === undefined) { bt = 0; }
+										
+					var r = rt*1.0/total;
+					var g = gt*1.0/total;
+					var b = bt*1.0/total;
+		
+					//Emphasise extreme values so they look less "grey".
+					//console.log(features[i].get('stat_id'));
+					//console.log(r, g, b);
+					r = enhance(r, skewFactor, boundary);
+					g = enhance(g, skewFactor, boundary);
+					b = enhance(b, skewFactor, boundary);
+					//console.log(r, g, b);
+					var colourHex = rgb2Hex(r, g, b);
+					//console.log(colourHex);
+					features[i].set('fillColor', '#' + colourHex);
+					
+					/*
+					if (features[i].get('radius') > 50)
+					{
+						features[i].set('geolabel', features[i].get('name'));				
+					}*/
+					/* console.log(ratio); */
+				}		
+			}
+			else if (yearcomp != "same")
+			{
+				if (metric == "nrtotal") { metric = "total"; }
 				if (features[i].get('yeardata') !== undefined && features[i].get('yeardata')[year] !== undefined)
 				{
-					var value = features[i].get('yeardata')[year][metricKey[metric]];
+					var value = features[i].get('yeardata')[year][metric];
 					var compvalue = 0;
 					if (features[i].get('yeardata')[yearcomp] !== undefined)
 					{
-						compvalue = features[i].get('yeardata')[yearcomp][metricKey[metric]];
+						compvalue = features[i].get('yeardata')[yearcomp][metric];
 					}		
 					var diffvalue = value - compvalue;
 					if (diffvalue > 0)
@@ -1721,15 +2507,15 @@ function handleChange()
 						diffvalue = -diffvalue;
 					}
 					features[i].set('radius', scalingFactor*Math.sqrt(diffvalue));
-				}
-		
+				}		
 			}
 			else
 			{
 				if (features[i].get('yeardata') !== undefined
 					&& features[i].get('yeardata')[year] !== undefined)
 				{
-					var value = features[i].get('yeardata')[year][metricKey[metric]];
+					if (metric == "nrtotal") { metric = "total"; }
+					var value = features[i].get('yeardata')[year][metric];
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
 				}
 			}
@@ -1772,11 +2558,11 @@ function handleChange()
 	*/
 	
 	var caption = metricInfo[metric]["keyexample"];
-	var fills = ["#ffffff", "#ffffff", "#ffffff"];
-	var strokes = ["#000000", "#000000", "#000000"];
-	var labelcolours = ["#000000", "#000000", "#000000"];
-	var strokeWidths = [3, 3, 3];
-	var labels = ["", "", ""];
+	var fills = ["#ffffff", "#ffffff"];
+	var strokes = ["#000000", "#000000"];
+	var labelcolours = [undefined, undefined];
+	var strokeWidths = [3, 3];
+	var labels = ["", ""];
 	var key = metricInfo[metric]["defaultkey"];
 		
 	if (metric == "journeys")
@@ -1809,7 +2595,7 @@ function handleChange()
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [demographicMap[metric][75][1], demographicMap[metric][90][1]];
-		strokeWidths = [2.2, 2.2];
+		strokeWidths = [3, 3];
 		labels = [demographicMap[metric][75][0], demographicMap[metric][90][0]];
 	}
 	else if ("houseprices" == metric)
@@ -1817,7 +2603,7 @@ function handleChange()
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGBRColour(0), getGBRColour(1)];
-		strokeWidths = [2.6, 2.6];
+		strokeWidths = [3, 3];
 		labels = ["250", "1000"];
 	
 	}
@@ -1826,33 +2612,54 @@ function handleChange()
 		caption = metricInfo[metric]["keyexample"];
 		fills = ['#ffffff', '#ffffff'];
 		labelcolours = [getGWRColour(1), getGWRColour(0)];
-		strokeWidths = [2.6, 2.6];
+		strokeWidths = [3, 3];
 		labels = ["-50", "50"];
 	
 	}
-	else if (metric == "map" || metric == "night")
+	else if (metric == "map" || metric == "night" || metric == "osi")
 	{
 		caption = "Station, Multiple-line station";
 	}
-	else if (metric == "total")
+	else if (metric == "nrmap")
+	{
+		caption = "Station";
+	}
+	else if (metric == "total" || metric == "nrtotal")
 	{
 		caption = "<table><tr><td>" + metricInfo[metric].keyValues[0]/1000000 + "M entries & exits</td><td>" + metricInfo[metric].keyValues[1]/1000000 + "M entries & exits</td></tr></table>";
-		if (yearcomp != "none")
+		if (yearcomp != "same")
 		{	
 			caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0]/1000000 + "M more entries & exits</td><td>" + metricInfo[metric].keyValues[1]/1000000 + "M fewer entries & exits</td></tr></table>";
-			strokes = ["#008800", "#FF0000", "#008800"]
+			strokes = ["#008800", "#FF0000"];
 		}
+	}
+	else if (metric == "closures")
+	{
+		caption = "<table class='keycaptiontable'><tr><td>Part-closed station</td><td>Closed station</td></tr></table>";
+		fills = ["#ffaa00", "#ff0000"];
+		strokeWidths = [4, 4];
+	
+	}
+	else if (metric == "peaktime") //TODO
+	{
+		caption = "<table class='keycaptiontable'><tr><td>Mainly entries before 10am on weekdays</td><td>Mainly entries after 10am on weekdays (green) or on Sundays (blue)</td></tr></table>";
+		fills = ["#ff0000", "#00ffff"];
+	}
+	else if (metric == "nrtickets")
+	{
+		caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0]/1000000 + "M entries/exits, 50% full fare tickets (blue) 50% reduced fare tickets (green)</td><td>" + metricInfo[metric].keyValues[1]/1000000 + "M entries/exits, 100% season tickets</td></tr></table>";
+		fills = ["#00ffff", "#ff0000"];
 	}
 	else 
 	{
-		if (yearcomp != "none")
+		if (yearcomp != "same")
 		{	
 			caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " more entries</td><td>" + metricInfo[metric].keyValues[1] + " fewer entries</td></tr></table>";		
 			if (metric.substr(metric.length - 4) == "_out")
 			{
 				caption = "<table class='keycaptiontable'><tr><td>" + metricInfo[metric].keyValues[0] + " more exits</td><td>" + metricInfo[metric].keyValues[1] + " fewer exits</td></tr></table>";
 			}
-			strokes = ["#008800", "#FF0000"]
+			strokes = ["#008800", "#FF0000"];
 		}
 		else
 		{
@@ -1890,46 +2697,106 @@ function handleChange()
 	
 }
 
-function updateSelectedInfo()
+function updateSelectedInfo(feature)
 {
-	var feature = selectClick.getFeatures().item(0);
+	console.log('updatedSelectedInfo');
+	$("#info").css('display', 'block');
+	//var feature = selectClick.getFeatures().item(0);
+	var metric = $("#themetric").val();	
 
-	var htmlstr = "<div style='font-size: 28px;' title='" + feature.getId() + "'>" + feature.get('name') + "</div>"
-	htmlstr += "<div>Zone " + feature.get('zone') + "</div>"; 
- 	htmlstr += "<div style='padding: 10px 0;'>";
-	var metric = $("#themetric").val();
-	
-	if (feature.get('lines') != undefined && linesForKey != undefined)
+	var htmlstr = "<div style='font-size: 21px;' title='" + feature.get('stat_id') + "'>" + feature.get('name') + "</div>";
+	htmlstr += "<div style='font-size: 14px;'>" + feature.getId() + "</div>";
+	if (feature.get('zone'))
 	{
-		for (var j = 0; j < feature.get('lines').length; j++)
-		{
-			var dates = "";
-			if (feature.get('lines')[j].opened)
-			{
-				dates += feature.get('lines')[j].opened + "-";
-			}
-			if (feature.get('lines')[j].closed)
-			{
-				if (dates == "")
-				{
-					dates += "-";
-				}
-				dates += feature.get('lines')[j].closed;
-			}
-			if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#year").val()) && 
-				(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#year").val()))
-			htmlstr += "<div class='keyCircle' style='background-color: " 
-				+ linesForKey[feature.get('lines')[j].name] + ";'>"
-				+ serviceFilterCodes[feature.get('lines')[j].name] 
-				+ "<div style='margin: 10px 0; font-size: 9px;'>" 
-				+ dates
-				+ "</div></div>";		 	
-		}
-		htmlstr += "</div><br style='clear: both;'>";
+		htmlstr += "<div>Zone " + feature.get('zone') + "</div>"; 
 	}
+	
+	if (feature.get('lines') !== undefined)
+	{
+		htmlstr += "<div id='keyCircles'>";
+
+		if (metricInfo[metric].availableDataYearsByNetwork)
+		{
+			htmlstr += "<div style='float: left; padding: 5px; font-size: 9px;'>Showing stats for:<br />";
+		
+			if (linesForKey != undefined)
+			{	
+				var primaryBalls = [];
+				var otherBalls = [];	
+				var primaryOrderPos = 9999;
+			
+				for (var j = 0; j < feature.get('lines').length; j++)
+				{
+					var network = feature.get('lines')[j].network;
+					if (primaryOrder.indexOf(network) < primaryOrderPos && 
+						(feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#networkYear").val()) && 
+						(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#networkYear").val()))
+					{
+						primaryOrderPos = primaryOrder.indexOf(network);
+					}
+				}
+				var primaryNetwork = primaryOrder[primaryOrderPos];
+		
+				for (var j = 0; j < feature.get('lines').length; j++)
+				{
+					if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#networkYear").val()) && 
+						(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#networkYear").val()))
+					var thehtml = "<div class='keyCircleContainer'><div class='keyCircleCircle' style='background-color: " 
+						+ linesForKey[feature.get('lines')[j].name] + ";'>"
+						+ serviceFilterCodes[feature.get('lines')[j].name] 
+						+ "</div></div>";		 	
+					else continue;
+
+					var network = feature.get('lines')[j].network;
+					if (network == primaryNetwork)
+					{
+						primaryBalls.push(thehtml);		
+					}
+					else
+					{
+						otherBalls.push(thehtml);					
+					}
+				}
+				for (var i in primaryBalls)
+				{
+					htmlstr += primaryBalls[i];
+				}
+				htmlstr += "</div>";
+				if (otherBalls.length > 0)
+				{
+					htmlstr += "<div style='float: left; padding: 5px; font-size: 9px;'>Other lines:<br />";
+					for (var i in otherBalls)
+					{
+						htmlstr += otherBalls[i];
+					}
+					htmlstr += "</div>";
+				}
+			}
+		}
+		else
+		{
+			for (var j = 0; j < feature.get('lines').length; j++)
+			{
+				if ((feature.get('lines')[j].opened === undefined || feature.get('lines')[j].opened <= $("#networkYear").val()) && 
+					(feature.get('lines')[j].closed === undefined || feature.get('lines')[j].closed >= $("#networkYear").val()))
+				htmlstr += "<div class='keyCircleContainer'><div class='keyCircleCircle' style='background-color: " 
+					+ linesForKey[feature.get('lines')[j].name] + ";'>"
+					+ serviceFilterCodes[feature.get('lines')[j].name] 
+					+ "</div></div>";
+			}		 	
+		}
+		htmlstr += "</div>";
+	}
+
+	$("#infotitle").html(htmlstr);
+	
 	if (metric == "journeys")
 	{
-		htmlstr += "<h3>Top 20 journeys from this station<br />typical day (RODS data)</h3>";
+		if (!odLoaded || linesForKey === undefined)
+		{
+			console.log("Not ready yet!");
+			return;
+		}
 
 		/* Reset from previous population. */
 		var features = layerPoints.getSource().getFeatures();
@@ -1949,7 +2816,7 @@ function updateSelectedInfo()
 					var matched = false;
 					for (var j in features)
 					{
-						if (features[j].get('tfl_intid') == toStationName)
+						if (features[j].get('stat_id') == toStationName)
 						{
 							matched = true;
 							if (flows[toStationName] > 0 || (compflows !== undefined && compflows[toStationName] > 0))
@@ -1981,7 +2848,7 @@ function updateSelectedInfo()
 					var matched = false;
 					for (var j in features)
 					{
-						if (features[j].get('tfl_intid') == toStationName)
+						if (features[j].get('stat_id') == toStationName)
 						{
 							matched = true;
 							if (flows[toStationName] > 0)
@@ -1996,7 +2863,7 @@ function updateSelectedInfo()
 		
 			/* Set up HTML table. */
 			var tuples = [];
-
+ 
 			var features = layerPoints.getSource().getFeatures();
 			for (var j in features) tuples.push([features[j].get('name'), features[j].get('toHereCount'), features[j].get('lines')]);
 
@@ -2007,25 +2874,30 @@ function updateSelectedInfo()
 				return a < b ? 1 : (a > b ? -1 : 0);
 			});
 
-			htmlstr += "<div style='height: 180px; overflow-y: scroll;'><table>";
+			var infohtml = 'Top destination stations for journeys starting here, on a typical weekday:';
+			infohtml += "<table>";
 			for (var i = 0; i < tuples.length; i++) 
 			{
 				var key = tuples[i][0];
 				var value = tuples[i][1];
 				if (value > 0) 
 				{
-					htmlstr += "<tr><td style='font-size: 12px;'>" + key + "</td><td>&nbsp;</td><td>";
+					infohtml += "<tr><td style='font-size: 11px;'>" + key + "</td><td>&nbsp;</td><td>";
 					for (var j = 0; j < tuples[i][2].length; j++)
 					{
-						htmlstr += "<div class='keyBall' style='background-color: " + linesForKey[tuples[i][2][j].name] + ";'>&nbsp;</div>";		 	
+						infohtml += "<div class='keyBall' style='background-color: " + linesForKey[tuples[i][2][j].name] + ";'>&nbsp;</div>";		 	
 					}
 				
-					htmlstr += "</td><th style='font-size: 12px;'>" + value + "</th></tr>";
+					infohtml += "</td><th style='font-size: 11px;'>" + value + "</th></tr>";
 				}
-				if (i == 19) { break; }
+				if (i == 15) { break; }
 			}
 		
-			htmlstr += "</table></div>";		
+			infohtml += "</table>";	
+			$("#infotable1title").html(infohtml);
+			$("#infotable1chart").html('');		
+			$("#infotable2title").html('');
+			$("#infotable2chart").html('');		
 		}
 		else
 		{
@@ -2038,15 +2910,15 @@ function updateSelectedInfo()
 		var tuples = [];
 		var sum = 0;
 
-		for (var j in demographicData[metric][feature.get('tfl_intid')]) 
+		for (var j in demographicData[metric][feature.get('stat_id')]) 
 		{
 			if (j != "c001")
 			{
-				tuples.push([j, demographicData[metric][feature.get('tfl_intid')][j]]);
+				tuples.push([j, demographicData[metric][feature.get('stat_id')][j]]);
 			}
 			else
 			{
-				sum = demographicData[metric][feature.get('tfl_intid')][j];
+				sum = demographicData[metric][feature.get('stat_id')][j];
 			}
 		}
 		tuples.sort(function(a, b) {
@@ -2056,113 +2928,284 @@ function updateSelectedInfo()
 			return a < b ? 1 : (a > b ? -1 : 0);
 		});
 
-		htmlstr += "<div style='font-size: 18px;' title='Population: " + sum + "'>" + metricInfo[metric]["subinfo"] + "</div></h1>";
-		htmlstr += "<table id='keysubtable'>";
+		var infohtml = "<div id='subinfo' title='Population: " + sum + "'>" + metricInfo[metric]["subinfo"] + "</div>";
+		infohtml += "<table id='keysubtable'>";
 		for (var i = 0; i < tuples.length; i++) 
 		{
 			var key = tuples[i][0];
 			var value = tuples[i][1];
-			if (value > 0 && value/(sum*1.0) >= metricInfo[metric]["infolimit"] && value >= metricInfo[metric]["infolimit"]*1000) 
+			if (value > 0 && value/(sum*1.0) >= metricInfo[metric]["infolimit"] && value >= metricInfo[metric]["infolimit"]*1000 && i < 20) 
 			{
-				htmlstr += "<tr><td>";
+				infohtml += "<tr><td>";
 				if ( demographicMap[metric][key] !== undefined)
 				{
-					htmlstr += "<div style='margin: 1px 5px; width: 10px; height: 10px; border-radius: 5px; background-color: " + demographicMap[metric][key][1] + ";'>&nbsp;</div><td>" + demographicMap[metric][key][0];
+					infohtml += "<div style='margin: 1px 5px; width: 10px; height: 10px; border-radius: 5px; background-color: " + demographicMap[metric][key][1] + ";'>&nbsp;</div><td>" + demographicMap[metric][key][0];
 				}
 				else
 				{
-					htmlstr += "</td><td>" + key;	
+					infohtml += "</td><td>" + key;	
 					console.log(key);		
 				}
-				htmlstr += "</td><td>" + Math.round(1000*(value/(sum*1.0)))/10.0 + "%</td></tr>";
+				infohtml += "</td><td>" + Math.round(1000*(value/(sum*1.0)))/10.0 + "%</td></tr>";
 			}
 		}		
-		htmlstr += "</table>";
+		infohtml += "</table>";
+		$("#infotable1title").html(infohtml);
+		$("#infotable1chart").html('');
+		$("#infotable2title").html('');
+		$("#infotable2chart").html('');
 	}
 	else if (metric == "livesontheline" || metric == "houseprices" || metric == "housepricesdiff")
 	{
-		htmlstr += "</h1>" + metricInfo[metric]["subinfo"];
+		$("#infotable1title").html(metricInfo[metric]["subinfo"]);
+		$("#infotable1chart").html('');
+		$("#infotable2title").html('');
+		$("#infotable2chart").html('');
 	}
-	else if (metric == "map" || metric == "night")
+	/* else if (metric == "map" || metric == "night" || metric == "osi")
 	{
-		htmlstr += "</h1>";	
-	}
+		$("#infotable1title").html('');
+		$("#infotable1chart").html('');
+		$("#infotable2title").html('');
+		$("#infotable2chart").html('');
+	} */
 	else
 	{
-		htmlstr += "<h3>Station Entries & Exits (Primary mode only)</h3></h1>";	
-		htmlstr += "<table style='font-size: smaller;'><tr><th></th><th>Annual</th><th colspan='12'>Weekday</th><th colspan='2' rowspan='2'>Saturday</th><th colspan='2' rowspan='2'>Sunday</th></tr>";
-		htmlstr += "<tr><th></th><th>Total</th><th colspan='2'>Total</th><th colspan='2'>Early</th><th colspan='2'>AM Peak</th><th colspan='2'>Interpeak</th><th colspan='2'>PM Peak</th><th colspan='2'>Evening</th></tr>";
-		htmlstr += "<tr><th></th><th>(M)</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th><th>Entry</th><th>Exit</th></tr>";
+		$("#infotable1title").html("Daily Entries & Exits");	
+		$("#infotable2title").html("Time of Day Entries/Exits");	
+
+		console.log(metric);
+		if (["nrmap", "nrtotal", "nrtickets"].indexOf(metric) >= 0)
+		{
+			$("#infotable1title").html("Annual Entries & Exits (National Rail)");	
+			$("#infotable2title").html("Ticket Type: Full / Reduced / Season");			
+		}
+
+		var dataTable = new google.visualization.DataTable();
+		dataTable.addColumn('string', 'Year');
+		dataTable.addColumn('number', 'In (Weekday)');
+		dataTable.addColumn('number', 'In (Saturday)');
+		dataTable.addColumn('number', 'In (Sunday)');
+		dataTable.addColumn('number', 'Out (Weekday)');
+		dataTable.addColumn('number', 'Out (Saturday)');
+		dataTable.addColumn('number', 'Out (Sunday)');
+		dataTable.addColumn('number', 'Average Daily Total');
+
+		var dataTable2 = new google.visualization.DataTable();
+		dataTable2.addColumn('string', 'Year');
+		dataTable2.addColumn('number', 'Early (In) %');
+		dataTable2.addColumn('number', 'Early (Out) %');
+		dataTable2.addColumn('number', 'AM Peak (In) %');
+		dataTable2.addColumn('number', 'AM Peak (Out) %');
+		dataTable2.addColumn('number', 'Interpeak (In) %');
+		dataTable2.addColumn('number', 'Interpeak (Out) %');
+		dataTable2.addColumn('number', 'PM Peak (In) %');
+		dataTable2.addColumn('number', 'PM Peak (Out) %');
+		dataTable2.addColumn('number', 'Evening (In) %');
+		dataTable2.addColumn('number', 'Evening (Out) %');
+		dataTable2.addColumn('number', 'Full Fare %');
+		dataTable2.addColumn('number', 'Reduced Fare %');
+		dataTable2.addColumn('number', 'Season Ticket %');
+
+		var rows = [];
+		var rows2 = [];
+
 		var yeardata = feature.get('yeardata');
 
 		if (yeardata !== undefined)
 		{
 			var keys = Object.keys(yeardata).sort();
-			var prevyear = 0;
-			/* console.log(keys); */
 			for (var k in keys)
 			{
 				var year = keys[k];
-				htmlstr += "<tr><th>" + year + "</th>" 
-				+ compareValuesHTML(yeardata, "tf_yr", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_t", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_t", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_pre", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_pre", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_apk", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_apk", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_mid", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_mid", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_ppk", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_ppk", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_w_eve", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_w_eve", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_sa", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_sa", year, prevyear) 
-				+ compareValuesHTML(yeardata, "i_su", year, prevyear) 
-				+ compareValuesHTML(yeardata, "o_su", year, prevyear) 
-				+ "</tr>";
-				prevyear = year;
+				var total = yeardata[year]['total']/364;
+				if (["nrmap", "nrtotal", "nrtickets"].indexOf(metric) >= 0)
+				{
+					total = yeardata[year]['total'];
+				}
+				rows.push([
+					year, 
+					yeardata[year]['in'], 
+					yeardata[year]['sat_in'], 
+					yeardata[year]['sun_in'], 
+					yeardata[year]['out'], 
+					yeardata[year]['sat_out'], 
+					yeardata[year]['sun_out'],
+					total
+				]);
+				var row2total = 0.01*(
+					yeardata[year]['early_in'] + yeardata[year]['early_out'] +
+					yeardata[year]['am_in'] + yeardata[year]['am_out'] +
+					yeardata[year]['mid_in'] + yeardata[year]['mid_out'] +
+					yeardata[year]['pm_in'] + yeardata[year]['pm_out'] +
+					yeardata[year]['late_in'] + yeardata[year]['late_out']				
+				);
+				
+				var f_yr = yeardata[year]['f_yr'];
+				var r_yr = yeardata[year]['r_yr'];
+				var s_yr = yeardata[year]['s_yr'];
+				if (f_yr == undefined) { f_yr = 0; }
+				if (r_yr == undefined) { r_yr = 0; }
+				if (s_yr == undefined) { s_yr = 0; }
+				var row2NRtotal = 0.01*(f_yr+r_yr+s_yr); //Not "total" as (unlike above) we only want a total here, if there is component data.
+				
+				if (row2total > 0 || row2NRtotal > 0)
+				{
+					rows2.push([
+						year,
+						yeardata[year]['early_in']/row2total, 
+						yeardata[year]['early_out']/row2total, 
+						yeardata[year]['am_in']/row2total, 
+						yeardata[year]['am_out']/row2total, 
+						yeardata[year]['mid_in']/row2total, 
+						yeardata[year]['mid_out']/row2total, 
+						yeardata[year]['pm_in']/row2total, 
+						yeardata[year]['pm_out']/row2total, 
+						yeardata[year]['late_in']/row2total,
+						yeardata[year]['late_out']/row2total,
+						f_yr/row2NRtotal,
+						r_yr/row2NRtotal,
+						s_yr/row2NRtotal,
+					]);
+				}					
 			}
-		}	
-		htmlstr += "</table>";
-	}
+		}
 		
-	$("#info").html(htmlstr);
-	$("#info").css('display', 'block');
-}
+		dataTable.addRows(rows);
+		dataTable2.addRows(rows2);
+		coloursForKey = ['#ff0000', '#00ff00', '#00aaff', '#aa0000', '#00aa00', '#0055aa', '#aaaaaa', '#aaaaaa'];
+		coloursForKey2 = ['#ff0000', '#aa0000', '#ffff00', '#aaaa00', '#00ff00', '#00aa00', '#00ffff', '#00aaaa', '#0000ff', '#0000aa', '#0000ff', '#00ff00', '#ff0000'];
 
+		var options = {
+			chart: {
+			  /* title: 'Bikes in Docks',
+			  subtitle: 'last 24h' */
+			  pointsVisible: true,
+			  fontSize: 10
+			},
+			backgroundColor: { fill: 'transparent' },
+			chartArea: { backgroundColor: 'transparent' },
+			colors: coloursForKey,
+			legend: {position: 'none'},
+			//tooltip: { isHtml: true, textStyle: { fontSize: 11 } },
+			width: 250,
+			height: 180, /*
+			series: {
+				0: { axis: 'perday' },
+				1: { axis: 'perday' },
+				2: { axis: 'perday' },
+				3: { axis: 'perday' },
+				4: { axis: 'perday' },
+				5: { axis: 'perday' },
+				//6: { axis: 'peryear'}
+			},
+			axes: {
+				y: {
+					perday: { label: 'Counts/Day' },
+					//peryear: { label: 'Counts/Year'}
+				}
+			}, */
+			hAxis: {
+				//format: 'EEE HH:mm',
+				//gridlines: { color: '#444', count: 4 },
+				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
+				baselineColor: '#444',
+				//minTextSpacing: 0,
+				//viewWindow: { max: nd },
+				//viewWindowMode: "explicit", 
+				title: ''
+			},
+			vAxis: {
+				//format: 'decimal',
+				minValue: 0,
+				viewWindow: { min: 0 },
+				//viewWindowMode: "explicit", 
+				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
+				gridlines: { color: '#444' },
+			}	
+		};
 
-function compareValuesHTML(yeardata, valIndex, year, prevyear)
-{
-	var number = yeardata[year][valIndex];
-	var prevnumber = 0;
-	
-	if (yeardata[prevyear] !== undefined)
-	{	
-		prevnumber = yeardata[prevyear][valIndex];
-	}
-	if (number === undefined)
-	{
-		return "<td></td>";
-	}
-	if (valIndex == "tf_yr")
-	{
-		number = Math.round(number/10000.0)/100.0;			
-		prevnumber = Math.round(prevnumber/10000.0)/100.0;		
-	}
-	if (prevyear == 0 || number == prevnumber)
-	{ 
-		return "<td>" + number + "</td>";
-	}
-	if (number > prevnumber)
-	{
-		return "<td style='color: #ccffcc;'>" + number + "</td>";
-	}
-	else
-	{
-		return "<td style='color: #ff4444;'>" + number + "</td>";	
-	}
+		var options2 = {
+			chart: {
+			  /* title: 'Bikes in Docks',
+			  subtitle: 'last 24h' */
+			  pointsVisible: true,
+			  fontSize: 10
+			},
+			backgroundColor: { fill: 'transparent' },
+			chartArea: { backgroundColor: 'transparent' },
+			bars: 'horizontal',
+			isStacked: true,
+			series: { 
+				0: { color: coloursForKey2[0], }, 
+				1: { color: coloursForKey2[1], }, 
+				2: { color: coloursForKey2[2], }, 
+				3: { color: coloursForKey2[3], }, 
+				4: { color: coloursForKey2[4], }, 
+				5: { color: coloursForKey2[5], }, 
+				6: { color: coloursForKey2[6], }, 
+				7: { color: coloursForKey2[7], }, 
+				8: { color: coloursForKey2[8], }, 
+				9: { color: coloursForKey2[9], }, 
+				10: { color: coloursForKey2[10], }, 
+				11: { color: coloursForKey2[11], }, 
+				12: { color: coloursForKey2[12], }, 
+			},				
+			legend: {position: 'none'},
+			//tooltip: { isHtml: true, textStyle: { fontSize: 11 } },
+			width: 250,
+			height: 170, /*
+			series: {
+				0: { axis: 'perday' },
+				1: { axis: 'perday' },
+				2: { axis: 'perday' },
+				3: { axis: 'perday' },
+				4: { axis: 'perday' },
+				5: { axis: 'perday' },
+				//6: { axis: 'peryear'}
+			},
+			axes: {
+				y: {
+					perday: { label: 'Counts/Day' },
+					//peryear: { label: 'Counts/Year'}
+				}
+			}, */
+			hAxis: {
+				//format: 'EEE HH:mm',
+				gridlines: { color: '#444', count: 4 },
+				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
+				baselineColor: '#444',
+				//minTextSpacing: 0,
+				//viewWindow: { max: nd },
+				//viewWindowMode: "explicit", 
+				//title: 'Entries/Exits By Day Period'
+				title: '',
+			},
+			vAxis: {
+				//format: 'decimal',
+				//viewWindowMode: "explicit", 
+				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
+				gridlines: { color: '#444' },
+				title: '',
+			}	
+		};
+
+		var optionsMaterial = google.charts.Line.convertOptions(options);
+		var chart = new google.charts.Line(document.getElementById('infotable1chart'));		
+		chart.draw(dataTable, optionsMaterial);
+		
+		if (rows2.length > 0)
+		{
+			$('#infotable2').css('display', 'block');		
+			var optionsMaterial2 = google.charts.Bar.convertOptions(options2);
+			var chart2 = new google.charts.Bar(document.getElementById('infotable2chart'));		
+			chart2.draw(dataTable2, optionsMaterial2);
+		}
+		else
+		{
+			$('#infotable2').css('display', 'none');
+		}
+	}		
 }
 
 /* ****** Ad-hoc actions ****** */
@@ -2299,6 +3342,26 @@ function getBWYColour(ratio)
 
 }
 
+function getRWTColour(ratio)
+{
+	var r = (2*ratio);
+	var g = 2-(2*ratio);
+	var b = 2-(2*ratio);
+
+	if (r < 0) { r = 0; }
+	if (g < 0) { g = 0; }
+	if (b < 0) { b = 0; }
+	
+	if (r > 0.999 ) { r = 0.999; }
+	if (g > 0.999 ) { g = 0.999; }
+	if (b > 0.999 ) { b = 0.999; }
+
+	var colourHex = rgb2Hex(r, g, b);
+
+	return "#" + colourHex;
+
+}
+
 /* RGB values between 0 and 1. */
 function rgb2Hex(r, g, b)   
 {
@@ -2317,6 +3380,32 @@ function rgb2Hex(r, g, b)
 	colourHex += hexArray[code1];
 	colourHex += hexArray[code2];
 	return colourHex;
+}
+
+//RatioNum between 0 and 1. Skew factor 0 = no effect. Boundary is the neutral value, between 0 and 1.
+function enhance(ratioNum, skewFactor, boundary)
+{
+	if (ratioNum == 0) { return 0; }
+	
+	if (ratioNum < boundary)
+	{
+		ratioNum = ratioNum * Math.pow(ratioNum*(1.0/boundary), skewFactor);
+	}
+	else
+	{
+		ratioNum = 1.0 - (1.0-ratioNum) * Math.pow((1.0-ratioNum)*1.0/(1.0-boundary), skewFactor);
+	}
+
+	//Fix extremes to prevent conversion problems.
+	if (ratioNum < 0.001)
+	{
+		ratioNum = 0.001;
+	}
+	if (ratioNum > 0.999)
+	{
+		ratioNum = 0.999;
+	}	
+	return ratioNum;
 }
 
 /*
@@ -2340,47 +3429,28 @@ function bust()
 
 function updateUrl()
 {
-	var metric = $('#themetric').val();
-	var selected = "";
+	var layerString = "";
+	layerBackground.getVisible() ? layerString += "T" : layerString += "F";
+    layerAerial.getVisible() ? layerString += "T" : layerString += "F";
+	layerLines.getVisible() ? layerString += "T" : layerString += "F";
+	layerZones.getVisible() ? layerString += "T" : layerString += "F";
+
+	var centre = ol.proj.transform(olMap.getView().getCenter(), "EPSG:3857", "EPSG:4326");  
+	var selected = "*";
 	if (selectClick != undefined)
 	{
 		var selectFeatures = selectClick.getFeatures();
 		if (selectFeatures.getLength() > 0)
 		{
-			selected = selectFeatures.item(0).get('id');
+			selected = selectFeatures.item(0).getId();
 		}
-	
 	}
-	
-	var layerString = "";
-	layerBackground.getVisible() ? layerString += "T" : layerString += "F";
-	layerPoints.getVisible() ? layerString += "T" : layerString += "F";
-	layerLines.getVisible() ? layerString += "T" : layerString += "F";
-	layerThames.getVisible() ? layerString += "T" : layerString += "F";
-	layerGLA.getVisible() ? layerString += "T" : layerString += "F";
-    layerAerial.getVisible() ? layerString += "T" : layerString += "F";
-	layerZones.getVisible() ? layerString += "T" : layerString += "F";
-
-	var centre = ol.proj.transform(olMap.getView().getCenter(), "EPSG:3857", "EPSG:4326");
-	var hash = "metric=" + metric;
-	if ($('#year').val() != 'none')
-	{
-		hash += "&year=" + $('#year').val();
-	}
-	if ($('#yearcomp').val() != 'none' && metricInfo[metric].yearcomp)
-	{
-		hash += "&yearcomp=" + $('#yearcomp').val();
-	}	
+	var filter = "*";
 	if (serviceFilter != undefined)
 	{	
-		hash += "&filter=" + serviceFilterCodes[serviceFilter];
+		filter = serviceFilterCodes[serviceFilter];
 	}
-	if (selected != "")
-	{
-		hash += "&selected=" + selected;
-	}
-	hash += "&layers=" + layerString + "&zoom=" + olMap.getView().getZoom() + "&lon=" + centre[0].toFixed(4) + "&lat=" + centre[1].toFixed(4); 
-	window.location.hash = hash;
+	window.location.hash = "/" + $('#themetric').val() + "/" + $('#year').val() + "/" + $('#yearcomp').val() + "/" + filter + "/" + selected + "/" + layerString + "/" + olMap.getView().getZoom() + "/" + centre[0].toFixed(4) + "/" + centre[1].toFixed(4) + "/"; 
 }
 
 /*
@@ -2399,6 +3469,11 @@ function getKML()
 }
 */
 
-$(document).ready(function() {
-	init();
+google.charts.load('current', {'packages':['line', 'bar']});
+google.charts.setOnLoadCallback(function()
+{
+	$(document).ready(function()
+	{
+		init();
+	});
 });

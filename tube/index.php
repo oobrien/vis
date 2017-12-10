@@ -14,15 +14,20 @@
 
 	<title>Tube Creature</title>
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.css" />	
-	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
+	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.structure.css" />		
+	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.theme.css" />		
+	<link rel="stylesheet" type="text/css" media="all" href="style.css?t=<?php echo time(); ?>" />	
 	<link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin+Condensed" rel="stylesheet">
 	
 	<script type="text/javascript" src="http://lib.oomap.co.uk/jquery-1.12.4.js"></script>	     
+	<script type="text/javascript" src="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.js"></script>	     
+	<script type="text/javascript" src="http://lib.oomap.co.uk/moment.js"></script>
 	<script type="text/javascript" src="http://lib.oomap.co.uk/proj4.js"></script>	     
 	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol-debug.js"></script> 
-	<script type="text/javascript" src="config.js"></script>
-	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<script type="text/javascript" src="config.js?t=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="main.js?t=<?php echo time(); ?>"></script>
 	<script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -61,9 +66,11 @@
 				//</td> ?>
 			</tr>
 		</table>
-		<div style='text-align: center; padding-bottom: 7px; '>Interactive map created by Oliver O'Brien, UCL. <a style='color: #666;' href="http://oobrien.com/2014/10/tube-tongues/">About</a>.<br /><a href="http://tubecreature.com/closures/">See the live closures map</a>.<br /> 
-		<!-- Tip: change the Metric drop-down to see other versions, or see <a style='color: #666;' href="http://oobrien.com/">my blog</a>.
-		-->
+		<div id='about'>
+			Created by <a href="http://oobrien.com/">Oliver O'Brien</a>, UCL. 
+			<a href="http://oobrien.com/2014/10/tube-tongues/">About this map</a>. <a href="http://github.com/oobrien/vis">GitHub</a>.<br />
+			Tip: choose different data graphics from the Metric drop-down.
+		
 		</div>
 		
 		<div id='poster'> <!--
@@ -78,8 +85,22 @@
 	</div>
 
 	<div id="toppanel">
-		<div id='creature'><div id='p1'>&nbsp;</div><div id='p2'>&nbsp;</div><div id='p3'>&nbsp;</div><div id='p4'>&nbsp;</div><div id='p5'>&bull;&bull;</div></div>
-		<div id="supertitle">Tube Creature</div>
+		<div id='creature'><a href="/">
+			<div class='cp' id='c1'>T</div>
+			<div class='cp' id='c2'>U</div>
+			<div class='cp' id='c3'>B</div>
+			<div class='cp' id='c4'>E</div>
+			<div class='cp' id='c5'>C</div>
+			<div class='cp' id='c6'>R</div>
+			<div class='cp' id='c7'>E</div>
+			<div class='cp' id='c8'>A</div>
+			<div class='cp' id='c9'>T</div>
+			<div class='cp' id='c10'>U</div>
+			<div class='cp' id='c11'>R</div>
+			<div class='cp' id='c12'>E</div>
+			<!-- <div id='creaturehead'>&bull;&bull;</div> -->
+		</a></div>
+		
 		<div id="title">London Tube Data Maps</div>
 		<div id="subtitle">Loading...</div>
 		<div id='optionstable'>
@@ -88,9 +109,10 @@
 					Metric
 				</div>
 				<div style='background-color: #5577bb;'>
-					<select id='themetric' onchange='handleMetricChange()'>
+					<select id='themetric' onchange='handleMetricChange(false)'>
 						<option value='map'>Network Map</option>
 						<option value='night'>Night Tube Map</option>
+						<option value='osi'>Out-of-Station Interchanges</option>
 						<option value='total' selected='selected'>Annual Entries/Exits</option>
 						<option value='in'>Weekday Entries</option>
 						<option value='out'>Weekday Exits</option>
@@ -109,6 +131,7 @@
 						<option value='sun_in'>Sunday Entry</option>
 						<option value='sun_out'>Sunday Exit</option>
 						<option value='am_inout'>Entries vs Exits (AM peak)</option>
+						<option value='peaktime'>Peak Time of Entry</option>
 						<option value='wdwe_out'>Weekday vs Saturday Exits</option>
 						<option value='journeys'>Journey Destinations</option>
 						<option value='tongues'>Tube Tongues</option>
@@ -119,6 +142,9 @@
 						<option value='houseprices'>House Prices</option>
 						<option value='housepricesdiff'>House Prices &Delta;</option>
 						<option value='closures'>Tube Disruption Map (live!)</option>
+						<option value='nrmap'>NR: Network Map</option>
+						<option value='nrtotal'>NR: Annual Entries/Exits</option>
+						<option value='nrtickets'>NR: Ticket Type</option>
 						<!-- <option value='crossrail'>Crossrail</option>
 						<option value='overground'>Overground</option> -->
 					</select>
@@ -133,9 +159,9 @@
 				</div>
 			</div>
 			<div>
-				<div style='float:left; width: 80px; background-color: #778899;'>
+				<div style='float:left; width: 80px; background-color: #7788aa;'>
 					Compare with</div>
-				<div style='background-color: #778899;'>
+				<div style='background-color: #7788aa;'>
 					<select id='yearcomp' onchange='handleChange()'>
 					</select>
 				</div>
@@ -148,35 +174,62 @@
 					</select>
 				</div>
 			</div>
-			<div id='englishB' style='background-color: #7788aa;' colspan='2'>
+			
+		</div>
+		<div id='layerbuttons'>
+			<input type='checkbox' id='backgroundCB' checked='checked' onclick='toggleBackground()' />Basemap
+            <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Satellite 
+			<input type='checkbox' id='linesCB' checked='checked' onclick='toggleLines()' />Lines<br />
+			<input type='checkbox' id='zonesCB' onclick='toggleZones()' />Zones
+			<div id='englishB' style='background-color: #7788aa;'>
 				<button onclick='toggleEnglish()' />Show/hide English</button>
 			</div>
 		</div>
-		<div style='margin-top: 10px;'>
-			<input type='checkbox' id='backgroundCB' checked='checked' onclick='toggleBackground()' />Basemap
-            <input type='checkbox' id='aerialCB' onclick='toggleAerial()' />Satellite 
-			<input type='checkbox' id='linesCB' checked='checked' onclick='toggleLines()' />Lines
-			<input type='checkbox' id='zonesCB' onclick='toggleZones()' />Zones
+
+		<div id="key">
+			<div id='keytitle' onclick="toggleKey()">KEY</div>
+			<!-- <div>Area proportional to selected metric value.</div><br /> -->
+			<table id="keyTable">
+				<tr><td><div id="key1" class='keyBox'></div></td><td><div id="key2" class='keyBox'></div></td></tr>
+				<tr><td colspan='2'><div id="key1text"></div></td></tr>
+			</table>
+
+			<div id='closures'>
+				<table id='counts'><th style='color: white;'>Stations<br />Open</th><th style='color: #ffaa00;'>Stations<br />Part-Closed</th><th style='color: #ff0000;'>Stations<br />Closed</th><th style='color: #ff0000;'>Disrupted<br />Segments</th></tr>
+				<tr><td style='color: white;' id='countopen'></td><td style='color: #ffaa00;' id='countpc'></td><td style='color: #ff0000;' id='countclosed'></td><td  style='color: #ff0000;' id='countsegments'></td></tr></table>
+			
+				<div id='loadingDisruption'>Loading disruption data...<br /><img src='/images/spinner.gif' style='width: 16px; height: 16px;' alt='...' /></div>
+			</div>
+			<div id='linekey'></div>
+		</div>	
+		<div id='attribution'>
+		Source data Crown &copy; & database right ONS, ORR, SDG, WDTK, OS, OSM & HERE. For full attribution, see the "i" button on the map.
 		</div>
 	</div>
 
-	<div id="key">
-		<div id='keytitle' onclick="toggleKey()">KEY</div>
-		<!-- <div>Area proportional to selected metric value.</div><br /> -->
-		<div id='areainfo'></div>
-		<table id="keyTable">
-			<tr><td><div id="key1" class='keyBox'></div></td><td><div id="key2" class='keyBox'></div></td></tr>
-			<tr><td colspan='2'><div id="key1text"></div></td></tr>
-		</table>
-
-		<div id='linekey'>
-
-		</div>
-	</div>	
 	<div id="info">
+		<div id='closebuttonpanel'>
+			<button id='closebutton'>x</button>
+		</div>
+		<div id='infotitle'>
+		</div>
+		<div id='infotable1'>
+			<div id='infotable1title'>
+			</div>
+			<div id='infotable1chart'>
+			</div>
+		</div>
+		<div id='infotable2'>
+			<div id='infotable2title'>
+			</div>
+			<div id='infotable2chart'>
+			</div>
+		</div>
 	</div>
 
-	<div style='display: none; position: absolute; bottom: 10px; left: 10px; width: 150px;' id="button">
+	<div id='areainfo'></div>
+
+	<div style='display: none; position: absolute; bottom: 10px; right: 10px; width: 150px;' id="button">
 		<button type="button" onclick="bust();">View in full browser window</button>
 	</div>
 	
