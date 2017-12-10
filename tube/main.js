@@ -68,6 +68,8 @@ var blinkTimer;
 var dataTimer;
 var countdown;
 
+/* ****** Styles ****** */
+
 function pointCoreStyle(feature, resolution) 
 {
 	var zoomFactor = 0.15;
@@ -125,7 +127,6 @@ function pointLabelStyle(feature, resolution)
 	});			
 
 	return [metricLabel, nameLabel];
-
 };	
 
 function pointCaseStyle(feature, resolution) 
@@ -265,7 +266,6 @@ function thamesStyle(feature, resolution)
 
 function init()
 {
-	//TODO Historic - convert & to # and remove the x=
 	/* Specified by user in URL. */
 	var hash = window.location.hash;
 
@@ -329,15 +329,16 @@ function init()
 		$('#c' + i).css('backgroundColor', colourList[i]); 
 		$('#c' + i).css('color', 'black'); 
 	}	
+	
+	 /* ****** Layers and sources ****** */
 
-    //	url: "http://casa.oobrien.com/tiles/futurecity/{z}/{x}/{y}.png",
+    //	url: "http://tiles.oobrien.com/futurecity/{z}/{x}/{y}.png",
 	//	url: "http://2.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?app_id=YyCiz5fA5sFK593ZqCEG&app_code=hfwTGH-20M2rP3HyyWIltA",
-   	//	url: "http://marlin.casa.ucl.ac.uk/~ollie/tiles/londonboroughs/{z}/{x}/{y}.png"
    	layerBackground = new ol.layer.Tile({
    		source: new ol.source.XYZ({
 			url: "http://2.base.maps.cit.api.here.com/maptile/2.1/maptile/newest/normal.day.grey/{z}/{x}/{y}/256/png8?app_id=YyCiz5fA5sFK593ZqCEG&app_code=hfwTGH-20M2rP3HyyWIltA",
 			crossOrigin: null,
-			//attribution: "Map data &copy; <a href='http://osm.org/'>OSM</a>"
+			//attributions: [ "Map data &copy; <a href='http://osm.org/'>OSM</a>" ]
 			attributions: [ "<br />Background map and aerial imagery &copy; <a href='https://developer.here.com/'>HERE Maps/Navteq</a>. "]
 		}),
 		opacity: 0.25
@@ -621,7 +622,8 @@ function init()
 		}
 	}
 
-    //INTERACTIONS AND EVENTS		
+	/* ****** Interactions and events ****** */
+
 	selectClick = new ol.interaction.Select({
 		layers: [ layerPoints ],
 		condition: ol.events.condition.click,
@@ -869,21 +871,6 @@ function processLines()
 		}
 	} 	
 
-	//var tubeCreatureOrder = ["", "Bakerloo","Central","Circle","District","Hammersmith & City","Jubilee","Metropolitan","Northern","Piccadilly","Victoria", "Waterloo & City","London Overground"];
-
-	/*
-	for (var i = 1; i <= 12; i++)
-	{
-		//$('#c' + i).css('backgroundColor', linesForKey[tubeCreatureOrder[i]]); 
-		//$('#c' + i).css('color', 'black'); 
-	}
-	*/	
-	//$('#creaturehead').css('backgroundColor', linesForKey["London Overground"]); 
-	//$('#c3').css('color', 'black');
-	//$('#c5').css('color', 'black');
-	//$('#c6').css('color', 'black');
-	//$('#c11').css('color', 'black');
-
 	var linesForKeySorted = [];
 	for (var k in linesForKey)
 	{
@@ -899,21 +886,7 @@ function processLines()
 	{
 		for (line in linesForKeySorted)
 		{
-		/*	if (linesForKeySorted[line][0] == "Crossrail/TfL Rail")
-			{
-				if (linesForKeySorted[line][0] == "Crossrail/TfL Rail")
-				{
-					html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>Elizabeth</div>");							
-				}
-				else
-				{
-					html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
-				}
-			}
-			else
-			{ */
-				html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
-			//}
+			html += ("<div style='clear: both;'><div class='keyLineItem' style='background-color: " + linesForKeySorted[line][1] + ";' onclick='filterLine(\"" + linesForKeySorted[line][0] + "\");'>&nbsp;</div><div class='keyItemText'>"  + linesForKeySorted[line][0] + "</div>");			
 		}
 	}
 	html += "</td>";	
@@ -1004,7 +977,6 @@ function processLines()
 					priLine.set('strokeColor', features[i].get('lines')[j].colour);
 					priLine.set('strokeWidth', 3);					
 					priLine.set('strokeDashstyle', [4, 0]);
-					//priLine.set('strokeDashstyle', [0.1, 3.9]);
 					priLine.set('strokeLinecap', "square");		
 					layerLines.getSource().addFeature(priLine);	
 					priLineDrawn = true;	
@@ -1016,7 +988,6 @@ function processLines()
 					secLine.set('strokeColor', features[i].get('lines')[j].colour);	
 					secLine.set('strokeWidth', 3);
 					secLine.set('strokeDashstyle', [1, 7]);
-					//secLine.set('strokeDashstyle', [0.1, 7.9]);
 					secLine.set('strokeLinecap', "square");
 					layerLines.getSource().addFeature(secLine);
 					secLineDrawn = true;
@@ -1028,7 +999,6 @@ function processLines()
 					terLine.set('strokeColor', features[i].get('lines')[j].colour);	
 					terLine.set('strokeWidth', 3);
 					terLine.set('strokeDashstyle', [1, 11]);
-					//terLine.set('strokeDashstyle', [0.1, 11.9]);
 					terLine.set('strokeLinecap', "square");
 					layerLines.getSource().addFeature(terLine);
 					terLineDrawn = true;
@@ -1067,15 +1037,10 @@ function processLines()
 	
 }
 
+/* ****** AJAX data requests ****** */
+
 function requestData()
 {
-	/*
-	if ($("#themetric").val() == "map")
-	{
-		handleMetricChange();
-		return;
-	}
-	*/
 	$.ajax(
 	{
     	url: 'data/stats.json',
@@ -1140,34 +1105,9 @@ function requestDisruptionData()
 	
 	$('#loadingDisruption').css('display', 'block');
 	
-	var theurl = "";
-	//var timerange = $('#dates').val();
-	var timerange = "live";
-	
-	var today = moment().format('YYYY-MM-DD');
-	/*
-	var thissa = moment().day(6).format('YYYY-MM-DD'); //Doesn't work when viewing on Sundays.
-	var thissu = moment().day(6).add(1, 'days').format('YYYY-MM-DD'); //Doesn't work when viewing on Sundays.
-	var nextsa = moment().day(13).format('YYYY-MM-DD');
-	var nextsu = moment().day(13).add(1, 'days').format('YYYY-MM-DD');
-	*/			
-	if (timerange == "live") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	/*
-	if (timerange == "today") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + today + '&endDate=' + today + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "thiswe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "nextwe") { theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "2015-05-31") { theurl = "/data/2015-05-31.json"; }
-	if (timerange == "2017-01-09") { theurl = "/data/2017-01-09.json"; }
-	*/
-	if (timerange == "live") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	/*
-	if (timerange == "today") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + today + '&endDate=' + today + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "thiswe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + thissa + '&endDate=' + thissu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "nextwe") { thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?startDate=' + nextsa + '&endDate=' + nextsu + 'T23:59:59&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
-	if (timerange == "2015-05-31") { thestationurl = "/data/2015-05-31-stations.json"; }
-	if (timerange == "2017-01-09") { thestationurl = "/data/2017-01-09-stations.json"; }
-	*/
-	
+	var theurl = 'https://api.tfl.gov.uk/Line/Mode/tube,dlr,overground,tram,tflrail/Status?detail=true&app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+	var thestationurl = 'https://api.tfl.gov.uk/StopPoint/Mode/tube,dlr,overground,tram,tflrail/Disruption?app_id=' + tfl_app_id + '&app_key=' + tfl_app_key; }
+
 	$.ajax(
 	{
 		url: theurl,
@@ -1194,6 +1134,8 @@ function requestDisruptionData()
 	});
 	
 }
+
+/* ****** Handle responses from AJAX data requests ****** */
 
 function handleData(data)
 {
@@ -1226,10 +1168,6 @@ function handleData(data)
 	
 	for (var i in data)
 	{
-		if (!data[i].populated)
-		{
-			/* console.log(i); TODO Should not output anything here. */
-		}
 		delete data[i].populated;
 	}
 
@@ -1333,9 +1271,6 @@ function handleODData(dataText)
 				}
 			}
 		}
-		if (!matched) { 
-			//console.log("Ignoring data for journeys from: " + rowName); 
-		}
 	}
 	
 	odLoaded = true;
@@ -1376,15 +1311,13 @@ function handleStationDisruptionData(statusJSON)
 		}
 	}
 	
-	/* Manually close stations on the GOBLIN until Feb 2017 */
-/*	
+	/* Manually close stations on the GOBLIN until Feb 2018 */	
 	for (var i in stations)
 	{	
 		if (["910GUPRHLWY", "910GCROUCHH", "910GHRGYGL", "910GSTOTNHM", "910GWLTHQRD", "910GLEYTNMR", "910GLYTNSHR", "910GWNSTDPK", "910GWDGRNPK"].indexOf(stations[i].getId()) > -1) { stations[i].set('closed', true); }
 		//if ([].indexOf(stations[i].getId()) > -1) { stations[i].set('partclosed', true); }
 	}
-*/	
-	
+
 	var open = 0;
 	var pc = 0;
 	var closed = 0;
@@ -1422,8 +1355,7 @@ function handleDisruptionData(statusJSON)
 		}
 	}
 	
-	/* Manually close GOBLIN until Feb 2018 */
-	
+	/* Manually close GOBLIN until Feb 2018 */	
 	markClosed("910GGOSPLOK", "910GUPRHLWY", "Rail", "London Overground");	
 	markClosed("910GUPRHLWY", "910GCROUCHH", "Rail", "London Overground");
 	markClosed("910GCROUCHH", "910GHRGYGL", "Rail", "London Overground");
@@ -1474,7 +1406,6 @@ function handleDisruptionData(statusJSON)
 								stations[i].set('closed', true);
 							}
 						}
-						//TODO Future enhancement: Show station alert dots.
 					}				
 				} */
 				/* This is problematic, as sometimes TfL use special service and show the service using the disruption sequence, and sometimes they indicate a closed line with special service. Using the former for now. */	
@@ -1509,7 +1440,7 @@ function handleDisruptionData(statusJSON)
 					)
 					{
 						var segmentId = '#' + network + "-" + linename + "_";
-						//console.log(segmentId);
+						/* console.log(segmentId); //Useful to debug, if the closures map doesn't line up with TfL's own map - normally due to an incorrect ID. */
 
 						for (var f in features)
 						{	
@@ -1542,7 +1473,6 @@ function handleDisruptionData(statusJSON)
 	
 	handleChange();
 
-
 	var interval_ms_blink = 1000;
 	var interval_ms = 600000;
 	$('#loadingDisruption').css('display', 'none');
@@ -1550,18 +1480,9 @@ function handleDisruptionData(statusJSON)
 	{
 		blinkTimer = setInterval(flashLines, interval_ms_blink); //Every second (blink on/off)
 	}
-	//if ($('#dates').val() == "live")
-	//{
-		
-		dataTimer = setInterval(requestDisruptionData, interval_ms); //Every 10 minutes
-		countdown = interval_ms/interval_ms_blink;
-	//}
-	//else
-	//{
-	//	dataTimer = setInterval(requestDisruptionData, 3600000); //Hourly	
-	//}
+	dataTimer = setInterval(requestDisruptionData, interval_ms); //Every 10 minutes
+	countdown = interval_ms/interval_ms_blink;
 	$('#countsegments').html(disruptedSegCount);
-
 }
 
 function markClosed(startcode, endcode, network, linename)
@@ -1575,7 +1496,7 @@ function markClosed(startcode, endcode, network, linename)
 	}
 	if (startcode && endcode && startcode != endcode)
 	{
-		//console.log(segmentId);
+		/* console.log(segmentId); //Useful to debug, if the closures map doesn't line up with TfL's own map - normally due to an incorrect ID. */
 
 		var features = layerLinesAll.getSource().getFeatures();
 		for (var f in features)
@@ -2320,19 +2241,16 @@ function handleChange()
 				var stats = demographicData[metric][features[i].getId()];
 				if (stats)
 				{
-					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
 					features[i].set('radius', scalingFactor*0.15); 
 					/* if (stats[1] == "100")
 					{
 						stats[1] = "100+";
 					} */
 					features[i].set('geolabel', features[i].get('geolabel') + "\n(" + stats[1] + ")"); 
-					//features[i].set('labelcolor', "000000");	
 					ratio = ((stats[0]-250000.0)/750000.0)	
 					if (ratio < 0) { ratio = 0; }
 					if (ratio > 1) { ratio = 1; } 
 					features[i].set('labelcolor', getGBRColour(ratio));
-					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 10*parseInt(stats[0]/10000.00));
 					features[i].set('strokeWidth', 3);
 				}
@@ -2340,7 +2258,6 @@ function handleChange()
 				{
 					features[i].set('radius', scalingFactor*0.07); 
 					features[i].set('labelcolor', "#000000");				
-					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
 					features[i].set('strokeWidth', 3);				
 				}
@@ -2350,19 +2267,16 @@ function handleChange()
 				var stats = demographicData[metric][features[i].getId()];
 				if (stats)
 				{
-					//features[i].set('radius', scalingFactor*Math.sqrt(stats[1])*0.02); 
 					features[i].set('radius', scalingFactor*0.15); 
 					/* if (stats[1] == "100")
 					{
 						stats[1] = "100+";
 					} */
 					features[i].set('geolabel', features[i].get('geolabel') + "\n(" + stats[1] + ")"); 
-					//features[i].set('labelcolor', "000000");	
 					ratio = ((stats[0]+50000.0)/100000.0)	
 					if (ratio < 0) { ratio = 0; }
 					if (ratio > 1) { ratio = 1; } 
 					features[i].set('labelcolor', getGWRColour(1-ratio));
-					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '' + 1*parseInt(stats[0]/1000.00));
 					features[i].set('strokeWidth', 3);
 				}
@@ -2370,7 +2284,6 @@ function handleChange()
 				{
 					features[i].set('radius', scalingFactor*0.07); 
 					features[i].set('labelcolor', "#000000");				
-					//features[i].set('labelcolor', demographicMap[metric][stats][1]);
 					features[i].set('datalabel', '');
 					features[i].set('strokeWidth', 3);				
 				}
@@ -2386,7 +2299,6 @@ function handleChange()
 					var ratio = exit*1.0/(entry*1.0+exit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
 					features[i].set('fillColor', getGWRColour(ratio));
-					/* console.log(ratio); */
 				}		
 			}
 			else if (metric == "wdwe_out")
@@ -2400,7 +2312,6 @@ function handleChange()
 					var ratio = weexit*1.0/(wdexit*1.0+weexit*1.0);
 					features[i].set('radius', scalingFactor*Math.sqrt(value));
 					features[i].set('fillColor', getGWRColour(ratio));
-					/* console.log(ratio); */
 				}		
 			}
 			else if (metric == "peaktime")
@@ -2426,22 +2337,16 @@ function handleChange()
 					var b = bt*1.0/total;
 		
 					//Emphasise extreme values so they look less "grey".
-					//console.log(features[i].get('stat_id'));
-					//console.log(r, g, b);
 					r = enhance(r, skewFactor, boundary);
 					g = enhance(g, skewFactor, boundary);
 					b = enhance(b, skewFactor, boundary);
-					//console.log(r, g, b);
 					var colourHex = rgb2Hex(r, g, b);
-					//console.log(colourHex);
-					features[i].set('fillColor', '#' + colourHex);
-					
+					features[i].set('fillColor', '#' + colourHex);					
 					/*
 					if (features[i].get('radius') > 50)
 					{
 						features[i].set('geolabel', features[i].get('name'));				
 					}*/
-					/* console.log(ratio); */
 				}		
 			}
 			else if (metric == "nrtickets")
@@ -2467,14 +2372,10 @@ function handleChange()
 					var b = bt*1.0/total;
 		
 					//Emphasise extreme values so they look less "grey".
-					//console.log(features[i].get('stat_id'));
-					//console.log(r, g, b);
 					r = enhance(r, skewFactor, boundary);
 					g = enhance(g, skewFactor, boundary);
 					b = enhance(b, skewFactor, boundary);
-					//console.log(r, g, b);
 					var colourHex = rgb2Hex(r, g, b);
-					//console.log(colourHex);
 					features[i].set('fillColor', '#' + colourHex);
 					
 					/*
@@ -2482,7 +2383,6 @@ function handleChange()
 					{
 						features[i].set('geolabel', features[i].get('name'));				
 					}*/
-					/* console.log(ratio); */
 				}		
 			}
 			else if (yearcomp != "same")
@@ -2640,7 +2540,7 @@ function handleChange()
 		strokeWidths = [4, 4];
 	
 	}
-	else if (metric == "peaktime") //TODO
+	else if (metric == "peaktime")
 	{
 		caption = "<table class='keycaptiontable'><tr><td>Mainly entries before 10am on weekdays</td><td>Mainly entries after 10am on weekdays (green) or on Sundays (blue)</td></tr></table>";
 		fills = ["#ff0000", "#00ffff"];
@@ -2701,7 +2601,6 @@ function updateSelectedInfo(feature)
 {
 	console.log('updatedSelectedInfo');
 	$("#info").css('display', 'block');
-	//var feature = selectClick.getFeatures().item(0);
 	var metric = $("#themetric").val();	
 
 	var htmlstr = "<div style='font-size: 21px;' title='" + feature.get('stat_id') + "'>" + feature.get('name') + "</div>";
@@ -2861,7 +2760,6 @@ function updateSelectedInfo(feature)
 				}
 			}
 		
-			/* Set up HTML table. */
 			var tuples = [];
  
 			var features = layerPoints.getSource().getFeatures();
@@ -2962,13 +2860,6 @@ function updateSelectedInfo(feature)
 		$("#infotable2title").html('');
 		$("#infotable2chart").html('');
 	}
-	/* else if (metric == "map" || metric == "night" || metric == "osi")
-	{
-		$("#infotable1title").html('');
-		$("#infotable1chart").html('');
-		$("#infotable2title").html('');
-		$("#infotable2chart").html('');
-	} */
 	else
 	{
 		$("#infotable1title").html("Daily Entries & Exits");	
@@ -3078,8 +2969,6 @@ function updateSelectedInfo(feature)
 
 		var options = {
 			chart: {
-			  /* title: 'Bikes in Docks',
-			  subtitle: 'last 24h' */
 			  pointsVisible: true,
 			  fontSize: 10
 			},
@@ -3089,37 +2978,15 @@ function updateSelectedInfo(feature)
 			legend: {position: 'none'},
 			//tooltip: { isHtml: true, textStyle: { fontSize: 11 } },
 			width: 250,
-			height: 180, /*
-			series: {
-				0: { axis: 'perday' },
-				1: { axis: 'perday' },
-				2: { axis: 'perday' },
-				3: { axis: 'perday' },
-				4: { axis: 'perday' },
-				5: { axis: 'perday' },
-				//6: { axis: 'peryear'}
-			},
-			axes: {
-				y: {
-					perday: { label: 'Counts/Day' },
-					//peryear: { label: 'Counts/Year'}
-				}
-			}, */
+			height: 180,
 			hAxis: {
-				//format: 'EEE HH:mm',
-				//gridlines: { color: '#444', count: 4 },
 				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
 				baselineColor: '#444',
-				//minTextSpacing: 0,
-				//viewWindow: { max: nd },
-				//viewWindowMode: "explicit", 
 				title: ''
 			},
 			vAxis: {
-				//format: 'decimal',
 				minValue: 0,
 				viewWindow: { min: 0 },
-				//viewWindowMode: "explicit", 
 				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
 				gridlines: { color: '#444' },
 			}	
@@ -3127,8 +2994,6 @@ function updateSelectedInfo(feature)
 
 		var options2 = {
 			chart: {
-			  /* title: 'Bikes in Docks',
-			  subtitle: 'last 24h' */
 			  pointsVisible: true,
 			  fontSize: 10
 			},
@@ -3152,38 +3017,16 @@ function updateSelectedInfo(feature)
 				12: { color: coloursForKey2[12], }, 
 			},				
 			legend: {position: 'none'},
-			//tooltip: { isHtml: true, textStyle: { fontSize: 11 } },
 			width: 250,
-			height: 170, /*
-			series: {
-				0: { axis: 'perday' },
-				1: { axis: 'perday' },
-				2: { axis: 'perday' },
-				3: { axis: 'perday' },
-				4: { axis: 'perday' },
-				5: { axis: 'perday' },
-				//6: { axis: 'peryear'}
-			},
-			axes: {
-				y: {
-					perday: { label: 'Counts/Day' },
-					//peryear: { label: 'Counts/Year'}
-				}
-			}, */
+			height: 170,
 			hAxis: {
 				//format: 'EEE HH:mm',
 				gridlines: { color: '#444', count: 4 },
 				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
 				baselineColor: '#444',
-				//minTextSpacing: 0,
-				//viewWindow: { max: nd },
-				//viewWindowMode: "explicit", 
-				//title: 'Entries/Exits By Day Period'
 				title: '',
 			},
 			vAxis: {
-				//format: 'decimal',
-				//viewWindowMode: "explicit", 
 				textStyle: { fontName: 'Arial', fontSize: '10', color: 'white', bold: false },
 				gridlines: { color: '#444' },
 				title: '',
@@ -3206,6 +3049,32 @@ function updateSelectedInfo(feature)
 			$('#infotable2').css('display', 'none');
 		}
 	}		
+}
+
+function updateUrl()
+{
+	var layerString = "";
+	layerBackground.getVisible() ? layerString += "T" : layerString += "F";
+    layerAerial.getVisible() ? layerString += "T" : layerString += "F";
+	layerLines.getVisible() ? layerString += "T" : layerString += "F";
+	layerZones.getVisible() ? layerString += "T" : layerString += "F";
+
+	var centre = ol.proj.transform(olMap.getView().getCenter(), "EPSG:3857", "EPSG:4326");  
+	var selected = "*";
+	if (selectClick != undefined)
+	{
+		var selectFeatures = selectClick.getFeatures();
+		if (selectFeatures.getLength() > 0)
+		{
+			selected = selectFeatures.item(0).getId();
+		}
+	}
+	var filter = "*";
+	if (serviceFilter != undefined)
+	{	
+		filter = serviceFilterCodes[serviceFilter];
+	}
+	window.location.hash = "/" + $('#themetric').val() + "/" + $('#year').val() + "/" + $('#yearcomp').val() + "/" + filter + "/" + selected + "/" + layerString + "/" + olMap.getView().getZoom() + "/" + centre[0].toFixed(4) + "/" + centre[1].toFixed(4) + "/"; 
 }
 
 /* ****** Ad-hoc actions ****** */
@@ -3235,21 +3104,6 @@ function toggleAerial()
         }
         updateUrl();
 }
-
-function toggleKey()
-{
-	if ($("#keyTable").css('display') != 'none')
-	{
-		$("#keyTable").css('display', 'none');
-		$("#linekey").css('display', 'none');
-	}
-	else
-	{
-		$("#keyTable").css('display', "block");
-		$("#linekey").css('display', "block");
-	}	
-}
-
 
 function toggleLines()
 {
@@ -3425,32 +3279,6 @@ function hex2rgb(hex) {
 function bust()
 {
 	top.location = self.location.href;
-}
-
-function updateUrl()
-{
-	var layerString = "";
-	layerBackground.getVisible() ? layerString += "T" : layerString += "F";
-    layerAerial.getVisible() ? layerString += "T" : layerString += "F";
-	layerLines.getVisible() ? layerString += "T" : layerString += "F";
-	layerZones.getVisible() ? layerString += "T" : layerString += "F";
-
-	var centre = ol.proj.transform(olMap.getView().getCenter(), "EPSG:3857", "EPSG:4326");  
-	var selected = "*";
-	if (selectClick != undefined)
-	{
-		var selectFeatures = selectClick.getFeatures();
-		if (selectFeatures.getLength() > 0)
-		{
-			selected = selectFeatures.item(0).getId();
-		}
-	}
-	var filter = "*";
-	if (serviceFilter != undefined)
-	{	
-		filter = serviceFilterCodes[serviceFilter];
-	}
-	window.location.hash = "/" + $('#themetric').val() + "/" + $('#year').val() + "/" + $('#yearcomp').val() + "/" + filter + "/" + selected + "/" + layerString + "/" + olMap.getView().getZoom() + "/" + centre[0].toFixed(4) + "/" + centre[1].toFixed(4) + "/"; 
 }
 
 /*

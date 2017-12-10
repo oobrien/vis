@@ -16,7 +16,7 @@
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.css" />	
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.structure.css" />		
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.theme.css" />		
-	<link rel="stylesheet" type="text/css" media="all" href="style.css?t=<?php echo time(); ?>" />	
+	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
 	<link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin+Condensed" rel="stylesheet">
 	
@@ -24,10 +24,10 @@
 	<script type="text/javascript" src="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.js"></script>	     
 	<script type="text/javascript" src="http://lib.oomap.co.uk/moment.js"></script>
 	<script type="text/javascript" src="http://lib.oomap.co.uk/proj4.js"></script>	     
-	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol-debug.js"></script> 
+	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.js"></script> 
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type="text/javascript" src="config.js?t=<?php echo time(); ?>"></script>
-	<script type="text/javascript" src="main.js?t=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="config.js"></script>
+	<script type="text/javascript" src="main.js"></script>
 	<script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -60,46 +60,32 @@
 					<a href="https://twitter.com/share" class="twitter-share-button" data-via="oobr" data-hashtags="dataviz" data-dnt="true">Tweet</a>
 					<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
 				 </td>
-				<?php //<td>
-				//	<a href="https://twitter.com/oobr" class="twitter-follow-button" data-show-count="false" data-dnt="true">Follow @oobr</a>
-				//	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
-				//</td> ?>
 			</tr>
 		</table>
 		<div id='about'>
 			Created by <a href="http://oobrien.com/">Oliver O'Brien</a>, UCL. 
 			<a href="http://oobrien.com/2014/10/tube-tongues/">About this map</a>. <a href="http://github.com/oobrien/vis">GitHub</a>.<br />
-			Tip: choose different data graphics from the Metric drop-down.
-		
+			Tip: choose different data graphics from the Metric drop-down.		
 		</div>
-		
-		<div id='poster'> <!--
-			<div style='float: left; border: 2px dotted #aaf; padding: 3px 3px 0 3px; margin: 5px 5px 5px 5px; border-radius: 5px;'><a href="http://shop.oobrien.com/"><img src='images/tubetongues-micro.png' /></a></div>
-			<div style='float: left; border: 2px dotted #aaf; padding: 3px 3px 0 3px; margin: 5px 5px 10px 5px; border-radius: 5px;'><a href="http://shop.oobrien.com/"><img src='images/northsouth-micro.png' /></a></div>
-			<div style='text-align: center; padding: 13px 0; font-size: 12px; font-family: Apple Chancery, serif;'>
-			<div><span style='color: red;'>New!</span> A print of Tube Tongues<br /> is available at <a style='color: #666;' href='http://shop.oobrien.com/'>shop.oobrien.com</a></div>
-		-->
-		</div>	
-			
-		</div>		
 	</div>
 
 	<div id="toppanel">
-		<div id='creature'><a href="/">
-			<div class='cp' id='c1'>T</div>
-			<div class='cp' id='c2'>U</div>
-			<div class='cp' id='c3'>B</div>
-			<div class='cp' id='c4'>E</div>
-			<div class='cp' id='c5'>C</div>
-			<div class='cp' id='c6'>R</div>
-			<div class='cp' id='c7'>E</div>
-			<div class='cp' id='c8'>A</div>
-			<div class='cp' id='c9'>T</div>
-			<div class='cp' id='c10'>U</div>
-			<div class='cp' id='c11'>R</div>
-			<div class='cp' id='c12'>E</div>
-			<!-- <div id='creaturehead'>&bull;&bull;</div> -->
-		</a></div>
+		<div id='creature'>
+			<a href="/">
+				<div class='cp' id='c1'>T</div>
+				<div class='cp' id='c2'>U</div>
+				<div class='cp' id='c3'>B</div>
+				<div class='cp' id='c4'>E</div>
+				<div class='cp' id='c5'>C</div>
+				<div class='cp' id='c6'>R</div>
+				<div class='cp' id='c7'>E</div>
+				<div class='cp' id='c8'>A</div>
+				<div class='cp' id='c9'>T</div>
+				<div class='cp' id='c10'>U</div>
+				<div class='cp' id='c11'>R</div>
+				<div class='cp' id='c12'>E</div>
+			</a>
+		</div>
 		
 		<div id="title">London Tube Data Maps</div>
 		<div id="subtitle">Loading...</div>
@@ -145,8 +131,6 @@
 						<option value='nrmap'>NR: Network Map</option>
 						<option value='nrtotal'>NR: Annual Entries/Exits</option>
 						<option value='nrtickets'>NR: Ticket Type</option>
-						<!-- <option value='crossrail'>Crossrail</option>
-						<option value='overground'>Overground</option> -->
 					</select>
 				</div>
 			</div>
@@ -187,13 +171,10 @@
 		</div>
 
 		<div id="key">
-			<div id='keytitle' onclick="toggleKey()">KEY</div>
-			<!-- <div>Area proportional to selected metric value.</div><br /> -->
 			<table id="keyTable">
 				<tr><td><div id="key1" class='keyBox'></div></td><td><div id="key2" class='keyBox'></div></td></tr>
 				<tr><td colspan='2'><div id="key1text"></div></td></tr>
 			</table>
-
 			<div id='closures'>
 				<table id='counts'><th style='color: white;'>Stations<br />Open</th><th style='color: #ffaa00;'>Stations<br />Part-Closed</th><th style='color: #ff0000;'>Stations<br />Closed</th><th style='color: #ff0000;'>Disrupted<br />Segments</th></tr>
 				<tr><td style='color: white;' id='countopen'></td><td style='color: #ffaa00;' id='countpc'></td><td style='color: #ff0000;' id='countclosed'></td><td  style='color: #ff0000;' id='countsegments'></td></tr></table>

@@ -173,18 +173,6 @@ width: 80px;
 	overflow-y: auto;
 }
 
-#keytitle
-{
-	position: absolute;
-	left: 0;
-	top: 10px;
-	font-size: 18px; 
-	color: black;
-	transform: rotate(270deg);
-	transform-origin: bottom left 0;
-	cursor: pointer;
-}
-
 .keyBox
 {
 	width: 90px;
