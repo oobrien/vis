@@ -1,6 +1,37 @@
-var defaultJourneyStart = 322; /* Brixton */
+var lineAttrs = { 
+	"Bakerloo": 			{ "id":"B", "colour":"#B36305", "network":"Tube" }, 
+	"Central": 				{ "id":"C", "colour":"#E32017", "network":"Tube" }, 
+	"Circle": 				{ "id":"I", "colour":"#FFD300", "network":"Tube" },
+	"Crossrail": 			{ "id":"X", "colour":"#7156A5", "network":"Rail" }, //incl. TfL Rail, Elizabeth Line
+	"Crossrail 2": 			{ "id":"2", "colour":"#798A34", "network":"Rail" }, 
+	"DLR": 					{ "id":"L", "colour":"#00A4A7", "network":"DLR" }, 
+	"District": 			{ "id":"D", "colour":"#00782A", "network":"Tube" }, 
+	"Emirates Air Line": 	{ "id":"A", "colour":"#E51836", "network":"Emirates Air Line" }, 
+	"Hammersmith & City": 	{ "id":"H", "colour":"#F3A9BB", "network":"Tube" }, 
+	"Jubilee": 				{ "id":"J", "colour":"#A0A5A9", "network":"Tube" }, 
+	"Metropolitan": 		{ "id":"M", "colour":"#9B0056", "network":"Tube" }, 
+	"Northern": 			{ "id":"N", "colour":"#000000", "network":"Tube" }, 
+	"London Overground": 	{ "id":"O", "colour":"#EE7C0E", "network":"Rail" }, 
+	"Piccadilly": 			{ "id":"P", "colour":"#003688", "network":"Tube" }, 
+	"Tramlink": 			{ "id":"T", "colour":"#84B817", "network":"Tramlink" }, 
+	"Victoria": 			{ "id":"V", "colour":"#0098D4", "network":"Tube" },
+	"Waterloo & City": 		{ "id":"W", "colour":"#95CDBA", "network":"Tube" }, 
+	"National Rail": 		{ "id":"NR", "colour":"#333333", "network":"Rail" },
+	"East London": 			{ "id":null, "colour":"#FFA300", "network":"Tube" }, //We don't assign an ID as we don't want this to appear in our key.
+};
+
+var networkAttrs = {
+	"Tube": 				{ "id":"U", "colour":"#003688", "multiline":true },
+	"DLR":					{ "id":"L", "colour":"#00A4A7", "multiline":false },
+	"Rail": 				{ "id":"R", "colour":"#444444", "multiline":true },
+	"Tramlink": 			{ "id":"T", "colour":"#84B817", "multiline":false },
+	"Emirates Air Line": 	{ "id":"A", "colour":"#E51836", "multiline":false },
+}
+
+var primaryOrder = ["Tube", "DLR", "Rail", "Tramlink", "Emirates Air Line"];
 
 var demographicMap = {};
+var metricInfo = {};
 
 demographicMap["tongues"] = { 
 	"c002": ["English", "#222222"],
@@ -143,16 +174,14 @@ demographicMap["livesontheline"] = {
 demographicMap["houseprices"];
 demographicMap["housepricesdiff"];
 
-var metricInfo = {};
-
 metricInfo["map"] = {
 	"title": "Geographical Tube Map",
 	"subtitle": "The tube network in real life",
- 	"defaultDataYear": 2017,
- 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020],
+ 	"currentDataYear": 2017,
+ 	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2035],
  	"defaultNetworkYear": 2017,
  	"tieNetworkToData": true,
- 	"keyValues": [0.7, 0.7],
+ 	"keyValues": [0.1, 0.7],
  	"yearcomp": false,
  	"scale": 15,
 };
@@ -161,7 +190,7 @@ metricInfo["closures"] = {
 	"title": "Live Disruption Map",
 	"subtitle": "Live data on line & station closures",
 	"additional": "Disrupted line sections are shown as <span id='blinking'>blinking</span> dots. See <a href='https://tfl.gov.uk/tube-dlr-overground/status/'>TfL's status page</a> for details. Data updates in <span id='countdown'></span>s.",
- 	"defaultDataYear": 2017,
+ 	"currentDataYear": 2017,
  	"availableDataYears": [2017],
  	"availableDataYearsByNetwork": {
  		"Tube": [2017],
@@ -177,17 +206,26 @@ metricInfo["closures"] = {
  	"scale": 15,
 };
 
-metricInfo["osi"] = metricInfo["map"];
-metricInfo["osi"]["availableDataYears"] = [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017]; 
+metricInfo["osi"] = {
+	"title": "Free Out-of-Station Interchanges",
+	"subtitle": "'Hidden' free transfers",
+ 	"currentDataYear": 2017,
+ 	"availableDataYears": [2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2035],
+ 	"defaultNetworkYear": 2017,
+ 	"tieNetworkToData": true,
+ 	"keyValues": [0.1, 0.5],
+ 	"yearcomp": false,
+ 	"scale": 15,
+};
 
 metricInfo["night"] = {
 	"title": "Night Tube Map",
 	"subtitle": "Friday/Saturday late nights",
- 	"defaultDataYear": 2017,
- 	"availableDataYears": [2017],
- 	"defaultNetworkYear": 2017,
+ 	"currentDataYear": 2018,
+ 	"availableDataYears": [2016, 2017, 2018],
+ 	"defaultNetworkYear": 2018,
  	"tieNetworkToData": true,
- 	"keyValues": [0.7, 0.7],
+ 	"keyValues": [0.1, 0.5],
  	"yearcomp": false,
  	"scale": 15,
 };
@@ -195,7 +233,7 @@ metricInfo["night"] = {
 metricInfo["total"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Station Entry/Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
@@ -214,7 +252,7 @@ metricInfo["total"] = {
 metricInfo["in"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Station Entry/Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
@@ -235,7 +273,7 @@ metricInfo["out"] = metricInfo["in"];
 metricInfo["early_in"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Station Entry/Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
@@ -269,7 +307,7 @@ metricInfo["sun_out"] = metricInfo["in"];
 metricInfo["am_inout"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "AM peak Entry vs Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
@@ -288,7 +326,7 @@ metricInfo["am_inout"] = {
 metricInfo["wdwe_out"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Weekday vs Weekend Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
@@ -307,7 +345,7 @@ metricInfo["wdwe_out"] = {
 metricInfo["peaktime"] = {
 	"title": "London Tube Data Map",
 	"subtitle": "Peak Time of Entry",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2014, 2015, 2016],
@@ -326,7 +364,7 @@ metricInfo["peaktime"] = {
 metricInfo["journeys"] = {
 	"title": "Journey Destinations",
 	"subtitle": "For selected start station",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2012, 2014, 2015, 2016],
  	"availableDataYearsByNetwork": {
  		"Tube": [2012, 2014, 2015, 2016],
@@ -335,6 +373,8 @@ metricInfo["journeys"] = {
  		"Rail": [],
  		"Emirates Air Line": [],
  	}, 
+ 	"file": 'rods_od.csv',
+ 	"defaultkey": 322,
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
  	"keyValues": [1000, 50],
@@ -345,7 +385,7 @@ metricInfo["journeys"] = {
 metricInfo["nrmap"] = {
 	"title": "National Rail Data Map",
 	"subtitle": "Network Map",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2016],
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
@@ -357,7 +397,7 @@ metricInfo["nrmap"] = {
 metricInfo["nrtotal"] = {
 	"title": "National Rail Data Map",
 	"subtitle": "Station Entry/Exit Volumes",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2015, 2016],
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
@@ -369,7 +409,7 @@ metricInfo["nrtotal"] = {
 metricInfo["nrtickets"] = {
 	"title": "National Rail Data Map",
 	"subtitle": "Ticket Type (Full/Reduced/Season)",
- 	"defaultDataYear": 2016,
+ 	"currentDataYear": 2016,
  	"availableDataYears": [2015, 2016],
  	"defaultNetworkYear": 2016,
  	"tieNetworkToData": true,
@@ -382,13 +422,13 @@ metricInfo["tongues"] = {
 	"title": "Tube Tongues",
 	"subtitle": "Second most commonly spoken language (after English) by residents",
 	"subinfo": "Top primary languages spoken by people living near here:", 
-	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp; Chatgaya. Chinese ao (any other) excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br />Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire &amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.",
+	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp; Chatgaya. Chinese ao (any other) excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br />Inspired by <a href='http://spatial.ly/2012/07/lives-on-the-line/'>Lives on the Line</a> by James Cheshire &amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.",
 	"file": "qs204ew_tubebuffer200m.json",
 	"keyexample": "...of people living near here speak French.",
  	"defaultkey": "c012",
- 	"defaultDataYear": 2011,
+ 	"currentDataYear": 2011,
  	"availableDataYears": [2011],
- 	"defaultNetworkYear": 2019,
+ 	"defaultNetworkYear": 2017,
  	"tieNetworkToData": false,
  	"keyValues": [0.05, 0.10],
  	"infolimit": 0.005,
@@ -400,11 +440,11 @@ metricInfo["wardwords"] = {
 	"title": "Tube Tongues (Wards)",
 	"subtitle": "Second most commonly spoken language (after English) in each ward",
 	"subinfo": "Top primary languages spoken by people living in this ward:", 
-	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp; Chatgaya. Chinese ao (any other) excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br />Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire &amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.",
+	"additional": "Persian includes Farsi. Bengali includes Sylheti &amp; Chatgaya. Chinese ao (any other) excludes those who specified Mandarin or Cantonese. Tagalog includes Filipino.<br /><br />Inspired by <a href='http://spatial.ly/2012/07/lives-on-the-line/'>Lives on the Line</a> by James Cheshire &amp; <a href='http://mappinglondon.co.uk/2013/second-languages/'>Second Languages</a> by Neal Hudson.",
 	"file": "qs204ew_wardsingle.json",
 	"keyexample": "...of people living in this ward speak French.",
  	"defaultkey": "c012",
- 	"defaultDataYear": 2011,
+ 	"currentDataYear": 2011,
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2011,
  	"tieNetworkToData": false,
@@ -416,15 +456,15 @@ metricInfo["wardwords"] = {
 
 metricInfo["occupation"] = {
  	"title": "Working Lines",
- 	"subtitle": "What do the locals do?",
+ 	"subtitle": "What do people living here do?",
  	"subinfo": "Top occupations of people living near here:",
-	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br />Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.",
+	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br />Inspired by <a href='http://spatial.ly/2012/07/lives-on-the-line/'>Lives on the Line</a> by James Cheshire.",
  	"file": "qs606ew_tubebuffer200m.json",
  	"keyexample": "...of people living near here have artistic, literary or media occupations - the most popular job type locally.",
  	"defaultkey": "c049",
- 	"defaultDataYear": 2011,
+ 	"currentDataYear": 2011,
  	"availableDataYears": [2011],
- 	"defaultNetworkYear": 2019,
+ 	"defaultNetworkYear": 2017,
  	"tieNetworkToData": false,
  	"keyValues": [0.05, 0.10],
  	"infolimit": 0.03,
@@ -434,13 +474,13 @@ metricInfo["occupation"] = {
 
 metricInfo["wardwork"] = {
  	"title": "Working Lines (Wards)",
- 	"subtitle": "What do the locals do?",
+ 	"subtitle": "What do people living here do?",
  	"subinfo": "Top occupations of people living in this ward:",
-	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br />Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a> by James Cheshire.",
+	"additional": "I am using highly abbreviated names to avoid clutter on the map - see <a href='https://www.nomisweb.co.uk/census/2011/qs606ew.pdf'>here</a> for the full names. * = professional, ^ = associate professional, as = assistant/cashier, md = manager/director, med = media, elem = elementary, $ = financial.<br /><br />Inspired by <a href='http://spatial.ly/2012/07/lives-on-the-line/'>Lives on the Line</a> by James Cheshire.",
  	"file": "qs606ew_wardsingle.json",
  	"keyexample": "...of people living in this ward have artistic, literary or media occupations - the most popular job type locally.",
  	"defaultkey": "c049",
- 	"defaultDataYear": 2011,
+ 	"currentDataYear": 2011,
  	"availableDataYears": [2011],
  	"defaultNetworkYear": 2011,
  	"tieNetworkToData": false,
@@ -454,13 +494,13 @@ metricInfo["wardwork"] = {
  	"title": "Lives on the Line",
  	"subtitle": "A Map of Life Expectancy at Birth",
  	"subinfo": "Life expectancies at birth of people living in MSOAs touching a 200m buffer around the centroid of this station, 2009-13, Male+Female average",
-	"additional": "Inspired by <a href='http://life.mappinglondon.co.uk/'>Lives on the Line</a><br />by James Cheshire.</i>",
+	"additional": "Inspired by <a href='http://spatial.ly/2012/07/lives-on-the-line/'>Lives on the Line</a><br />by James Cheshire.</i>",
  	"file": "livesontheline20092013.json",
  	"keyexample": "The number indicates the life expectancy at birth",
  	"defaultkey": "82",
- 	"defaultDataYear": 2013,
+ 	"currentDataYear": 2013,
  	"availableDataYears": [2013],
- 	"defaultNetworkYear": 2019,
+ 	"defaultNetworkYear": 2017,
  	"tieNetworkToData": false,
  	"keyValues": [0.023, 0.023],
  	"infolimit": 0.01,
@@ -472,13 +512,13 @@ metricInfo["wardwork"] = {
  	"title": "House Prices (Zoopla)",
  	"subtitle": "Current listing prices for 2-beds, £K",
  	"subinfo": "House prices for properties within a square 1000m box around the centroid of this station, near-live.",
-	"additional": "Using near-live property data for 2-bed houses/flats, from Zoopla. Excludes listings over 1 year or last updated more than 6 months ago. Also excludes shared ownership/equity. Data is refreshed on a regular basis. <div><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='images/powered-by-zoopla.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a></div>",
+	"additional": "Using near-live property data for 2-bed houses/flats, from the Zoopla API:<div style='text-align: center; padding: 5px;'><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='https://www.zoopla.co.uk/static/images/mashery/powered-by-zoopla-150x73.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a></div> Excludes listings over 1 year or last updated more than 6 months ago. Also excludes shared ownership & shared equity properties. Data is refreshed on a regular basis.",
  	"file": "../houseprices/getzoopladata.php",
  	"keyexample": "The number indicates the average house prices",
  	"defaultkey": "500000",
- 	"defaultDataYear": 2017,
+ 	"currentDataYear": 2017,
  	"availableDataYears": [2017],
- 	"defaultNetworkYear": 2019,
+ 	"defaultNetworkYear": 2035,
  	"tieNetworkToData": false,
  	"keyValues": [0.025, 0.025],
  	"infolimit": 0.01,
@@ -490,13 +530,13 @@ metricInfo["wardwork"] = {
  	"title": "House Price Changes (Zoopla)",
  	"subtitle": "Current listing price changes (3 months) for 2-beds, £K",
  	"subinfo": "House prices for properties within a square 1000m box around the centroid of this station, near-live.",
-	"additional": "Using near-live property data for 2-bed houses/flats, from Zoopla. Excludes listings over 1 year or last updated more than 6 months ago. Also excludes shared ownership/equity. Data is refreshed on a regular basis. <div><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='images/powered-by-zoopla.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a></div>",
+	"additional": "Using near-live property data for 2-bed houses/flats, from the Zoopla API:<div style='text-align: center; padding: 5px;'><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='https://www.zoopla.co.uk/static/images/mashery/powered-by-zoopla-150x73.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a></div> Excludes listings over 1 year or last updated more than 6 months ago. Also excludes shared ownership/equity. Data is refreshed on a regular basis. <div><a href='http://zoopla.co.uk/' style='border-width: 0;'><img src='https://www.zoopla.co.uk/static/images/mashery/powered-by-zoopla-150x73.png' style='width: 150px; height: 73px; border-width: 0;' title='Property information powered by Zoopla' alt='Property information powered by Zoopla'></a></div>",
  	"file": "../houseprices/getzoopladiffdata.php",
  	"keyexample": "The number indicates the average house prices change between the last week and three months before",
  	"defaultkey": "10000",
- 	"defaultDataYear": 2017,
+ 	"currentDataYear": 2017,
  	"availableDataYears": [2017],
- 	"defaultNetworkYear": 2019,
+ 	"defaultNetworkYear": 2035,
  	"tieNetworkToData": false,
  	"keyValues": [0.025, 0.025],
  	"infolimit": 0.01,
