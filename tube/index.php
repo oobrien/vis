@@ -16,7 +16,7 @@
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.css" />	
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.structure.css" />		
 	<link rel="stylesheet" type="text/css" media="all" href="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.theme.css" />		
-	<link rel="stylesheet" type="text/css" media="all" href="style.css" />	
+	<link rel="stylesheet" type="text/css" media="all" href="style.css?t=<?php echo time(); ?>" />	
 	<link href="https://fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/css?family=Cabin+Condensed" rel="stylesheet">
 	
@@ -24,10 +24,10 @@
 	<script type="text/javascript" src="http://lib.oomap.co.uk/jquery-ui-1.11.4.dark/jquery-ui.js"></script>	     
 	<script type="text/javascript" src="http://lib.oomap.co.uk/moment.js"></script>
 	<script type="text/javascript" src="http://lib.oomap.co.uk/proj4.js"></script>	     
-	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol.js"></script> 
+	<script type="text/javascript" src="http://lib.oomap.co.uk/openlayers/v4.5.0-dist/ol-debug.js"></script> 
 	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-	<script type="text/javascript" src="config.js"></script>
-	<script type="text/javascript" src="main.js"></script>
+	<script type="text/javascript" src="config.js?t=<?php echo time(); ?>"></script>
+	<script type="text/javascript" src="main.js?t=<?php echo time(); ?>"></script>
 	<script>
 	  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
 	  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -63,9 +63,14 @@
 			</tr>
 		</table>
 		<div id='about'>
-			Created by <a href="http://oobrien.com/">Oliver O'Brien</a>, UCL. 
+			Created by <a href="http://oobrien.com/">Oliver O'Brien</a>, UCL/<a href="http://cdrc.ac.uk/">CDRC</a>. 
 			<a href="http://oobrien.com/2014/10/tube-tongues/">About this map</a>. <a href="http://github.com/oobrien/vis">GitHub</a>.<br />
-			Tip: choose different data graphics from the Metric drop-down.		
+			<div>Tip: choose different data maps from the Metric drop-down.</div>
+		<div id='status'>
+			Load status: <span id='points'>Points</span> <span id='stats'>Stats</span> <span id='osis'>OSIs</span> <span id='lines'>Lines</span>
+		</div>
+			<a href='http://cdrc.ac.uk/'><img src='/images/cdrc_col_220.jpg' style='width: 220px; height: 69px; padding: 5px 15px' alt='CDRC' /></a>
+			<div>A CDRC product. <a href="">Download the station stats data</a></div>
 		</div>
 	</div>
 
@@ -88,7 +93,7 @@
 		</div>
 		
 		<div id="title">London Tube Data Maps</div>
-		<div id="subtitle">Loading...</div>
+		<div id="subtitle">Select a metric from the drop-down...</div>
 		<div id='optionstable'>
 			<div>
 				<div style='float: left; style='background-color: #5577bb;'>
@@ -98,7 +103,7 @@
 					<select id='themetric' onchange='handleMetricChange(false)'>
 						<option value='map'>Network Map</option>
 						<option value='night'>Night Tube Map</option>
-						<option value='osi'>Out-of-Station Interchanges</option>
+						<option value='osi'>Out-of-Station Interchanges</option> 
 						<option value='total' selected='selected'>Annual Entries/Exits</option>
 						<option value='in'>Weekday Entries</option>
 						<option value='out'>Weekday Exits</option>
@@ -117,7 +122,9 @@
 						<option value='sun_in'>Sunday Entry</option>
 						<option value='sun_out'>Sunday Exit</option>
 						<option value='am_inout'>Entries vs Exits (AM peak)</option>
+						
 						<option value='peaktime'>Peak Time of Entry</option>
+						
 						<option value='wdwe_out'>Weekday vs Saturday Exits</option>
 						<option value='journeys'>Journey Destinations</option>
 						<option value='tongues'>Tube Tongues</option>
@@ -125,12 +132,16 @@
 						<option value='occupation'>Working Lines</option>
 						<option value='wardwork'>Working Lines (wards)</option>
 						<option value='livesontheline'>Lives on the Line</option>
+						
 						<option value='houseprices'>House Prices</option>
 						<option value='housepricesdiff'>House Prices &Delta;</option>
+						
 						<option value='closures'>Tube Disruption Map (live!)</option>
+						
 						<option value='nrmap'>NR: Network Map</option>
 						<option value='nrtotal'>NR: Annual Entries/Exits</option>
 						<option value='nrtickets'>NR: Ticket Type</option>
+						
 					</select>
 				</div>
 			</div>
