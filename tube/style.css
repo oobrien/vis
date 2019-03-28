@@ -225,11 +225,11 @@ h1 { font-size: 21px; }
 .keyLineItem
 {
 	font-size: 7px;
-	margin: 0 5px 0 0; 
-	height: 7px; 
+	margin: 0 2px 0 0; 
+	height: 8px; 
 	vertical-align: center;
 	padding: 0;
-	border-radius: 4px; 
+	border-radius: 2px; 
 	cursor: pointer; 
 }
 
@@ -341,6 +341,15 @@ table
 	clear: both;
 	margin-top: 20px;
 	margin-bottom: 5px;
+}
+
+#infotable1title table
+{
+	display: block;
+	height: 350px;
+	margin: 10px 0;
+	padding-right: 10px;
+	overflow: auto;
 }
 
 #subinfo
@@ -487,7 +496,7 @@ table
 {
 	#toppanel
 	{
-		padding: 10px;
+		padding: 8px;
 	}
 	#key
 	{
@@ -502,9 +511,32 @@ table
 	{
 		right: 10px;
 	}
-	.ol-attribution
+	.ol-attribution, .ol-zoom
 	{
-		left: 230px;
+		left: 225px;
 	}
-
+	#cdrcimage img
+	{
+		display: none;
+	}
+	#key
+	{
+		width: 190px;
+	}
+	#info
+	{
+		padding: 8px;
+	}
+	#closebuttonpanel
+	{
+	    margin: -8px 0 0 -38px;
+	}
+	.ol-scale-line
+	{
+		display: none;
+	}	
+	#tip, #status, #created
+	{
+		display: none;
+	}
 }
