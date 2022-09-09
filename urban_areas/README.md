@@ -14,6 +14,11 @@ Zoom levels 12+: OpenStreetMap buildings
 
 str14/16 = Strategi from late 2013 and mid 2016 respectively.
 
+str14 - Some buffering/hole-filling applied.
+str16 - Only larger areas included, and buffered in metre-space.
+
 The Large urban areas are the large polygons from Strategi urban regions only, and buffered outwards
 slightly, compared with the urba areas. Both differences can be seen on the image here.
 Note that Strategi urban regions are almost identical to Meridian 2 DLUAs, just buffered slightly differently.
+
+Source: Ordnance Survey, NISRA
