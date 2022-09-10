@@ -1,4 +1,4 @@
-## Liecence
+## Licence
 
 Everything in this folder is CC-By-NC except where noted below. Please contact me if you wish to use this data in commercial projects.
 
