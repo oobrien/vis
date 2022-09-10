@@ -19,5 +19,5 @@ The ULEZ (2021) has been extracted and manually georeferenced from a PDF on the 
 
 The area and boundary of the "Transport for London Road Network" (TLRN), also known as London's Red Routes. This is a set of polygons, split by London borough, showing the area of London's road network that is controlled by TfL, instead of each borough itself. These roads typically have lines on the side painted in red rather than yellow. Original source at http://roads.data.tfl.gov.uk/. Up to date as of July 2017.
 
-All above are Source TfL "Powered by TfL Open Data" exceot the Greater London Area data which is from OS Boundary-Line. (© Ordnance Survey Crown Copyright and Database right.)
+All above are Source TfL "Powered by TfL Open Data" except the Greater London Area data which is from OS Boundary-Line. (© Ordnance Survey Crown Copyright and Database right.)
 
