@@ -554,6 +554,6 @@
 { "type": "Feature", "properties": { "nlc_id": 1543, "id": "910GHPD", "name": "Harpenden", "lines": [ { "name": "Thameslink 6tph line", "opened": 2035 }, { "name": "National Rail" } ], "cartography": { "labelX": 30 }, "zone": "?" }, "geometry": { "type": "Point", "coordinates": [ -0.35146, 51.8146 ] } },
 { "type": "Feature", "properties": { "id": "910G950", "name": "Canary Wharf", "lines": [ { "name": "Elizabeth line", "opened": 2022 } ], "cartography": { "labelX": 30 }, "zone": "2" }, "geometry": { "type": "Point", "coordinates": [ -0.017465870885524, 51.50628412783459 ] } },
 { "type": "Feature", "properties": { "id": "910G981", "name": "King's Road Chelsea", "lines": [ { "name": "Elizabeth line 2", "opened": 2030 } ], "cartography": {  "labelX": 1, "labelY": 45 }, "zone": "1" }, "geometry": { "type": "Point", "coordinates": [ -0.16701, 51.48835 ] } },
-{ "type": "Feature", "properties": { "id": "910GBKRVS", "name": "Barking Riverside", "lines": [ { "name": "London Overground", "opened": 2022 } ] }, "geometry": { "type": "Point", "coordinates": [ 0.11599, 51.51955 ] } }
+{ "type": "Feature", "properties": { "id": "910GBKRVS", "name": "Barking Riverside", "lines": [ { "name": "London Overground", "opened": 2022 } ], "cartography": {  "labelX": 1, "labelY": 45 }, "zone": "4" }, "geometry": { "type": "Point", "coordinates": [ 0.11599, 51.51955 ] } }
 ]
 }
